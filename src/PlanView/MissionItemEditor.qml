@@ -19,6 +19,7 @@ Rectangle {
     color:  _currentItem ? qgcPal.missionItemEditor : qgcPal.windowShade
     radius: _radius
 
+
     property var    map                 ///< Map control
     property var    masterController
     property var    missionItem         ///< MissionItem associated with this editor
@@ -90,7 +91,7 @@ Rectangle {
         height:                 _hamburgerSize
         sourceSize.height:      _hamburgerSize
         source:                 "qrc:/qmlimages/Hamburger.svg"
-        visible:                missionItem.isCurrentItem && missionItem.sequenceNumber !== 0
+        visible:                 missionItem.isCurrentItem && missionItem.sequenceNumber !== 0 && missionItem.sequenceNumber !==1
         color:                  qgcPal.text
     }
 
@@ -214,7 +215,7 @@ Rectangle {
     QGCLabel {
         id:                     commandLabel
         anchors.fill:           commandPicker
-        visible:                !missionItem.isCurrentItem || !missionItem.isSimpleItem || _waypointsOnlyMode
+        visible:                !missionItem.isCurrentItem || !missionItem.isSimpleItem || _waypointsOnlyMode || missionItem.sequenceNumber == 1
         verticalAlignment:      Text.AlignVCenter
         horizontalAlignment:    Text.AlignHCenter
         text:                   missionItem.commandName
