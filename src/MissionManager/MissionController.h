@@ -101,6 +101,9 @@ public:
 
     Q_INVOKABLE void removeMissionItem(int index);
 
+    
+    Q_INVOKABLE void insertHomeItem(QGeoCoordinate coordinate);
+
     /// Add a new simple mission item to the list
     ///     @param i: index to insert at
     /// @return Sequence number for new item

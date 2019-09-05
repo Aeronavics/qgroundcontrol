@@ -346,6 +346,38 @@ int MissionController::_nextSequenceNumber(void)
     }
 }
 
+void MissionController::insertHomeItem(QGeoCoordinate coordinate)
+{
+    int sequenceNumber = 1;
+    SimpleMissionItem * newItem = new SimpleMissionItem(_controllerVehicle, _flyView, this);
+    newItem->setSequenceNumber(sequenceNumber);
+    newItem->setCoordinate(coordinate);
+    newItem->setCommand(MAV_CMD_NAV_WAYPOINT);
+    _initVisualItem(newItem);
+    if (_controllerVehicle->fixedWing() || _controllerVehicle->vtol() || _controllerVehicle->multiRotor()) {
+        MAV_CMD takeoffCmd = _controllerVehicle->vtol() ? MAV_CMD_NAV_VTOL_TAKEOFF : MAV_CMD_NAV_TAKEOFF;
+        if (_controllerVehicle->firmwarePlugin()->supportedMissionCommands().contains(takeoffCmd)) {
+            newItem->setCommand(takeoffCmd);
+        }
+    }
+	
+    newItem->setMissionFlightStatus(_missionFlightStatus);
+	if(_visualItems->count()>1){
+		_visualItems->removeAt(1);
+	}
+    _visualItems->insert(1, newItem);
+
+    // We send the click coordinate through here to be able to set the planned home position from the user click location if needed
+    _recalcAllWithClickCoordinate(coordinate);
+	_recalcAll();
+
+	QGeoCoordinate plannedHomeCoord = coordinate;
+	plannedHomeCoord.setAltitude(0);
+    _settingsItem->setCoordinate(plannedHomeCoord);
+
+    
+}
+
 int MissionController::insertSimpleMissionItem(QGeoCoordinate coordinate, int i)
 {
     int sequenceNumber = _nextSequenceNumber();

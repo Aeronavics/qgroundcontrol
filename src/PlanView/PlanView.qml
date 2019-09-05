@@ -50,6 +50,7 @@ Item {
     property var    _visualItems:                       _missionController.visualItems
     property bool   _lightWidgetBorders:                editorMap.isSatelliteMap
     property bool   _addWaypointOnClick:                false
+    property bool   _addHomeOnClick:                    false
     property bool   _addROIOnClick:                     false
     property bool   _singleComplexItem:                 _missionController.complexMissionItemNames.length === 1
     property int    _editingLayer:                      bar.currentIndex ? _layers[bar.currentIndex] : _layerMission
@@ -265,6 +266,11 @@ Item {
             _missionController.setCurrentPlanViewIndex(0, true)
         }
     }
+    function insertHomeItem(coordinate, index) {
+        _missionController.insertHomeItem(coordinate, index)
+        _missionController.setCurrentPlanViewIndex(1, true)
+        _addHomeOnClick = false
+    }
 
     /// Inserts a new simple mission item
     ///     @param coordinate Location to insert item
@@ -441,7 +447,9 @@ Item {
 
                     switch (_editingLayer) {
                     case _layerMission:
-                        if (_addWaypointOnClick) {
+                        if (_addHomeOnClick) {
+                            insertHomeItem(coordinate, 1)
+                        } else if (_addWaypointOnClick) {
                             insertSimpleMissionItem(coordinate, _missionController.visualItems.count)
                         } else if (_addROIOnClick) {
                             _addROIOnClick = false
@@ -555,7 +563,7 @@ Item {
                     buttonVisible:      true,
                 },
                 {
-                    name:               qsTr("File"),
+                    name:               qsTr("Mission"),
                     iconSource:         "/qmlimages/MapSync.svg",
                     buttonEnabled:      !_planMasterController.syncInProgress,
                     buttonVisible:      true,
@@ -591,6 +599,14 @@ Item {
                     buttonEnabled:      true,
                     buttonVisible:      true,
                     dropPanelComponent: centerMapDropPanel
+                },
+                {
+                    name:               qsTr("Home"),
+                    iconSource:         "/qmlimages/MapHome.svg",
+                    buttonEnabled:      true,
+                    buttonVisible:      true,
+                    toggle:             true,
+                    checked:            _addHomeOnClick
                 }
             ]
 
@@ -617,6 +633,14 @@ Item {
                 case 4:
                     if (_singleComplexItem) {
                         addComplexItem(_missionController.complexMissionItemNames[0])
+                    }
+                    break
+                case 6:
+                    if(_addHomeOnClick) {
+                        _addHomeOnClick = false
+                    }
+                    else{
+                        _addHomeOnClick = checked
                     }
                     break
                 }
