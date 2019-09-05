@@ -369,7 +369,6 @@ void MissionController::insertHomeItem(QGeoCoordinate coordinate)
 
     // We send the click coordinate through here to be able to set the planned home position from the user click location if needed
     _recalcAllWithClickCoordinate(coordinate);
-	_recalcAll();
 
 	QGeoCoordinate plannedHomeCoord = coordinate;
 	plannedHomeCoord.setAltitude(0);

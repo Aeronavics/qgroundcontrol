@@ -575,7 +575,7 @@ Item {
                     name:               _editingLayer == _layerRallyPoints ? qsTr("Rally Point") : qsTr("Waypoint"),
                     iconSource:         "/qmlimages/MapAddMission.svg",
                     buttonEnabled:      true,
-                    buttonVisible:      true,
+                    buttonVisible:      _missionController.plannedHomePosition.isValid,
                     toggle:             true,
                     checked:            _addWaypointOnClick
                 },
@@ -583,14 +583,14 @@ Item {
                     name:               qsTr("ROI"),
                     iconSource:         "/qmlimages/MapAddMission.svg",
                     buttonEnabled:      true,
-                    buttonVisible:      !_isRally && _waypointsOnlyMode,
+                    buttonVisible:      _waypointsOnlyMode && !_isRally && _missionController.plannedHomePosition.isValid,
                     toggle:             true
                 },
                 {
                     name:               _singleComplexItem ? _missionController.complexMissionItemNames[0] : qsTr("Pattern"),
                     iconSource:         "/qmlimages/MapDrawShape.svg",
                     buttonEnabled:      true,
-                    buttonVisible:      !_isRally,
+                    buttonVisible:      !_isRally && _missionController.plannedHomePosition.isValid,
                     dropPanelComponent: _singleComplexItem ? undefined : patternDropPanel
                 },
                 {
@@ -604,7 +604,7 @@ Item {
                     name:               qsTr("Home"),
                     iconSource:         "/qmlimages/MapHome.svg",
                     buttonEnabled:      true,
-                    buttonVisible:      true,
+                    buttonVisible:      !_missionController.plannedHomePosition.isValid,
                     toggle:             true,
                     checked:            _addHomeOnClick
                 }
