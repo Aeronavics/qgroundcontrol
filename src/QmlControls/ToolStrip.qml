@@ -83,8 +83,7 @@ Rectangle {
                     } else if (checked) {
                         var panelEdgeTopPoint = mapToItem(_root, width, 0)
                         dropPanel.show(panelEdgeTopPoint, height, modelData.dropPanelComponent)
-                    }
-                    if(_root && buttonTemplate)
+                    } else if(_root && buttonTemplate)
                         _root.lastClickedButton = buttonTemplate
                 }
             }
