@@ -396,6 +396,31 @@ Item {
         id:             panel
         anchors.fill:   parent
 
+        //FlightMap {
+        //    id: mapAbove
+        //    gesture.enabled: false
+        //    anchors.fill: parent
+        //    color: 'transparent' // Necessary to make this map transparent
+
+        //    activeMapType: mapAbove.supportedMapTypes[3]
+        //    center: editorMap.center
+        //    zoomLevel: editorMap.zoomLevel
+        //    opacity: 0.5
+        //    z: editorMap.z + 1
+
+        //    function updateActiveMapType() {
+        //        var settings =  QGroundControl.settingsManager.flightMapSettings
+        //        var fullMapName = "Google Terrain"
+
+        //        for (var i = 0; i < mapAbove.supportedMapTypes.length; i++) {
+        //            if (fullMapName === mapAbove.supportedMapTypes[i].name) {
+        //                mapAbove.activeMapType = mapAbove.supportedMapTypes[i]
+        //                return
+        //            }
+        //        }
+        //    }
+        //}
+
         FlightMap {
             id:                         editorMap
             anchors.fill:               parent
@@ -403,6 +428,7 @@ Item {
             allowGCSLocationCenter:     true
             allowVehicleLocationCenter: true
             planView:                   true
+            //z: parent.z + 1
 
             // This is the center rectangle of the map which is not obscured by tools
             property rect centerViewport:   Qt.rect(_leftToolWidth, 0, editorMap.width - _leftToolWidth - _rightPanelWidth, editorMap.height - _statusHeight)
