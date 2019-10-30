@@ -297,10 +297,10 @@ Rectangle {
 
             Row{
                 Switch{
-                    scale: 0.7
+                    id:             switchShowAllValues
+                    transform: Scale {origin.x: -_margin*2; origin.y: _margin*2; xScale: 0.7; yScale: 0.7}
                     checked :       false
                     onClicked:      missionItem.rawEdit = checked
-                    anchors.verticalCenter: parent.verticalCenter
                 }
                 QGCLabel{
                     id:             textShowAllValues
