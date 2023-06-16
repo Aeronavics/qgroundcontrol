@@ -55,6 +55,7 @@
 #include "MockLink.h"
 #endif
 #include "Autotune.h"
+#include "RemoteIDManager.h"
 
 #if defined(QGC_AIRMAP_ENABLED)
 #include "AirspaceVehicleManager.h"
@@ -90,12 +91,14 @@ const char* Vehicle::_altitudeTuningSetpointFactName = "altitudeTuningSetpoint";
 const char* Vehicle::_flightDistanceFactName =      "flightDistance";
 const char* Vehicle::_flightTimeFactName =          "flightTime";
 const char* Vehicle::_distanceToHomeFactName =      "distanceToHome";
+const char* Vehicle::_timeToHomeFactName =          "timeToHome";
 const char* Vehicle::_missionItemIndexFactName =    "missionItemIndex";
 const char* Vehicle::_headingToNextWPFactName =     "headingToNextWP";
 const char* Vehicle::_headingToHomeFactName =       "headingToHome";
 const char* Vehicle::_distanceToGCSFactName =       "distanceToGCS";
 const char* Vehicle::_hobbsFactName =               "hobbs";
 const char* Vehicle::_throttlePctFactName =         "throttlePct";
+const char* Vehicle::_imuTempFactName =             "imuTemp";
 
 const char* Vehicle::_gpsFactGroupName =                "gps";
 const char* Vehicle::_gps2FactGroupName =               "gps2";
@@ -152,12 +155,14 @@ Vehicle::Vehicle(LinkInterface*             link,
     , _flightDistanceFact           (0, _flightDistanceFactName,    FactMetaData::valueTypeDouble)
     , _flightTimeFact               (0, _flightTimeFactName,        FactMetaData::valueTypeElapsedTimeInSeconds)
     , _distanceToHomeFact           (0, _distanceToHomeFactName,    FactMetaData::valueTypeDouble)
+    , _timeToHomeFact               (0, _timeToHomeFactName,        FactMetaData::valueTypeDouble)
     , _missionItemIndexFact         (0, _missionItemIndexFactName,  FactMetaData::valueTypeUint16)
     , _headingToNextWPFact          (0, _headingToNextWPFactName,   FactMetaData::valueTypeDouble)
     , _headingToHomeFact            (0, _headingToHomeFactName,     FactMetaData::valueTypeDouble)
     , _distanceToGCSFact            (0, _distanceToGCSFactName,     FactMetaData::valueTypeDouble)
     , _hobbsFact                    (0, _hobbsFactName,             FactMetaData::valueTypeString)
     , _throttlePctFact              (0, _throttlePctFactName,       FactMetaData::valueTypeUint16)
+    , _imuTempFact                  (0, _imuTempFactName,           FactMetaData::valueTypeInt16)
     , _gpsFactGroup                 (this)
     , _gps2FactGroup                (this)
     , _windFactGroup                (this)
@@ -177,7 +182,8 @@ Vehicle::Vehicle(LinkInterface*             link,
     _linkManager = _toolbox->linkManager();
 
     connect(_joystickManager, &JoystickManager::activeJoystickChanged, this, &Vehicle::_loadSettings);
-    connect(qgcApp()->toolbox()->multiVehicleManager(), &MultiVehicleManager::activeVehicleAvailableChanged, this, &Vehicle::_loadSettings);
+    connect(qgcApp()->toolbox()->multiVehicleManager(), &MultiVehicleManager::activeVehicleAvailableChanged, this, &Vehicle::_activeVehicleAvailableChanged);
+    connect(qgcApp()->toolbox()->multiVehicleManager(), &MultiVehicleManager::activeVehicleChanged, this, &Vehicle::_activeVehicleChanged);
 
     _mavlink = _toolbox->mavlinkProtocol();
     qCDebug(VehicleLog) << "Link started with Mavlink " << (_mavlink->getCurrentVersion() >= 200 ? "V2" : "V1");
@@ -313,6 +319,7 @@ Vehicle::Vehicle(MAV_AUTOPILOT              firmwareType,
     , _distanceToGCSFact                (0, _distanceToGCSFactName,     FactMetaData::valueTypeDouble)
     , _hobbsFact                        (0, _hobbsFactName,             FactMetaData::valueTypeString)
     , _throttlePctFact                  (0, _throttlePctFactName,       FactMetaData::valueTypeUint16)
+    , _imuTempFact                      (0, _imuTempFactName,           FactMetaData::valueTypeInt16)
     , _gpsFactGroup                     (this)
     , _gps2FactGroup                    (this)
     , _windFactGroup                    (this)
@@ -405,6 +412,9 @@ void Vehicle::_commonInit()
     connect(_rallyPointManager, &RallyPointManager::error,          this, &Vehicle::_rallyPointManagerError);
     connect(_rallyPointManager, &RallyPointManager::loadComplete,   this, &Vehicle::_firstRallyPointLoadComplete);
 
+    // Remote ID manager might want to acces parameters so make sure to create it after
+    _remoteIDManager = new RemoteIDManager(this);
+
     // Flight modes can differ based on advanced mode
     connect(_toolbox->corePlugin(), &QGCCorePlugin::showAdvancedUIChanged, this, &Vehicle::flightModesChanged);
 
@@ -431,11 +441,13 @@ void Vehicle::_commonInit()
     _addFact(&_flightDistanceFact,      _flightDistanceFactName);
     _addFact(&_flightTimeFact,          _flightTimeFactName);
     _addFact(&_distanceToHomeFact,      _distanceToHomeFactName);
+    _addFact(&_timeToHomeFact,          _timeToHomeFactName);
     _addFact(&_missionItemIndexFact,    _missionItemIndexFactName);
     _addFact(&_headingToNextWPFact,     _headingToNextWPFactName);
     _addFact(&_headingToHomeFact,       _headingToHomeFactName);
     _addFact(&_distanceToGCSFact,       _distanceToGCSFactName);
     _addFact(&_throttlePctFact,         _throttlePctFactName);
+    _addFact(&_imuTempFact,             _imuTempFactName);
 
     _hobbsFact.setRawValue(QVariant(QString("0000:00:00")));
     _addFact(&_hobbsFact,               _hobbsFactName);
@@ -657,6 +669,7 @@ void Vehicle::_mavlinkMessageReceived(LinkInterface* link, mavlink_message_t mes
     _ftpManager->_mavlinkMessageReceived(message);
     _parameterManager->mavlinkMessageReceived(message);
     _imageProtocolManager->mavlinkMessageReceived(message);
+    _remoteIDManager->mavlinkMessageReceived(message);
 
     _waitForMavlinkMessageMessageReceived(message);
 
@@ -688,7 +701,7 @@ void Vehicle::_mavlinkMessageReceived(LinkInterface* link, mavlink_message_t mes
         _handleSysStatus(message);
         break;
     case MAVLINK_MSG_ID_RAW_IMU:
-        emit mavlinkRawImu(message);
+        _handleRawImuTemp(message);
         break;
     case MAVLINK_MSG_ID_SCALED_IMU:
         emit mavlinkScaledImu1(message);
@@ -722,9 +735,6 @@ void Vehicle::_mavlinkMessageReceived(LinkInterface* link, mavlink_message_t mes
         break;
     case MAVLINK_MSG_ID_VFR_HUD:
         _handleVfrHud(message);
-        break;
-    case MAVLINK_MSG_ID_RANGEFINDER:
-        _handleRangefinder(message);
         break;
     case MAVLINK_MSG_ID_NAV_CONTROLLER_OUTPUT:
         _handleNavControllerOutput(message);
@@ -787,6 +797,9 @@ void Vehicle::_mavlinkMessageReceived(LinkInterface* link, mavlink_message_t mes
     case MAVLINK_MSG_ID_CAMERA_FEEDBACK:
         _handleCameraFeedback(message);
         break;
+    case MAVLINK_MSG_ID_RANGEFINDER:
+        _handleRangefinder(message);
+        break;
 #endif
     }
 
@@ -807,6 +820,14 @@ void Vehicle::_handleCameraFeedback(const mavlink_message_t& message)
     QGeoCoordinate imageCoordinate((double)feedback.lat / qPow(10.0, 7.0), (double)feedback.lng / qPow(10.0, 7.0), feedback.alt_msl);
     qCDebug(VehicleLog) << "_handleCameraFeedback coord:index" << imageCoordinate << feedback.img_idx;
     _cameraTriggerPoints.append(new QGCQGeoCoordinate(imageCoordinate, this));
+}
+
+void Vehicle::_handleRangefinder(mavlink_message_t& message)
+{
+
+    mavlink_rangefinder_t rangefinder;
+    mavlink_msg_rangefinder_decode(&message, &rangefinder);
+    _rangeFinderDistFact.setRawValue(qIsNaN(rangefinder.distance) ? 0 : rangefinder.distance);
 }
 #endif
 
@@ -938,7 +959,6 @@ void Vehicle::_chunkedStatusTextCompleted(uint8_t compId)
 
 void Vehicle::_handleStatusText(mavlink_message_t& message)
 {
-    QByteArray  b;
     QString     messageText;
 
     mavlink_statustext_t statustext;
@@ -946,9 +966,9 @@ void Vehicle::_handleStatusText(mavlink_message_t& message)
 
     uint8_t compId = message.compid;
 
-    b.resize(MAVLINK_MSG_STATUSTEXT_FIELD_TEXT_LEN+1);
-    strncpy(b.data(), statustext.text, MAVLINK_MSG_STATUSTEXT_FIELD_TEXT_LEN);
-    b[b.length()-1] = '\0';
+    char b[MAVLINK_MSG_STATUSTEXT_FIELD_TEXT_LEN+1];
+    strncpy(b, statustext.text, MAVLINK_MSG_STATUSTEXT_FIELD_TEXT_LEN);
+    b[sizeof(b)-1] = '\0';
     messageText = QString(b);
     bool includesNullTerminator = messageText.length() < MAVLINK_MSG_STATUSTEXT_FIELD_TEXT_LEN;
 
@@ -1006,15 +1026,10 @@ void Vehicle::_handleVfrHud(mavlink_message_t& message)
         _altitudeTuningOffset = vfrHud.alt;
     }
     _altitudeTuningFact.setRawValue(vfrHud.alt - _altitudeTuningOffset);
+    if (!qIsNaN(vfrHud.groundspeed) && !qIsNaN(_distanceToHomeFact.cookedValue().toDouble())) {
+      _timeToHomeFact.setRawValue(_distanceToHomeFact.cookedValue().toDouble() / vfrHud.groundspeed);
+    }
 }
-
-void Vehicle::_handleRangefinder(mavlink_message_t& message)
-{
-    mavlink_rangefinder_t rangefinder;
-    mavlink_msg_rangefinder_decode(&message, &rangefinder);
-    _rangeFinderDistFact.setRawValue(qIsNaN(rangefinder.distance) ? 0 : rangefinder.distance);
-}
-
 
 void Vehicle::_handleNavControllerOutput(mavlink_message_t& message)
 {
@@ -1331,7 +1346,7 @@ QString Vehicle::vehicleUIDStr()
 {
     QString uid;
     uint8_t* pUid = (uint8_t*)(void*)&_uid;
-    uid.asprintf("%02X:%02X:%02X:%02X:%02X:%02X:%02X:%02X",
+    uid = uid.asprintf("%02X:%02X:%02X:%02X:%02X:%02X:%02X:%02X",
                  pUid[0] & 0xff,
             pUid[1] & 0xff,
             pUid[2] & 0xff,
@@ -1685,7 +1700,7 @@ EventHandler& Vehicle::_eventHandler(uint8_t compid)
     return *eventData->data();
 }
 
-void Vehicle::setEventsMetadata(uint8_t compid, const QString& metadataJsonFileName, const QString& translationJsonFileName)
+void Vehicle::setEventsMetadata(uint8_t compid, const QString& metadataJsonFileName)
 {
     _eventHandler(compid).setMetadata(metadataJsonFileName);
 
@@ -1710,7 +1725,7 @@ void Vehicle::setEventsMetadata(uint8_t compid, const QString& metadataJsonFileN
                    false);
 }
 
-void Vehicle::setActuatorsMetadata(uint8_t compid, const QString& metadataJsonFileName, const QString& translationJsonFileName)
+void Vehicle::setActuatorsMetadata(uint8_t compid, const QString& metadataJsonFileName)
 {
     if (!_actuators) {
         _actuators = new Actuators(this, this);
@@ -2050,7 +2065,7 @@ void Vehicle::_handleTextMessage(int newCount)
     }
 }
 
-void Vehicle::resetMessages()
+void Vehicle::resetAllMessages()
 {
     // Reset Counts
     int count = _currentMessageCount;
@@ -2068,6 +2083,31 @@ void Vehicle::resetMessages()
     }
 }
 
+// Reset warning counts only
+void Vehicle::resetErrorLevelMessages()
+{
+    int prevMessageCount = _currentMessageCount;
+    MessageType_t prevMessagetype = _currentMessageType;
+
+    _currentMessageCount -= _currentErrorCount;
+    _currentErrorCount   = 0;
+
+    if (_currentWarningCount > 0) {
+        _currentMessageType = MessageWarning;
+    } else if (_currentNormalCount > 0) {
+        _currentMessageType = MessageNormal;
+    } else {
+        _currentMessageType = MessageNone;
+    }
+
+    if (prevMessageCount != _currentMessageCount) {
+        emit newMessageCountChanged();
+    }
+    if (prevMessagetype != _currentMessageType) {
+        emit messageTypeChanged();
+    }
+}
+
 void Vehicle::_loadSettings()
 {
     QSettings settings;
@@ -2076,6 +2116,22 @@ void Vehicle::_loadSettings()
     if (_toolbox->joystickManager()->joysticks().count()) {
         setJoystickEnabled(settings.value(_joystickEnabledSettingsKey, false).toBool());
         _startJoystick(true);
+    }
+}
+
+void Vehicle::_activeVehicleAvailableChanged(bool isActiveVehicleAvailable)
+{
+    // if there is no longer an active vehicle, disconnect the joystick
+    if(!isActiveVehicleAvailable) {
+        setJoystickEnabled(false);
+    }
+}
+
+void Vehicle::_activeVehicleChanged(Vehicle *newActiveVehicle)
+{
+    if(newActiveVehicle == this) {
+        // this vehicle is the newly active vehicle
+        setJoystickEnabled(true);
     }
 }
 
@@ -2978,7 +3034,7 @@ bool Vehicle::_commandCanBeDuplicated(MAV_CMD command)
     }
 }
 
-void Vehicle::_sendMavCommandWorker(bool commandInt, bool showError, MavCmdResultHandler resultHandler, void* resultHandlerData, int targetCompId, MAV_CMD command, MAV_FRAME frame, float param1, float param2, float param3, float param4, float param5, float param6, float param7)
+void Vehicle::_sendMavCommandWorker(bool commandInt, bool showError, MavCmdResultHandler resultHandler, void* resultHandlerData, int targetCompId, MAV_CMD command, MAV_FRAME frame, float param1, float param2, float param3, float param4, double param5, double param6, float param7)
 {
     if ((targetCompId == MAV_COMP_ID_ALL) || (isMavCommandPending(targetCompId, command) && !_commandCanBeDuplicated(command))) {
         bool    compIdAll       = targetCompId == MAV_COMP_ID_ALL;
@@ -3016,13 +3072,13 @@ void Vehicle::_sendMavCommandWorker(bool commandInt, bool showError, MavCmdResul
     entry.showError         = showError;
     entry.resultHandler     = resultHandler;
     entry.resultHandlerData = resultHandlerData;
-    entry.rgParam[0]        = param1;
-    entry.rgParam[1]        = param2;
-    entry.rgParam[2]        = param3;
-    entry.rgParam[3]        = param4;
-    entry.rgParam[4]        = param5;
-    entry.rgParam[5]        = param6;
-    entry.rgParam[6]        = param7;
+    entry.rgParam1          = param1;
+    entry.rgParam2          = param2;
+    entry.rgParam3          = param3;
+    entry.rgParam4          = param4;
+    entry.rgParam5          = param5;
+    entry.rgParam6          = param6;
+    entry.rgParam7          = param7;
     entry.maxTries          = _sendMavCommandShouldRetry(command) ? _mavCommandMaxRetryCount : 1;
     entry.ackTimeoutMSecs   = sharedLink->linkConfiguration()->isHighLatency() ? _mavCommandAckTimeoutMSecsHighLatency : _mavCommandAckTimeoutMSecs;
     entry.elapsedTimer.start();
@@ -3075,13 +3131,13 @@ void Vehicle::_sendMavCommandFromList(int index)
         cmd.target_component =  commandEntry.targetCompId;
         cmd.command =           commandEntry.command;
         cmd.frame =             commandEntry.frame;
-        cmd.param1 =            commandEntry.rgParam[0];
-        cmd.param2 =            commandEntry.rgParam[1];
-        cmd.param3 =            commandEntry.rgParam[2];
-        cmd.param4 =            commandEntry.rgParam[3];
-        cmd.x =                 commandEntry.frame == MAV_FRAME_MISSION ? commandEntry.rgParam[4] : commandEntry.rgParam[4] * 1e7;
-        cmd.y =                 commandEntry.frame == MAV_FRAME_MISSION ? commandEntry.rgParam[5] : commandEntry.rgParam[5] * 1e7;
-        cmd.z =                 commandEntry.rgParam[6];
+        cmd.param1 =            commandEntry.rgParam1;
+        cmd.param2 =            commandEntry.rgParam2;
+        cmd.param3 =            commandEntry.rgParam3;
+        cmd.param4 =            commandEntry.rgParam4;
+        cmd.x =                 commandEntry.frame == MAV_FRAME_MISSION ? commandEntry.rgParam5 : commandEntry.rgParam5 * 1e7;
+        cmd.y =                 commandEntry.frame == MAV_FRAME_MISSION ? commandEntry.rgParam6 : commandEntry.rgParam6 * 1e7;
+        cmd.z =                 commandEntry.rgParam7;
         mavlink_msg_command_int_encode_chan(_mavlink->getSystemId(),
                                             _mavlink->getComponentId(),
                                             sharedLink->mavlinkChannel(),
@@ -3095,13 +3151,13 @@ void Vehicle::_sendMavCommandFromList(int index)
         cmd.target_component =  commandEntry.targetCompId;
         cmd.command =           commandEntry.command;
         cmd.confirmation =      0;
-        cmd.param1 =            commandEntry.rgParam[0];
-        cmd.param2 =            commandEntry.rgParam[1];
-        cmd.param3 =            commandEntry.rgParam[2];
-        cmd.param4 =            commandEntry.rgParam[3];
-        cmd.param5 =            commandEntry.rgParam[4];
-        cmd.param6 =            commandEntry.rgParam[5];
-        cmd.param7 =            commandEntry.rgParam[6];
+        cmd.param1 =            commandEntry.rgParam1;
+        cmd.param2 =            commandEntry.rgParam2;
+        cmd.param3 =            commandEntry.rgParam3;
+        cmd.param4 =            commandEntry.rgParam4;
+        cmd.param5 =            static_cast<float>(commandEntry.rgParam5);
+        cmd.param6 =            static_cast<float>(commandEntry.rgParam6);
+        cmd.param7 =            commandEntry.rgParam7;
         mavlink_msg_command_long_encode_chan(_mavlink->getSystemId(),
                                              _mavlink->getComponentId(),
                                              sharedLink->mavlinkChannel(),
@@ -3754,6 +3810,17 @@ void Vehicle::_handleADSBVehicle(const mavlink_message_t& message)
 
         _toolbox->adsbVehicleManager()->adsbVehicleUpdate(vehicleInfo);
     }
+}
+
+void Vehicle::_handleRawImuTemp(mavlink_message_t& message)
+{
+    // This is used by compass calibration
+    emit mavlinkRawImu(message);
+    
+    mavlink_raw_imu_t imuRaw;
+    mavlink_msg_raw_imu_decode(&message, &imuRaw);
+
+    _imuTempFact.setRawValue(imuRaw.temperature == 0 ? 0 : imuRaw.temperature * 0.01);
 }
 
 void Vehicle::_updateDistanceHeadingToHome()

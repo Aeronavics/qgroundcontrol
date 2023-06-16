@@ -6,7 +6,7 @@ include(GNUInstallDirs)
 
 set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug;Release;RelWithDebInfo;MinSizeRel;Coverage")
 
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTORCC ON)
@@ -224,8 +224,13 @@ install(
     DESTINATION ${CMAKE_INSTALL_DATADIR}/icons/hicolor/128x128/apps/
     RENAME org.mavlink.qgroundcontrol.png
 )
+configure_file(
+    ${CMAKE_SOURCE_DIR}/deploy/org.mavlink.qgroundcontrol.metainfo.xml.in
+    ${CMAKE_BINARY_DIR}/metainfo/org.mavlink.qgroundcontrol.metainfo.xml
+    @ONLY
+)
 install(
-    FILES ${CMAKE_SOURCE_DIR}/deploy/org.mavlink.qgroundcontrol.metainfo.xml
+    FILES ${CMAKE_BINARY_DIR}/metainfo/org.mavlink.qgroundcontrol.metainfo.xml
     DESTINATION ${CMAKE_INSTALL_DATADIR}/metainfo/
 )
 

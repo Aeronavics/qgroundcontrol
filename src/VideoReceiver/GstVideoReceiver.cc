@@ -63,6 +63,7 @@ GstVideoReceiver::GstVideoReceiver(QObject* parent)
 
 GstVideoReceiver::~GstVideoReceiver(void)
 {
+    stop();
     _slotHandler.shutdown();
 }
 
@@ -122,7 +123,7 @@ GstVideoReceiver::start(const QString& uri, unsigned timeout, int buffer)
 
         _lastSourceFrameTime = 0;
 
-        gst_pad_add_probe(pad, GST_PAD_PROBE_TYPE_BUFFER, _teeProbe, this, nullptr);
+        _teeProbeId = gst_pad_add_probe(pad, GST_PAD_PROBE_TYPE_BUFFER, _teeProbe, this, nullptr);
         gst_object_unref(pad);
         pad = nullptr;
 
@@ -286,6 +287,15 @@ GstVideoReceiver::stop(void)
     }
 
     qCDebug(VideoReceiverLog) << "Stopping" << _uri;
+
+    if (_teeProbeId != 0) {
+        GstPad* sinkpad;
+        if ((sinkpad = gst_element_get_static_pad(_tee, "sink")) != nullptr) {
+            gst_pad_remove_probe(sinkpad, _teeProbeId);
+            sinkpad = nullptr;
+        }
+        _teeProbeId = 0;
+    }
 
     if (_pipeline != nullptr) {
         GstBus* bus;
@@ -683,6 +693,58 @@ GstVideoReceiver::_handleEOS(void)
     }
 }
 
+gboolean
+GstVideoReceiver::_filterParserCaps(GstElement* bin, GstPad* pad, GstElement* element, GstQuery* query, gpointer data)
+{
+    Q_UNUSED(bin)
+    Q_UNUSED(pad)
+    Q_UNUSED(element)
+    Q_UNUSED(data)
+
+    if (GST_QUERY_TYPE(query) != GST_QUERY_CAPS) {
+        return FALSE;
+    }
+
+    GstCaps* srcCaps;
+
+    gst_query_parse_caps(query, &srcCaps);
+
+    if (srcCaps == nullptr || gst_caps_is_any(srcCaps)) {
+        return FALSE;
+    }
+
+    GstCaps* sinkCaps = nullptr;
+
+    GstCaps* filter;
+
+    if ((filter = gst_caps_from_string("video/x-h264")) != nullptr) {
+        if (gst_caps_can_intersect(srcCaps, filter)) {
+            sinkCaps = gst_caps_from_string("video/x-h264,stream-format=avc");
+        }
+
+        gst_caps_unref(filter);
+        filter = nullptr;
+    } else if ((filter = gst_caps_from_string("video/x-h265")) != nullptr) {
+        if (gst_caps_can_intersect(srcCaps, filter)) {
+            sinkCaps = gst_caps_from_string("video/x-h265,stream-format=hvc1");
+        }
+
+        gst_caps_unref(filter);
+        filter = nullptr;
+    }
+
+    if (sinkCaps == nullptr) {
+        return FALSE;
+    }
+
+    gst_query_set_caps_result(query, sinkCaps);
+
+    gst_caps_unref(sinkCaps);
+    sinkCaps = nullptr;
+
+    return TRUE;
+}
+
 GstElement*
 GstVideoReceiver::_makeSource(const QString& uri)
 {
@@ -758,6 +820,8 @@ GstVideoReceiver::_makeSource(const QString& uri)
             qCCritical(VideoReceiverLog) << "gst_element_factory_make('parsebin') failed";
             break;
         }
+
+        g_signal_connect(parser, "autoplug-query", G_CALLBACK(_filterParserCaps), nullptr);
 
         gst_bin_add_many(GST_BIN(bin), source, parser, nullptr);
 
