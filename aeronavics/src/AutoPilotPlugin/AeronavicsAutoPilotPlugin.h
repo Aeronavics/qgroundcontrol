@@ -1,0 +1,32 @@
+/****************************************************************************
+ *
+ * (c) 2009-2019 QGROUNDCONTROL PROJECT <http://www.qgroundcontrol.org>
+ *
+ * QGroundControl is licensed according to the terms in the file
+ * COPYING.md in the root of the source code directory.
+ *
+ * @file
+ *   @brief Custom Autopilot Plugin
+ *   @author Gus Grubba <gus@auterion.com>
+ */
+
+#pragma once
+
+#include "APMAutoPilotPlugin.h"
+#include "Vehicle.h"
+
+class AeronavicsAutoPilotPlugin : public APMAutoPilotPlugin
+{
+    Q_OBJECT
+public:
+    AeronavicsAutoPilotPlugin(Vehicle* vehicle, QObject* parent);
+
+    const QVariantList& vehicleComponents() final;
+
+private slots:
+    void         _advancedChanged        (bool advanced);
+
+private:
+    QVariantList _components;
+
+};

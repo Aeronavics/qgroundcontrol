@@ -1,0 +1,51 @@
+<RCC>
+    <qresource prefix="/img">
+        <file alias="altitude.svg">res/Images/altitude.svg</file>
+        <file alias="attitude_crosshair.svg">res/Images/attitude_crosshair.svg</file>
+        <file alias="attitude_dial.svg">res/Images/attitude_dial.svg</file>
+        <file alias="attitude_pointer.svg">res/Images/attitude_pointer.svg</file>
+        <file alias="chronometer.svg">res/Images/chronometer.svg</file>
+        <file alias="compass_needle.svg">res/Images/compass_needle.svg</file>
+        <file alias="compass_pointer.svg">res/Images/compass_pointer.svg</file>
+        <file alias="distance.svg">res/Images/distance.svg</file>
+        <file alias="horizontal_speed.svg">res/Images/horizontal_speed.svg</file>
+        <file alias="microSD.svg">res/Images/microSD.svg</file>
+        <file alias="odometer.svg">res/Images/odometer.svg</file>
+        <file alias="vertical_speed.svg">res/Images/vertical_speed.svg</file>
+        <file alias="CustomAppIcon.png">res/Images/CustomAppIcon.png</file>
+        <file alias="AeronavicsLogoBlack.png">res/Images/AeronavicsLogoBlack.png</file>
+        <file alias="AeronavicsLogoWhite.png">res/Images/AeronavicsLogoWhite.png</file>
+        <file alias="AeronavicsFullLogoBlack.png">res/Images/AeronavicsFullLogoBlack.png</file>
+        <file alias="AeronavicsFullLogoWhite.png">res/Images/AeronavicsFullLogoWhite.png</file>
+        <file alias="AeronavicsSettingLogoBlack">res/Images/AeronavicsSettingsLogoBlack.png</file>
+        <file alias="AeronavicsSettingLogoWhite">res/Images/AeronavicsSettingsLogoWhite.png</file>
+        <file alias="AeronavicsSettingLogoFull">res/Images/AeronavicsSettingsLogoFull.png</file>
+        <file alias="home.svg">res/Images/home.svg</file>
+    </qresource>
+    <qresource prefix="/qmlimages">
+        <file alias="PaperPlane.svg">res/Images/CustomVehicleIcon.svg</file>
+    </qresource>
+    <qresource prefix="/Aeronavics/Widgets">
+        <file alias="Aeronavics/Widgets/AeronavicsArtificialHorizon.qml">res/Aeronavics/Widgets/AeronavicsArtificialHorizon.qml</file>
+        <file alias="Aeronavics/Widgets/AeronavicsAttitudeWidget.qml">res/Aeronavics/Widgets/AeronavicsAttitudeWidget.qml</file>
+        <file alias="Aeronavics/Widgets/AeronavicsIconButton.qml">res/Aeronavics/Widgets/AeronavicsIconButton.qml</file>
+        <file alias="Aeronavics/Widgets/AeronavicsOnOffSwitch.qml">res/Aeronavics/Widgets/AeronavicsOnOffSwitch.qml</file>
+        <file alias="Aeronavics/Widgets/AeronavicsQuickButton.qml">res/Aeronavics/Widgets/AeronavicsQuickButton.qml</file>
+        <file alias="Aeronavics/Widgets/AeronavicsSignalStrength.qml">res/Aeronavics/Widgets/AeronavicsSignalStrength.qml</file>
+        <file alias="Aeronavics/Widgets/AeronavicsToolBarButton.qml">res/Aeronavics/Widgets/AeronavicsToolBarButton.qml</file>
+        <file alias="Aeronavics/Widgets/AeronavicsVehicleButton.qml">res/Aeronavics/Widgets/AeronavicsVehicleButton.qml</file>
+        <file alias="Aeronavics/Widgets/qmldir">res/Aeronavics/Widgets/qmldir</file>
+    </qresource>
+    <qresource prefix="/qml">
+        <file alias="QGroundControl/FlightDisplay/AeronavicsFlyViewOverlay.qml">res/AeronavicsFlyViewOverlay.qml</file>
+        <file alias="QGroundControl/FlightDisplay/FlyView.qml">res/qml/FlyView.qml</file>
+        <file alias="QGroundControl/FlightDisplay/FlyViewWidgetLayer.qml">res/FlyViewWidgetLayer.qml</file>
+        <file alias="QGroundControl/FlightDisplay/qmldir">res/qml/QGroundControl/FlightDisplay/qmldir</file>
+        <file alias="QGroundControl/Controls/MainToolBar.qml">src/ui/toolbar/MainToolBar.qml</file>
+        <file alias="MainRootWindow.qml">src/ui/MainRootWindow.qml</file>
+        <file alias="VehicleSummary.qml">res/qml/VehicleSummary.qml</file>
+    </qresource>
+    <qresource prefix="/toolbar">
+        <file alias="BatteryIndicator.qml">res/qml/BatteryIndicator.qml</file>
+    </qresource>
+</RCC>

@@ -1,0 +1,10 @@
+Module Aeronavics.Widgets
+
+AeronavicsArtificialHorizon 1.0     AeronavicsArtificialHorizon.qml
+AeronavicsAttitudeWidget    1.0     AeronavicsAttitudeWidget.qml
+AeronavicsIconButton        1.0     AeronavicsIconButton.qml
+AeronavicsOnOffSwitch       1.0     AeronavicsOnOffSwitch.qml
+AeronavicsQuickButton       1.0     AeronavicsQuickButton.qml
+AeronavicsSignalStrength    1.0     AeronavicsSignalStrength.qml
+AeronavicsToolBarButton     1.0     AeronavicsToolBarButton.qml
+AeronavicsVehicleButton     1.0     AeronavicsVehicleButton.qml

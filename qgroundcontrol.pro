@@ -94,16 +94,16 @@ exists(user_config.pri):infile(user_config.pri, CONFIG) {
 # break anything.
 
 contains (CONFIG, QGC_DISABLE_CUSTOM_BUILD) {
-    message("Disable custom build override")
+    message("Disable aeronavics build override")
 } else {
-    exists($$PWD/custom/custom.pri) {
-        message("Found custom build")
+    exists($$PWD/aeronavics/aeronavics.pri) {
+        message("Found aeronavics build")
         CONFIG  += CustomBuild
         DEFINES += QGC_CUSTOM_BUILD
         # custom.pri must define:
         # CUSTOMCLASS  = YourIQGCCorePluginDerivation
         # CUSTOMHEADER = \"\\\"YourIQGCCorePluginDerivation.h\\\"\"
-        include($$PWD/custom/custom.pri)
+        include($$PWD/aeronavics/aeronavics.pri)
     }
 }
 
@@ -332,27 +332,27 @@ include(QGCExternalLibs.pri)
 #
 
 CustomBuild {
-    exists($$PWD/custom/qgroundcontrol.qrc) {
-        message("Using custom qgroundcontrol.qrc")
-        RESOURCES += $$PWD/custom/qgroundcontrol.qrc
+    exists($$PWD/aeronavics/qgroundcontrol.qrc) {
+        message("Using aeronavics qgroundcontrol.qrc")
+        RESOURCES += $$PWD/aeronavics/qgroundcontrol.qrc
     } else {
         RESOURCES += $$PWD/qgroundcontrol.qrc
     }
-    exists($$PWD/custom/qgcresources.qrc) {
-        message("Using custom qgcresources.qrc")
-        RESOURCES += $$PWD/custom/qgcresources.qrc
+    exists($$PWD/aeronavics/qgcresources.qrc) {
+        message("Using aeronavics qgcresources.qrc")
+        RESOURCES += $$PWD/aeronavics/qgcresources.qrc
     } else {
         RESOURCES += $$PWD/qgcresources.qrc
     }
-    exists($$PWD/custom/qgcimages.qrc) {
-        message("Using custom qgcimages.qrc")
-        RESOURCES += $$PWD/custom/qgcimages.qrc
+    exists($$PWD/aeronavics/qgcimages.qrc) {
+        message("Using aeronavics qgcimages.qrc")
+        RESOURCES += $$PWD/aeronavics/qgcimages.qrc
     } else {
         RESOURCES += $$PWD/qgcimages.qrc
     }
-    exists($$PWD/custom/InstrumentValueIcons.qrc) {
-        message("Using custom InstrumentValueIcons.qrc")
-        RESOURCES += $$PWD/custom/InstrumentValueIcons.qrc
+    exists($$PWD/aeronavics/InstrumentValueIcons.qrc) {
+        message("Using aeronavics InstrumentValueIcons.qrc")
+        RESOURCES += $$PWD/aeronavics/InstrumentValueIcons.qrc
     } else {
         RESOURCES += $$PWD/resources/InstrumentValueIcons/InstrumentValueIcons.qrc
     }
@@ -431,6 +431,8 @@ contains (DEFINES, QGC_ENABLE_PAIRING) {
 #
 
 HEADERS += \
+    src/QmlControls/CustomAction.h \
+    src/QmlControls/CustomActionManager.h \
     src/QmlControls/QmlUnitsConversion.h \
     src/Vehicle/VehicleEscStatusFactGroup.h \
     src/api/QGCCorePlugin.h \
@@ -445,6 +447,7 @@ contains (DEFINES, QGC_ENABLE_PAIRING) {
 }
 
 SOURCES += \
+    src/QmlControls/CustomActionManager.cc \
     src/Vehicle/VehicleEscStatusFactGroup.cc \
     src/api/QGCCorePlugin.cc \
     src/api/QGCOptions.cc \
@@ -496,6 +499,7 @@ DebugBuild { PX4FirmwarePlugin { PX4FirmwarePluginFactory { APMFirmwarePlugin { 
         src/MissionManager/TransectStyleComplexItemTestBase.h \
         src/MissionManager/VisualMissionItemTest.h \
         src/qgcunittest/ComponentInformationCacheTest.h \
+        src/qgcunittest/ComponentInformationTranslationTest.h \
         src/qgcunittest/GeoTest.h \
         src/qgcunittest/MavlinkLogTest.h \
         src/qgcunittest/MultiSignalSpy.h \
@@ -544,6 +548,7 @@ DebugBuild { PX4FirmwarePlugin { PX4FirmwarePluginFactory { APMFirmwarePlugin { 
         src/MissionManager/TransectStyleComplexItemTestBase.cc \
         src/MissionManager/VisualMissionItemTest.cc \
         src/qgcunittest/ComponentInformationCacheTest.cc \
+        src/qgcunittest/ComponentInformationTranslationTest.cc \
         src/qgcunittest/GeoTest.cc \
         src/qgcunittest/MavlinkLogTest.cc \
         src/qgcunittest/MultiSignalSpy.cc \
@@ -645,6 +650,7 @@ HEADERS += \
     src/Geo/PolarStereographic.hpp \
     src/QGC.h \
     src/QGCApplication.h \
+    src/QGCCachedFileDownload.h \
     src/QGCComboBox.h \
     src/QGCConfig.h \
     src/QGCFileDownload.h \
@@ -677,6 +683,7 @@ HEADERS += \
     src/Settings/AppSettings.h \
     src/Settings/AutoConnectSettings.h \
     src/Settings/BrandImageSettings.h \
+    src/Settings/RemoteIDSettings.h \
     src/Settings/FirmwareUpgradeSettings.h \
     src/Settings/FlightMapSettings.h \
     src/Settings/FlyViewSettings.h \
@@ -706,6 +713,7 @@ HEADERS += \
     src/Vehicle/CompInfoGeneral.h \
     src/Vehicle/ComponentInformationCache.h \
     src/Vehicle/ComponentInformationManager.h \
+    src/Vehicle/ComponentInformationTranslation.h \
     src/Vehicle/EventHandler.h \
     src/Vehicle/FTPManager.h \
     src/Vehicle/GPSRTKFactGroup.h \
@@ -715,6 +723,7 @@ HEADERS += \
     src/Vehicle/MAVLinkLogManager.h \
     src/Vehicle/MAVLinkStreamConfig.h \
     src/Vehicle/MultiVehicleManager.h \
+    src/Vehicle/RemoteIDManager.h \
     src/Vehicle/StateMachine.h \
     src/Vehicle/SysStatusSensorInfo.h \
     src/Vehicle/TerrainFactGroup.h \
@@ -901,6 +910,7 @@ SOURCES += \
     src/Geo/PolarStereographic.cpp \
     src/QGC.cc \
     src/QGCApplication.cc \
+    src/QGCCachedFileDownload.cc \
     src/QGCComboBox.cc \
     src/QGCFileDownload.cc \
     src/QGCLoggingCategory.cc \
@@ -932,6 +942,7 @@ SOURCES += \
     src/Settings/AppSettings.cc \
     src/Settings/AutoConnectSettings.cc \
     src/Settings/BrandImageSettings.cc \
+    src/Settings/RemoteIDSettings.cc \
     src/Settings/FirmwareUpgradeSettings.cc \
     src/Settings/FlightMapSettings.cc \
     src/Settings/FlyViewSettings.cc \
@@ -961,6 +972,7 @@ SOURCES += \
     src/Vehicle/CompInfoGeneral.cc \
     src/Vehicle/ComponentInformationCache.cc \
     src/Vehicle/ComponentInformationManager.cc \
+    src/Vehicle/ComponentInformationTranslation.cc \
     src/Vehicle/EventHandler.cc \
     src/Vehicle/FTPManager.cc \
     src/Vehicle/GPSRTKFactGroup.cc \
@@ -970,6 +982,7 @@ SOURCES += \
     src/Vehicle/MAVLinkLogManager.cc \
     src/Vehicle/MAVLinkStreamConfig.cc \
     src/Vehicle/MultiVehicleManager.cc \
+    src/Vehicle/RemoteIDManager.cc \
     src/Vehicle/StateMachine.cc \
     src/Vehicle/SysStatusSensorInfo.cc \
     src/Vehicle/TerrainFactGroup.cc \
