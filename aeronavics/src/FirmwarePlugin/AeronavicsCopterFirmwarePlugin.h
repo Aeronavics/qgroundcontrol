@@ -48,6 +48,7 @@ public:
         AUTOROTATE  = 26,
         AUTO_RTL    = 27,
         TURTLE      = 28,
+        HASTEN      = 29,  // Custom secondary Loiter
     };
 
     AeronavicsCopterMode(uint32_t mode, bool settable);

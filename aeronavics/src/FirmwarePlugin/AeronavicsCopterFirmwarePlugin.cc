@@ -39,6 +39,7 @@ AeronavicsCopterMode::AeronavicsCopterMode(uint32_t mode, bool settable) :
         { AUTOROTATE,   "AutoRotate" },
         { AUTO_RTL,     "AutoRTL" },
         { TURTLE,       "Turtle" },
+        { HASTEN,       "Hasten"},
     });
 }
 
@@ -48,6 +49,7 @@ AeronavicsCopterFirmwarePlugin::AeronavicsCopterFirmwarePlugin(void)
         AeronavicsCopterMode(AeronavicsCopterMode::ALT_HOLD,      true),
         AeronavicsCopterMode(AeronavicsCopterMode::POS_HOLD,      true),
         AeronavicsCopterMode(AeronavicsCopterMode::LOITER,        true),
+        AeronavicsCopterMode(AeronavicsCopterMode::HASTEN,        true),
         AeronavicsCopterMode(AeronavicsCopterMode::AUTO,          true),
         AeronavicsCopterMode(AeronavicsCopterMode::LAND,          true),
         AeronavicsCopterMode(AeronavicsCopterMode::RTL,           true),

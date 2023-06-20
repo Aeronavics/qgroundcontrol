@@ -44,6 +44,7 @@
         <file alias="QGroundControl/Controls/MainToolBar.qml">src/ui/toolbar/MainToolBar.qml</file>
         <file alias="MainRootWindow.qml">src/ui/MainRootWindow.qml</file>
         <file alias="VehicleSummary.qml">res/qml/VehicleSummary.qml</file>
+        <file alias="GeneralSettings.qml">res/qml/GeneralSettings.qml</file>
     </qresource>
     <qresource prefix="/toolbar">
         <file alias="BatteryIndicator.qml">res/qml/BatteryIndicator.qml</file>
