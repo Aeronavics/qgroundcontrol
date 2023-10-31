@@ -113,6 +113,8 @@ public:
 
     Q_INVOKABLE void grabImage(const QString& imageFile = QString());
 
+    Q_INVOKABLE void toggleVideo   ();
+
 signals:
     void hasVideoChanged            ();
     void isGStreamerChanged         ();
@@ -176,6 +178,7 @@ protected:
     QString                 _uvcVideoSourceID;
     bool                    _fullScreen             = false;
     Vehicle*                _activeVehicle          = nullptr;
+    unsigned                _videoInstance          = 0;
 };
 
 #endif

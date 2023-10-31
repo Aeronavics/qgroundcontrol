@@ -99,6 +99,11 @@ Rectangle {
         }
     }
 
+    function changeCamera() {
+        console.log("toggle Camera")
+        _videoStreamManager.toggleVideo()
+    }
+
     function toggleShooting() {
         console.log("toggleShooting", _anyVideoStreamAvailable)
         if (_mavlinkCamera && (_mavlinkCamera.capturesVideo || _mavlinkCamera.capturesPhotos) ) {
@@ -267,8 +272,8 @@ Rectangle {
 
             MouseArea {
                 anchors.fill:   parent
-                enabled:        _canShootInCurrentMode
-                onClicked:      toggleShooting()
+                enabled:        true
+                onClicked:      changeCamera()
             }
         }
 
