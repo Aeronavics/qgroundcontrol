@@ -100,7 +100,6 @@ Rectangle {
     }
 
     function changeCamera() {
-        console.log("toggle Camera")
         _videoStreamManager.toggleVideo()
     }
 

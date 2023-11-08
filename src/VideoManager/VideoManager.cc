@@ -734,14 +734,8 @@ VideoManager::_updateSettings(unsigned id)
     else if (source == VideoSettings::videoSourceMPEGTS)
         settingsChanged |= _updateVideoUri(0, QStringLiteral("mpegts://0.0.0.0:%1").arg(_videoSettings->udpPort()->rawValue().toInt()));
     else if (source == VideoSettings::videoSourceRTSP) {
-        if (_videoInstance == 1) {
-            settingsChanged |= _updateVideoUri(0, "rtsp://icon-12187/proxyStream-2");
-            qCCritical(VideoManagerLog) << "Video source URI Changed to: rtsp://icon-12187/proxyStream-2";
-        }
-        else {
             settingsChanged |= _updateVideoUri(0, "rtsp://icon-12187/proxyStream-1");
-            qCCritical(VideoManagerLog) << "Video source URI Changed to: rtsp://icon-12187/proxyStream-1";
-        }
+            settingsChanged |= _updateVideoUri(1, "rtsp://icon-12187/proxyStream-2");
     }
     else if (source == VideoSettings::videoSourceTCP)
         settingsChanged |= _updateVideoUri(0, QStringLiteral("tcp://%1").arg(_videoSettings->tcpUrl()->rawValue().toString()));
@@ -772,9 +766,8 @@ VideoManager::_updateSettings(unsigned id)
 void
 VideoManager::toggleVideo()
 {
-    _videoInstance = 1 - _videoInstance;
-    //_updateSettings(0);
-    _restartVideo(0);
+    _mainVideo = !_mainVideo;
+    emit mainVideoChanged();
 }
 
 //-----------------------------------------------------------------------------

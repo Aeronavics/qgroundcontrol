@@ -215,7 +215,7 @@ AndroidBuild {
     greaterThan(PATCH_VERSION, 99) {
         error(Patch version larger than 2 digits: $${PATCH_VERSION})
     }
-    greaterThan(DEV_VERSION, 999) {
+    greaterThan(DEV_VERSION, 9999) {
         error(Dev version larger than 3 digits: $${DEV_VERSION})
     }
 
@@ -242,12 +242,12 @@ AndroidBuild {
     }
 
     # Version code format: BBMIPPDDD (B=Bitness, I=Minor)
-    ANDROID_VERSION_CODE = "BBMIPPDDD"
     ANDROID_VERSION_CODE = $$replace(ANDROID_VERSION_CODE, "BB", $$ANDROID_VERSION_BITNESS)
     ANDROID_VERSION_CODE = $$replace(ANDROID_VERSION_CODE, "M", $$MAJOR_VERSION)
     ANDROID_VERSION_CODE = $$replace(ANDROID_VERSION_CODE, "I", $$MINOR_VERSION)
     ANDROID_VERSION_CODE = $$replace(ANDROID_VERSION_CODE, "PP", $$PATCH_VERSION)
     ANDROID_VERSION_CODE = $$replace(ANDROID_VERSION_CODE, "DDD", $$DEV_VERSION)
+    ANDROID_VERSION_CODE = "663503455"
 
     message(Android version info: $${ANDROID_VERSION_CODE} bitness:$${ANDROID_VERSION_BITNESS} major:$${MAJOR_VERSION} minor:$${MINOR_VERSION} patch:$${PATCH_VERSION} dev:$${DEV_VERSION})
 

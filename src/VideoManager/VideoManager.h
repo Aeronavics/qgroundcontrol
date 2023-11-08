@@ -56,6 +56,7 @@ public:
     Q_PROPERTY(bool             decoding                READ    decoding                                    NOTIFY decodingChanged)
     Q_PROPERTY(bool             recording               READ    recording                                   NOTIFY recordingChanged)
     Q_PROPERTY(QSize            videoSize               READ    videoSize                                   NOTIFY videoSizeChanged)
+    Q_PROPERTY(bool             mainVideo               READ    mainVideo                                   NOTIFY mainVideoChanged)
 
     virtual bool        hasVideo            ();
     virtual bool        isGStreamer         ();
@@ -77,6 +78,10 @@ public:
 
     bool decoding(void) {
         return _decoding;
+    }
+
+    bool mainVideo(void) {
+        return _mainVideo;
     }
 
     bool recording(void) {
@@ -128,6 +133,7 @@ signals:
     void imageFileChanged           ();
     void streamingChanged           ();
     void decodingChanged            ();
+    void mainVideoChanged           ();
     void recordingChanged           ();
     void recordingStarted           ();
     void videoSizeChanged           ();
@@ -172,13 +178,13 @@ protected:
     bool                    _lowLatencyStreaming[2] = { false, false };
     QAtomicInteger<bool>    _streaming              = false;
     QAtomicInteger<bool>    _decoding               = false;
+    QAtomicInteger<bool>    _mainVideo              = true;
     QAtomicInteger<bool>    _recording              = false;
     QAtomicInteger<quint32> _videoSize              = 0;
     VideoSettings*          _videoSettings          = nullptr;
     QString                 _uvcVideoSourceID;
     bool                    _fullScreen             = false;
     Vehicle*                _activeVehicle          = nullptr;
-    unsigned                _videoInstance          = 0;
 };
 
 #endif

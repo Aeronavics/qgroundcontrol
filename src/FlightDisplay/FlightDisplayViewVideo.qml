@@ -67,7 +67,7 @@ Item {
     Rectangle {
         anchors.fill:   parent
         color:          "black"
-        visible:        QGroundControl.videoManager.decoding
+        visible:        QGroundControl.videoManager.decoding && QGroundControl.videoManager.mainVideo
         function getWidth() {
             //-- Fit Width or Stretch
             if(_fitMode === 0 || _fitMode === 2) {
@@ -90,16 +90,6 @@ Item {
                 id:             videoContent
                 objectName:     "videoContent"
 
-                Connections {
-                    target: QGroundControl.videoManager
-                    function onImageFileChanged() {
-                        videoContent.grabToImage(function(result) {
-                            if (!result.saveToFile(QGroundControl.videoManager.imageFile)) {
-                                console.error('Error capturing video frame');
-                            }
-                        });
-                    }
-                }
                 Rectangle {
                     color:  Qt.rgba(1,1,1,0.5)
                     height: parent.height
@@ -143,46 +133,6 @@ Item {
 
             property bool videoDisabled: QGroundControl.settingsManager.videoSettings.videoSource.rawValue === QGroundControl.settingsManager.videoSettings.disabledVideoSource
         }
-
-        //-- Thermal Image
-        Item {
-            id:                 thermalItem
-            width:              height * QGroundControl.videoManager.thermalAspectRatio
-            height:             _camera ? (_camera.thermalMode === QGCCameraControl.THERMAL_FULL ? parent.height : (_camera.thermalMode === QGCCameraControl.THERMAL_PIP ? ScreenTools.defaultFontPixelHeight * 12 : parent.height * _thermalHeightFactor)) : 0
-            anchors.centerIn:   parent
-            visible:            QGroundControl.videoManager.hasThermal && _camera.thermalMode !== QGCCameraControl.THERMAL_OFF
-            function pipOrNot() {
-                if(_camera) {
-                    if(_camera.thermalMode === QGCCameraControl.THERMAL_PIP) {
-                        anchors.centerIn    = undefined
-                        anchors.top         = parent.top
-                        anchors.topMargin   = mainWindow.header.height + (ScreenTools.defaultFontPixelHeight * 0.5)
-                        anchors.left        = parent.left
-                        anchors.leftMargin  = ScreenTools.defaultFontPixelWidth * 12
-                    } else {
-                        anchors.top         = undefined
-                        anchors.topMargin   = undefined
-                        anchors.left        = undefined
-                        anchors.leftMargin  = undefined
-                        anchors.centerIn    = parent
-                    }
-                }
-            }
-            Connections {
-                target:                 _camera
-                onThermalModeChanged:   thermalItem.pipOrNot()
-            }
-            onVisibleChanged: {
-                thermalItem.pipOrNot()
-            }
-            QGCVideoBackground {
-                id:             thermalVideo
-                objectName:     "thermalVideo"
-                anchors.fill:   parent
-                receiver:       QGroundControl.videoManager.thermalVideoReceiver
-                opacity:        _camera ? (_camera.thermalMode === QGCCameraControl.THERMAL_BLEND ? _camera.thermalOpacity / 100 : 1.0) : 0
-            }
-        }
         //-- Zoom
         PinchArea {
             id:             pinchZoom
@@ -198,6 +148,97 @@ Item {
                         z = Math.round(pinch.scale)
                     }
                     if(pinchZoom.zoom != z) {
+                        _camera.stepZoom(z)
+                    }
+                }
+            }
+            property int zoom: 0
+        }
+    }
+    Rectangle {
+        anchors.fill:   parent
+        color:          "black"
+        visible:        QGroundControl.videoManager.decoding && !QGroundControl.videoManager.mainVideo
+        function getWidth() {
+            //-- Fit Width or Stretch
+            if(_fitMode === 0 || _fitMode === 2) {
+                return parent.width
+            }
+            //-- Fit Height
+            return _ar != 0.0 ? parent.height * _ar : parent.width
+        }
+        function getHeight() {
+            //-- Fit Height or Stretch
+            if(_fitMode === 1 || _fitMode === 2) {
+                return parent.height
+            }
+            //-- Fit Width
+            return _ar != 0.0 ? parent.width * (1 / _ar) : parent.height
+        }
+        Component {
+            id: videoBackgroundComponent2
+            QGCVideoBackground {
+                id:             thermalVideo
+                objectName:     "thermalVideo"
+
+                Rectangle {
+                    color:  Qt.rgba(1,1,1,0.5)
+                    height: parent.height
+                    width:  1
+                    x:      parent.width * 0.33
+                    visible: _showGrid && !QGroundControl.videoManager.fullScreen
+                }
+                Rectangle {
+                    color:  Qt.rgba(1,1,1,0.5)
+                    height: parent.height
+                    width:  1
+                    x:      parent.width * 0.66
+                    visible: _showGrid && !QGroundControl.videoManager.fullScreen
+                }
+                Rectangle {
+                    color:  Qt.rgba(1,1,1,0.5)
+                    width:  parent.width
+                    height: 1
+                    y:      parent.height * 0.33
+                    visible: _showGrid && !QGroundControl.videoManager.fullScreen
+                }
+                Rectangle {
+                    color:  Qt.rgba(1,1,1,0.5)
+                    width:  parent.width
+                    height: 1
+                    y:      parent.height * 0.66
+                    visible: _showGrid && !QGroundControl.videoManager.fullScreen
+                }
+            }
+        }
+        Loader {
+            // GStreamer is causing crashes on Lenovo laptop OpenGL Intel drivers. In order to workaround this
+            // we don't load a QGCVideoBackground object when video is disabled. This prevents any video rendering
+            // code from running. Setting QGCVideoBackground.receiver = null does not work to prevent any
+            // video OpenGL from being generated. Hence the Loader to completely remove it.
+            height:             parent.getHeight()
+            width:              parent.getWidth()
+            anchors.centerIn:   parent
+            visible:            QGroundControl.videoManager.decoding
+            sourceComponent:    videoBackgroundComponent2
+
+            property bool videoDisabled: QGroundControl.settingsManager.videoSettings.videoSource.rawValue === QGroundControl.settingsManager.videoSettings.disabledVideoSource
+        }
+        //-- Zoom
+        PinchArea {
+            id:             pinchZoom2
+            enabled:        _hasZoom
+            anchors.fill:   parent
+            onPinchStarted: pinchZoom2.zoom = 0
+            onPinchUpdated: {
+                if(_hasZoom) {
+                    var z = 0
+                    if(pinch.scale < 1) {
+                        z = Math.round(pinch.scale * -10)
+                    } else {
+                        z = Math.round(pinch.scale)
+                    }
+                    if(pinchZoom2.zoom != z) {
                         _camera.stepZoom(z)
                     }
                 }
