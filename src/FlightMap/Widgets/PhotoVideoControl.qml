@@ -185,15 +185,17 @@ Rectangle {
                         onClicked:      toggleShooting()
 
                         function toggleShooting() {
-                            if (_cameraInPhotoMode) {
-                                if (_camera.photoCaptureStatus === MavlinkCameraControl.PHOTO_CAPTURE_INTERVAL_IN_PROGRESS) {
-                                    _camera.stopTakePhoto()
-                                } else if (_camera.photoCaptureStatus === MavlinkCameraControl.PHOTO_CAPTURE_IDLE || _camera.photoCaptureStatus === MavlinkCameraControl.PHOTO_CAPTURE_INTERVAL_IDLE) {
-                                    _camera.takePhoto()
-                                }
-                            } else {
-                                _camera.toggleVideoRecording()
-                            }
+                            _cameraManager.nextCamera();
+
+                            // if (_cameraInPhotoMode) {
+                            //     if (_camera.photoCaptureStatus === MavlinkCameraControl.PHOTO_CAPTURE_INTERVAL_IN_PROGRESS) {
+                            //         _camera.stopTakePhoto()
+                            //     } else if (_camera.photoCaptureStatus === MavlinkCameraControl.PHOTO_CAPTURE_IDLE || _camera.photoCaptureStatus === MavlinkCameraControl.PHOTO_CAPTURE_INTERVAL_IDLE) {
+                            //         _camera.takePhoto()
+                            //     }
+                            // } else {
+                            //     _camera.toggleVideoRecording()
+                            // }
                         }
                     }
                 }

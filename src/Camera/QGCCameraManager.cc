@@ -192,6 +192,11 @@ QGCVideoStreamInfo* QGCCameraManager::thermalStreamInstance()
     return nullptr;
 }
 
+void QGCCameraManager::nextCamera()
+{
+    _stepCamera(1);
+}
+
 MavlinkCameraControl* QGCCameraManager::_findCamera(int id)
 {
     for(int i = 0; i < _cameras.count(); i++) {

@@ -51,6 +51,7 @@ public:
     virtual void                    setCurrentCamera    (int sel);
     virtual QGCVideoStreamInfo*     currentStreamInstance();
     virtual QGCVideoStreamInfo*     thermalStreamInstance();
+    virtual void                    nextCamera          ();
 
     /// Returns a list of CameraMetaData objects for available cameras on the vehicle.
     virtual const QVariantList &cameraList();
