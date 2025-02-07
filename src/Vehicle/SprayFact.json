@@ -1,0 +1,44 @@
+{
+    "version":              1,
+    "fileType":             "FactMetaData",
+    "QGC.MetaData.Facts":
+[
+{
+    "name":             "mesFlowrate",
+    "shortDesc":        "Measured Flowrate",
+    "type":             "uint16",
+    "units":            "ml/s"
+},
+{
+    "name":             "desFlowrate",
+    "shortDesc":        "Desired Flowrate",
+    "type":             "uint16",
+    "units":            "ml/s"
+},
+{
+    "name":             "sprayeVolume",
+    "shortDesc":        "Volume Sprayed",
+    "type":             "float",
+    "decimalPlaces":    2,
+    "units":            "l"
+},
+{
+    "name":             "sprayRemaining",
+    "shortDesc":        "Remaining Spray",
+    "type":             "float",
+    "decimalPlaces":    1,
+    "units":            "%"
+},
+{
+    "name":             "mesPressure",
+    "shortDesc":        "Mesured Pressure",
+    "type":             "uint16",
+    "units":            "kpa"
+},
+{
+    "name":             "error",
+    "shortDesc":        "Spray Error",
+    "type":             "uint8"
+}
+]
+}
