@@ -56,6 +56,7 @@ public:
     Q_PROPERTY(bool             decoding                READ    decoding                                    NOTIFY decodingChanged)
     Q_PROPERTY(bool             recording               READ    recording                                   NOTIFY recordingChanged)
     Q_PROPERTY(QSize            videoSize               READ    videoSize                                   NOTIFY videoSizeChanged)
+    Q_PROPERTY(bool             secondaryStream         READ    secondaryStream                             NOTIFY secondaryStreamChanged)
 
     virtual bool        hasVideo            ();
     virtual bool        isGStreamer         ();
@@ -70,6 +71,7 @@ public:
     virtual bool        autoStreamConfigured();
     virtual bool        hasThermal          ();
     virtual QString     imageFile           ();
+    virtual bool        secondaryStream     () { return _secondaryStream; }
 
     bool streaming(void) {
         return _streaming;
@@ -111,12 +113,14 @@ public:
     Q_INVOKABLE void startRecording (const QString& videoFile = QString());
     Q_INVOKABLE void stopRecording  ();
 
-    Q_INVOKABLE void grabImage(const QString& imageFile = QString());
+    Q_INVOKABLE void grabImage      (const QString& imageFile = QString());
+
+    Q_INVOKABLE void toggleStreams  ();
 
 signals:
     void hasVideoChanged            ();
     void isGStreamerChanged         ();
-    void isUvcChanged               ();
+    void isUvcChanged               (); 
     void uvcVideoSourceIDChanged    ();
     void fullScreenChanged          ();
     void isAutoStreamChanged        ();
@@ -129,6 +133,7 @@ signals:
     void recordingChanged           ();
     void recordingStarted           ();
     void videoSizeChanged           ();
+    void secondaryStreamChanged     ();
 
 protected slots:
     void _videoSourceChanged        ();
@@ -161,6 +166,8 @@ protected:
     VideoReceiver*          _videoReceiver[2]       = { nullptr, nullptr };
     void*                   _videoSink[2]           = { nullptr, nullptr };
     QString                 _videoUri[2];
+    bool                    _secondaryStream        = false;
+
     // FIXME: AV: _videoStarted seems to be access from 3 different threads, from time to time
     // 1) Video Receiver thread
     // 2) Video Manager/main app thread

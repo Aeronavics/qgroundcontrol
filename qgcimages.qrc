@@ -207,5 +207,11 @@
         <file alias="Yield.svg">src/ui/toolbar/Images/Yield.svg</file>
         <file alias="ZoomMinus.svg">src/FlightMap/Images/ZoomMinus.svg</file>
         <file alias="ZoomPlus.svg">src/FlightMap/Images/ZoomPlus.svg</file>
+        <file alias="camera_swap.svg">src/Camera/images/camera_swap.svg</file>
+        <file alias="fuel.svg">src/ui/toolbar/Images/fuel.svg</file>
+        <file alias="engine.svg">src/ui/toolbar/Images/engine.svg</file>
+        <file alias="spray.svg">src/ui/toolbar/Images/spray.svg</file>
+        <file alias="video_swap.svg">src/Camera/images/video_swap.svg</file>
     </qresource>
+    <qresource prefix="/"/>
 </RCC>

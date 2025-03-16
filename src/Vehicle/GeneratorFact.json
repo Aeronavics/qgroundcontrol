@@ -6,13 +6,15 @@
 {
     "name":             "status",
     "shortDesc":        "Status",
-    "type":             "uint64"
+    "type":             "uint64",
+    "decimalPlaces":    0
 },
 {
     "name":             "genSpeed",
     "shortDesc":        "Generator Speed",
     "type":             "uint16",
-    "units":            "rpm"
+    "units":            "rpm",
+    "decimalPlaces":    0
 },
 {
     "name":             "batteryCurrent",
@@ -59,19 +61,25 @@
     "name":             "genTemp",
     "shortDesc":        "Generator Temperature",
     "type":             "int16",
-    "units":            "°C"
+    "units":            "°C",
+    "decimalPlaces":    0
 },
 {
     "name":             "runtime",
     "shortDesc":        "runtime",
-    "type":             "uint32",
-    "units":            "sec"
+    "type":             "string"
 },
 {
     "name":             "timeMaintenance",
     "shortDesc":        "Time until Maintenance",
-    "type":             "int32",
-    "units":            "sec"
+    "type":             "string"
+},
+{
+    "name":             "fuelRemaining",
+    "shortDesc":        "Fuel Remaining",
+    "type":             "uint8",
+    "units":            "%",
+    "decimalPlaces":    0
 }
 ]
 }

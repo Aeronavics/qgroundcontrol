@@ -13,6 +13,7 @@ const char* VehicleGeneratorFactGroup::_batCurrentSetpointFactName =    "batCurr
 const char* VehicleGeneratorFactGroup::_genTempFactName =               "genTemp";
 const char* VehicleGeneratorFactGroup::_runtimeFactName =               "runtime";
 const char* VehicleGeneratorFactGroup::_timeMaintenanceFactName =       "timeMaintenance";
+const char* VehicleGeneratorFactGroup::_fuelRemainingFactName =             "fuelRemaining";
 
 VehicleGeneratorFactGroup::VehicleGeneratorFactGroup(QObject* parent)
     : FactGroup(1000, ":/json/Vehicle/GeneratorFact.json", parent)
@@ -25,8 +26,9 @@ VehicleGeneratorFactGroup::VehicleGeneratorFactGroup(QObject* parent)
     , _rectifierTempFact        (0, _rectifierTempFactName,         FactMetaData::valueTypeInt16)
     , _batCurrentSetpointFact   (0, _batCurrentSetpointFactName,    FactMetaData::valueTypeFloat)
     , _genTempFact              (0, _genTempFactName,               FactMetaData::valueTypeInt16)
-    , _runtimeFact              (0, _runtimeFactName,               FactMetaData::valueTypeUint32)
-    , _timeMaintenanceFact      (0, _timeMaintenanceFactName,       FactMetaData::valueTypeInt32)
+    , _runtimeFact              (0, _runtimeFactName,               FactMetaData::valueTypeString)
+    , _timeMaintenanceFact      (0, _timeMaintenanceFactName,       FactMetaData::valueTypeString)
+    , _fuelRemainingFact        (0, _fuelRemainingFactName,         FactMetaData::valueTypeUint8)
 {
     _addFact(&_statusFact,              _statusFactName);
     _addFact(&_genSpeedFact,            _genSpeedFactName);
@@ -39,6 +41,7 @@ VehicleGeneratorFactGroup::VehicleGeneratorFactGroup(QObject* parent)
     _addFact(&_genTempFact,             _genTempFactName);
     _addFact(&_runtimeFact,             _runtimeFactName);
     _addFact(&_timeMaintenanceFact,     _timeMaintenanceFactName);
+    _addFact(&_fuelRemainingFact,       _fuelRemainingFactName);
 
     // Start out as not available "--.--"
     _statusFact.setRawValue(qQNaN());
@@ -52,6 +55,7 @@ VehicleGeneratorFactGroup::VehicleGeneratorFactGroup(QObject* parent)
     _genTempFact.setRawValue(qQNaN());
     _runtimeFact.setRawValue(qQNaN());
     _timeMaintenanceFact.setRawValue(qQNaN());
+    _fuelRemainingFact.setRawValue(qQNaN());
 }
 
 void VehicleGeneratorFactGroup::handleMessage(Vehicle* /* vehicle */, mavlink_message_t& message)
@@ -59,6 +63,9 @@ void VehicleGeneratorFactGroup::handleMessage(Vehicle* /* vehicle */, mavlink_me
     switch (message.msgid) {
     case MAVLINK_MSG_ID_GENERATOR_STATUS:
         _handleGeneratorStatus(message);
+        break;
+    case MAVLINK_MSG_ID_FUEL_STATUS:
+        _handleFuelStatus(message);
         break;
     default:
         break;
@@ -80,8 +87,23 @@ void VehicleGeneratorFactGroup::_handleGeneratorStatus(mavlink_message_t& messag
     rectifierTemp()->setRawValue        (generator.rectifier_temperature == INT16_MAX ? qQNaN() : generator.rectifier_temperature);
     batCurrentSetpoint()->setRawValue   (generator.bat_current_setpoint);
     genTemp()->setRawValue              (generator.generator_temperature == INT16_MAX ? qQNaN() : generator.generator_temperature);
-    runtime()->setRawValue              (generator.runtime == UINT32_MAX ? qQNaN() : generator.runtime);
-    timeMaintenance()->setRawValue      (generator.time_until_maintenance == INT32_MAX ? qQNaN() : generator.time_until_maintenance);
+
+
+    uint32_t run_time_hours = generator.runtime / 3600;
+    uint32_t run_time_minutes = (generator.runtime % 3600) / 60;
+    std::string run_time_string = std::to_string(run_time_hours) + "h " + std::to_string(run_time_minutes) + "m";
+    runtime()->setRawValue              (run_time_string.c_str());
+
+    uint32_t maintenance_time_hours = generator.time_until_maintenance / 3600;
+    uint32_t maintenance_time_minutes = (generator.time_until_maintenance % 3600) / 60;
+    std::string maintenance_time_string = std::to_string(maintenance_time_hours) + "h " + std::to_string(maintenance_time_minutes) + "m";
+    timeMaintenance()->setRawValue      (maintenance_time_string.c_str());
+}
+
+void VehicleGeneratorFactGroup::_handleFuelStatus(mavlink_message_t& message) {
+    mavlink_fuel_status_t fuel_status;
+    mavlink_msg_fuel_status_decode(&message, &fuel_status);
+    fuelRemaining()->setRawValue(fuel_status.percent_remaining);
 }
 
 void VehicleGeneratorFactGroup::_updateGeneratorFlags() {

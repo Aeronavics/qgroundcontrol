@@ -69,44 +69,44 @@ void
 QGCCameraManager::_mavlinkMessageReceived(const mavlink_message_t& message)
 {
     //-- Only pay attention to camera components, as identified by their compId
-    if(message.sysid == _vehicle->id() && (message.compid == MAV_COMP_ID_AUTOPILOT1 ||
-        (message.compid >= MAV_COMP_ID_CAMERA && message.compid <= MAV_COMP_ID_CAMERA6))) {
-        switch (message.msgid) {
-            case MAVLINK_MSG_ID_CAMERA_CAPTURE_STATUS:
-                _handleCaptureStatus(message);
-                break;
-            case MAVLINK_MSG_ID_STORAGE_INFORMATION:
-                _handleStorageInfo(message);
-                break;
-            case MAVLINK_MSG_ID_HEARTBEAT:
-                _handleHeartbeat(message);
-                break;
-            case MAVLINK_MSG_ID_CAMERA_INFORMATION:
-                _handleCameraInfo(message);
-                break;
-            case MAVLINK_MSG_ID_CAMERA_SETTINGS:
-                _handleCameraSettings(message);
-                break;
-            case MAVLINK_MSG_ID_PARAM_EXT_ACK:
-                _handleParamAck(message);
-                break;
-            case MAVLINK_MSG_ID_PARAM_EXT_VALUE:
-                _handleParamValue(message);
-                break;
-            case MAVLINK_MSG_ID_VIDEO_STREAM_INFORMATION:
-                _handleVideoStreamInfo(message);
-                break;
-            case MAVLINK_MSG_ID_VIDEO_STREAM_STATUS:
-                _handleVideoStreamStatus(message);
-                break;
-            case MAVLINK_MSG_ID_BATTERY_STATUS:
-                _handleBatteryStatus(message);
-                break;
-            case MAVLINK_MSG_ID_CAMERA_TRACKING_IMAGE_STATUS:
-                _handleTrackingImageStatus(message);
-                break;
-        }
-    }
+    // if(message.sysid == _vehicle->id() && (message.compid == MAV_COMP_ID_AUTOPILOT1 ||
+    //     (message.compid >= MAV_COMP_ID_CAMERA && message.compid <= MAV_COMP_ID_CAMERA6))) {
+    //     switch (message.msgid) {
+    //         case MAVLINK_MSG_ID_CAMERA_CAPTURE_STATUS:
+    //             _handleCaptureStatus(message);
+    //             break;
+    //         case MAVLINK_MSG_ID_STORAGE_INFORMATION:
+    //             _handleStorageInfo(message);
+    //             break;
+    //         case MAVLINK_MSG_ID_HEARTBEAT:
+    //             _handleHeartbeat(message);
+    //             break;
+    //         case MAVLINK_MSG_ID_CAMERA_INFORMATION:
+    //             _handleCameraInfo(message);
+    //             break;
+    //         case MAVLINK_MSG_ID_CAMERA_SETTINGS:
+    //             _handleCameraSettings(message);
+    //             break;
+    //         case MAVLINK_MSG_ID_PARAM_EXT_ACK:
+    //             _handleParamAck(message);
+    //             break;
+    //         case MAVLINK_MSG_ID_PARAM_EXT_VALUE:
+    //             _handleParamValue(message);
+    //             break;
+    //         case MAVLINK_MSG_ID_VIDEO_STREAM_INFORMATION:
+    //             _handleVideoStreamInfo(message);
+    //             break;
+    //         case MAVLINK_MSG_ID_VIDEO_STREAM_STATUS:
+    //             _handleVideoStreamStatus(message);
+    //             break;
+    //         case MAVLINK_MSG_ID_BATTERY_STATUS:
+    //             _handleBatteryStatus(message);
+    //             break;
+    //         case MAVLINK_MSG_ID_CAMERA_TRACKING_IMAGE_STATUS:
+    //             _handleTrackingImageStatus(message);
+    //             break;
+    //     }
+    // }
 }
 
 //-----------------------------------------------------------------------------
@@ -514,6 +514,13 @@ QGCCameraManager::_stopZoom()
     if(pCamera) {
         pCamera->stopZoom();
     }
+}
+
+//-----------------------------------------------------------------------------
+void
+QGCCameraManager::toggleCameras()
+{
+    _stepCamera(1);
 }
 
 //-----------------------------------------------------------------------------

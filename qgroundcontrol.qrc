@@ -19,6 +19,9 @@
         <file alias="VTOLModeIndicator.qml">src/ui/toolbar/VTOLModeIndicator.qml</file>
         <file alias="APMSupportForwardingIndicator.qml">src/ui/toolbar/APMSupportForwardingIndicator.qml</file>
         <file alias="GimbalIndicator.qml">src/ui/toolbar/GimbalIndicator.qml</file>
+        <file alias="GeneratorIndicator.qml">src/ui/toolbar/GeneratorIndicator.qml</file>
+        <file alias="SprayIndicator.qml">src/ui/toolbar/SprayIndicator.qml</file>
+        <file alias="FuelIndicator.qml">src/ui/toolbar/FuelIndicator.qml</file>
     </qresource>
     <qresource prefix="/checklists">
         <file alias="DefaultChecklist.qml">src/FlightDisplay/DefaultChecklist.qml</file>

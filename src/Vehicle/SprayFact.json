@@ -16,7 +16,7 @@
     "units":            "ml/s"
 },
 {
-    "name":             "sprayeVolume",
+    "name":             "sprayedVolume",
     "shortDesc":        "Volume Sprayed",
     "type":             "float",
     "decimalPlaces":    2,
@@ -31,7 +31,7 @@
 },
 {
     "name":             "mesPressure",
-    "shortDesc":        "Mesured Pressure",
+    "shortDesc":        "Measured Pressure",
     "type":             "uint16",
     "units":            "kpa"
 },

@@ -71,6 +71,7 @@ private slots:
 
 private:
     QVariantList                _components;
+    bool                        _showAdvanced;
 };
 
 #endif

@@ -246,22 +246,22 @@ Item {
         _outputState()
     }
     onShowStartMissionChanged: {
-        if (_corePlugin.guidedActionsControllerLogging()) {
-            console.log("showStartMission", showStartMission)
-        }
-        _outputState()
-        if (showStartMission) {
-            confirmAction(actionStartMission)
-        }
+        // if (_corePlugin.guidedActionsControllerLogging()) {
+        //     console.log("showStartMission", showStartMission)
+        // }
+        // _outputState()
+        // if (showStartMission) {
+        //     confirmAction(actionStartMission)
+        // }
     }
     onShowContinueMissionChanged: {
-        if (_corePlugin.guidedActionsControllerLogging()) {
-            console.log("showContinueMission", showContinueMission)
-        }
-        _outputState()
-        if (showContinueMission) {
-            confirmAction(actionContinueMission)
-        }
+        // if (_corePlugin.guidedActionsControllerLogging()) {
+        //     console.log("showContinueMission", showContinueMission)
+        // }
+        // _outputState()
+        // if (showContinueMission) {
+        //     confirmAction(actionContinueMission)
+        // }
     }
     onShowRTLChanged: {
         if (_corePlugin.guidedActionsControllerLogging()) {

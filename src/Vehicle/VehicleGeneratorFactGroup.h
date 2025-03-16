@@ -21,6 +21,7 @@ public:
     Q_PROPERTY(Fact* genTemp            READ genTemp            CONSTANT)
     Q_PROPERTY(Fact* runtime            READ runtime            CONSTANT)
     Q_PROPERTY(Fact* timeMaintenance    READ timeMaintenance    CONSTANT)
+    Q_PROPERTY(Fact* fuelRemaining      READ fuelRemaining      CONSTANT)
     Q_PROPERTY(QVariantList flagsListGenerator   READ flagsListGenerator  NOTIFY flagsListGeneratorChanged)
 
     Fact* status                () { return &_statusFact; }
@@ -34,6 +35,7 @@ public:
     Fact* genTemp               () { return &_genTempFact; }
     Fact* runtime               () { return &_runtimeFact; }
     Fact* timeMaintenance       () { return &_timeMaintenanceFact; }
+    Fact* fuelRemaining         () { return &_fuelRemainingFact; }
     QVariantList& flagsListGenerator() {return _flagsListGenerator; }
 
     // Overrides from FactGroup
@@ -50,6 +52,7 @@ public:
     static const char* _genTempFactName;
     static const char* _runtimeFactName;
     static const char* _timeMaintenanceFactName;
+    static const char* _fuelRemainingFactName;
 
 signals:
     void flagsListGeneratorChanged();
@@ -57,6 +60,8 @@ signals:
 protected:
     void _handleGeneratorStatus(mavlink_message_t& message);
     void _updateGeneratorFlags();
+
+    void _handleFuelStatus(mavlink_message_t& message);
 
     Fact _statusFact;
     Fact _genSpeedFact;
@@ -69,6 +74,7 @@ protected:
     Fact _genTempFact;
     Fact _runtimeFact;
     Fact _timeMaintenanceFact;
+    Fact _fuelRemainingFact;
 
     QVariantList _flagsListGenerator;
     int _prevFlag;

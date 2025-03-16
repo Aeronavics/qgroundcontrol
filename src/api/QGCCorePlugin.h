@@ -218,4 +218,5 @@ protected:
 
 private:
     QGCCorePlugin_p*    _p;
+    bool                _advanced_state;
 };

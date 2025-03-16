@@ -99,6 +99,19 @@ Rectangle {
         }
     }
 
+    function toggleCamera() {
+        console.log("toggleCamera", _anyVideoStreamAvailable)
+
+
+        // if (_mavlinkCamera) {
+        //     if (_multipleMavlinkCameras) {
+        //         // _mavlinkCameraManager.currentCamera = _mavlinkCameraManager.cameras.count >_mavlinkCameraManagerCurCameraIndex + 1 ? _mavlinkCameraManagerCurCameraIndex + 1: 0;
+        //         _mavlinkCameraManager.toggleCameras()
+        //     }
+        // }
+        _videoStreamManager.toggleStreams()
+    }
+
     function toggleShooting() {
         console.log("toggleShooting", _anyVideoStreamAvailable)
 
@@ -106,40 +119,47 @@ Rectangle {
         // behavior which wasn't working correctly. This should work:
         //    if (_mavlinkCamera && (_mavlinkCamera.capturesVideo || _mavlinkCamera.capturesPhotos) ) {
         // but it doesn't for some strange reason. Hence all the stuff below...
-        var mavlinkCameraCaptureVideoOrPhotos = false
-        if (_mavlinkCamera) {
-            if (_mavlinkCamera.capturesVideo || _mavlinkCamera.capturesPhotos) {
-                mavlinkCameraCaptureVideoOrPhotos = true
-            }
-        }
-        
-        if (mavlinkCameraCaptureVideoOrPhotos) {
-            if(_mavlinkCameraInVideoMode) {
-                _mavlinkCamera.toggleVideo()
-            } else {
-                if(_mavlinkCameraInPhotoMode && !_mavlinkCameraPhotoCaptureIsIdle && _mavlinkCameraElapsedMode) {
-                    _mavlinkCamera.stopTakePhoto()
-                } else {
-                    _mavlinkCamera.takePhoto()
-                }
-            }
-        } else if (_onlySimpleCameraAvailable || (_simpleCameraAvailable && _anyVideoStreamAvailable && _videoStreamInPhotoMode && !videoGrabRadio.checked)) {
-            _simplePhotoCaptureIsIdle = false
-            _activeVehicle.triggerSimpleCamera()
-            simplePhotoCaptureTimer.start()
-        } else if (_anyVideoStreamAvailable) {
-            if (_videoStreamInPhotoMode) {
-                _simplePhotoCaptureIsIdle = false
+
+        // if (_mavlinkCamera) {
+            // if (_mavlinkCamera.capturesVideo || _mavlinkCamera.capturesPhotos) {
                 _videoStreamManager.grabImage()
-                simplePhotoCaptureTimer.start()
-            } else {
-                if (_videoStreamManager.recording) {
-                    _videoStreamManager.stopRecording()
-                } else {
-                    _videoStreamManager.startRecording()
-                }
-            }
-        }
+            // }
+        // }
+
+        // var mavlinkCameraCaptureVideoOrPhotos = false
+        // if (_mavlinkCamera) {
+        //     if (_mavlinkCamera.capturesVideo || _mavlinkCamera.capturesPhotos) {
+        //         mavlinkCameraCaptureVideoOrPhotos = true
+        //     }
+        // }
+        
+        // if (mavlinkCameraCaptureVideoOrPhotos) {
+        //     if(_mavlinkCameraInVideoMode) {
+        //         _mavlinkCamera.toggleVideo()
+        //     } else {
+        //         if(_mavlinkCameraInPhotoMode && !_mavlinkCameraPhotoCaptureIsIdle && _mavlinkCameraElapsedMode) {
+        //             _mavlinkCamera.stopTakePhoto()
+        //         } else {
+        //             _mavlinkCamera.takePhoto()
+        //         }
+        //     }
+        // } else if (_onlySimpleCameraAvailable || (_simpleCameraAvailable && _anyVideoStreamAvailable && _videoStreamInPhotoMode && !videoGrabRadio.checked)) {
+        //     _simplePhotoCaptureIsIdle = false
+        //     _activeVehicle.triggerSimpleCamera()
+        //     simplePhotoCaptureTimer.start()
+        // } else if (_anyVideoStreamAvailable) {
+        //     if (_videoStreamInPhotoMode) {
+        //         _simplePhotoCaptureIsIdle = false
+        //         _videoStreamManager.grabImage()
+        //         simplePhotoCaptureTimer.start()
+        //     } else {
+        //         if (_videoStreamManager.recording) {
+        //             _videoStreamManager.stopRecording()
+        //         } else {
+        //             _videoStreamManager.startRecording()
+        //         }
+        //     }
+        // }
     }
 
     Timer {
@@ -240,49 +260,96 @@ Rectangle {
             }
         }
 
-        RowLayout {
-            Layout.alignment:   Qt.AlignHCenter
-            spacing:            0
-            visible:            _showModeIndicator && !_mavlinkCamera && _simpleCameraAvailable && _videoStreamInPhotoMode
+        // RowLayout {
+        //     Layout.alignment:   Qt.AlignHCenter
+        //     spacing:            0
+        //     visible:            _showModeIndicator && !_mavlinkCamera && _simpleCameraAvailable && _videoStreamInPhotoMode
 
-            QGCRadioButton {
-                id:             videoGrabRadio
-                font.pointSize: ScreenTools.smallFontPointSize
-                text:           qsTr("Video Grab")
-            }
-            QGCRadioButton {
-                font.pointSize: ScreenTools.smallFontPointSize
-                text:           qsTr("Camera Trigger")
-                checked:        true
-            }
-        }
+        //     QGCRadioButton {
+        //         id:             videoGrabRadio
+        //         font.pointSize: ScreenTools.smallFontPointSize
+        //         text:           qsTr("Video Grab")
+        //     }
+        //     QGCRadioButton {
+        //         font.pointSize: ScreenTools.smallFontPointSize
+        //         text:           qsTr("Camera Trigger")
+        //         checked:        true
+        //     }
+        // }
 
-        // Take Photo, Start/Stop Video button
-        // IMPORTANT: This control supports both mavlink cameras and simple video streams. Do no reference anything here which is not
-        // using the unified properties/functions.
-        Rectangle {
-            Layout.alignment:   Qt.AlignHCenter
-            color:              Qt.rgba(0,0,0,0)
-            width:              ScreenTools.defaultFontPixelWidth * 6
-            height:             width
-            radius:             width * 0.5
-            border.color:       qgcPal.buttonText
-            border.width:       3
+        Row {
+            spacing: 20
+            // Take Photo, Start/Stop Video button
+            // IMPORTANT: This control supports both mavlink cameras and simple video streams. Do no reference anything here which is not
+            // using the unified properties/functions.
+            Rectangle {
+                Layout.alignment:   Qt.AlignHCenter
+                color:              Qt.rgba(0,0,0,0)
+                width:              ScreenTools.defaultFontPixelWidth * 8
+                height:             width
+                radius:             width * 0.5
+                border.color:       qgcPal.buttonText
+                border.width:       3
+
+                // Rectangle {
+                //     anchors.centerIn:   parent
+                //     width:              parent.width * (_isShootingInCurrentMode ? 0.5 : 0.75)
+                //     height:             width
+                //     radius:             _isShootingInCurrentMode ? 0 : width * 0.5
+                //     color:              _canShootInCurrentMode ? qgcPal.colorGreen : qgcPal.colorGrey
+                // }
+                QGCColoredImage {
+                    height:             parent.height * 0.75
+                    width:              height
+                    anchors.centerIn:   parent
+                    source:             "/qmlimages/camera_photo.svg"
+                    fillMode:           Image.PreserveAspectFit
+                    sourceSize.height:  height
+                    color:               _canShootInCurrentMode ? qgcPal.colorWhite : qgcPal.colorGrey
+                }
+
+                MouseArea {
+                    anchors.fill:   parent
+                    enabled:        _canShootInCurrentMode
+                    onClicked:      toggleShooting()
+                }
+            }
+
 
             Rectangle {
-                anchors.centerIn:   parent
-                width:              parent.width * (_isShootingInCurrentMode ? 0.5 : 0.75)
+                Layout.alignment:   Qt.AlignHCenter
+                color:              Qt.rgba(0,0,0,0)
+                width:              ScreenTools.defaultFontPixelWidth * 8
                 height:             width
-                radius:             _isShootingInCurrentMode ? 0 : width * 0.5
-                color:              _canShootInCurrentMode ? qgcPal.colorRed : qgcPal.colorGrey
-            }
+                radius:             width * 0.5
+                border.color:       qgcPal.buttonText
+                border.width:       3
 
-            MouseArea {
-                anchors.fill:   parent
-                enabled:        _canShootInCurrentMode
-                onClicked:      toggleShooting()
+                // Rectangle {
+                //     anchors.centerIn:   parent
+                //     width:              parent.width * (_isShootingInCurrentMode ? 0.5 : 0.75)
+                //     height:             width
+                //     radius:             _isShootingInCurrentMode ? 0 : width * 0.5
+                //     color:              _canShootInCurrentMode ? qgcPal.colorGreen : qgcPal.colorGrey
+                // }
+                QGCColoredImage {
+                    height:             parent.height * 0.65
+                    width:              height
+                    anchors.centerIn:   parent
+                    source:             "/qmlimages/video_swap.svg"
+                    fillMode:           Image.PreserveAspectFit
+                    sourceSize.height:  height
+                    color:               _canShootInCurrentMode ? qgcPal.colorWhite : qgcPal.colorGrey
+                }
+
+                MouseArea {
+                    anchors.fill:   parent
+                    enabled:        _canShootInCurrentMode
+                    onClicked:      toggleCamera()
+                }
             }
         }
+
 
         // Tracking button
         Rectangle {
