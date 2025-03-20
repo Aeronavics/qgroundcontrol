@@ -32,7 +32,11 @@ Item {
     property var sprayer: _activeVehicle.spray
 
     function getSprayColor() {
-        if (sprayer.sprayRemaining.rawValue < 10)
+        if (sprayer.mesFlowrate.rawValue > 0)
+        {
+            return qgcPal.colorGreen
+        }
+        else if (sprayer.sprayRemaining.rawValue < 10)
         {
             return qgcPal.colorRed
         }

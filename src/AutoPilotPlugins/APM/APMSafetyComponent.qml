@@ -139,72 +139,72 @@ SetupPage {
                 }
             }
 
-            Column {
-                spacing: _margins / 2
-                visible: _batt1MonitorEnabled
+            // Column {
+            //     spacing: _margins / 2
+            //     visible: _batt1MonitorEnabled
 
-                QGCLabel {
-                    text:       qsTr("Battery1 Failsafe Triggers")
-                    font.family: ScreenTools.demiboldFontFamily
-                }
+            //     QGCLabel {
+            //         text:       qsTr("Battery1 Failsafe Triggers")
+            //         font.family: ScreenTools.demiboldFontFamily
+            //     }
 
-                Rectangle {
-                    width:  battery1FailsafeLoader.x + battery1FailsafeLoader.width + _margins
-                    height: battery1FailsafeLoader.y + battery1FailsafeLoader.height + _margins
-                    color:  ggcPal.windowShade
+            //     Rectangle {
+            //         width:  battery1FailsafeLoader.x + battery1FailsafeLoader.width + _margins
+            //         height: battery1FailsafeLoader.y + battery1FailsafeLoader.height + _margins
+            //         color:  ggcPal.windowShade
 
-                    Loader {
-                        id:                 battery1FailsafeLoader
-                        anchors.margins:    _margins
-                        anchors.top:        parent.top
-                        anchors.left:       parent.left
-                        sourceComponent:    _batt1ParamsAvailable ? batteryFailsafeComponent : restartRequiredComponent
+            //         Loader {
+            //             id:                 battery1FailsafeLoader
+            //             anchors.margins:    _margins
+            //             anchors.top:        parent.top
+            //             anchors.left:       parent.left
+            //             sourceComponent:    _batt1ParamsAvailable ? batteryFailsafeComponent : restartRequiredComponent
 
-                        property Fact battMonitor:              _batt1Monitor
-                        property bool battParamsAvailable:      _batt1ParamsAvailable
-                        property Fact failsafeBattLowAct:       _failsafeBatt1LowAct
-                        property Fact failsafeBattCritAct:      _failsafeBatt1CritAct
-                        property Fact failsafeBattLowMah:       _failsafeBatt1LowMah
-                        property Fact failsafeBattCritMah:      _failsafeBatt1CritMah
-                        property Fact failsafeBattLowVoltage:   _failsafeBatt1LowVoltage
-                        property Fact failsafeBattCritVoltage:  _failsafeBatt1CritVoltage
-                    }
-                } // Rectangle
-            } // Column - Battery Failsafe Settings
+            //             property Fact battMonitor:              _batt1Monitor
+            //             property bool battParamsAvailable:      _batt1ParamsAvailable
+            //             property Fact failsafeBattLowAct:       _failsafeBatt1LowAct
+            //             property Fact failsafeBattCritAct:      _failsafeBatt1CritAct
+            //             property Fact failsafeBattLowMah:       _failsafeBatt1LowMah
+            //             property Fact failsafeBattCritMah:      _failsafeBatt1CritMah
+            //             property Fact failsafeBattLowVoltage:   _failsafeBatt1LowVoltage
+            //             property Fact failsafeBattCritVoltage:  _failsafeBatt1CritVoltage
+            //         }
+            //     } // Rectangle
+            // } // Column - Battery Failsafe Settings
 
 
-            Column {
-                spacing: _margins / 2
-                visible: _batt2MonitorEnabled
+            // Column {
+            //     spacing: _margins / 2
+            //     visible: _batt2MonitorEnabled
 
-                QGCLabel {
-                    text:       qsTr("Battery2 Failsafe Triggers")
-                    font.family: ScreenTools.demiboldFontFamily
-                }
+            //     QGCLabel {
+            //         text:       qsTr("Battery2 Failsafe Triggers")
+            //         font.family: ScreenTools.demiboldFontFamily
+            //     }
 
-                Rectangle {
-                    width:  battery2FailsafeLoader.x + battery2FailsafeLoader.width + _margins
-                    height: battery2FailsafeLoader.y + battery2FailsafeLoader.height + _margins
-                    color:  ggcPal.windowShade
+            //     Rectangle {
+            //         width:  battery2FailsafeLoader.x + battery2FailsafeLoader.width + _margins
+            //         height: battery2FailsafeLoader.y + battery2FailsafeLoader.height + _margins
+            //         color:  ggcPal.windowShade
 
-                    Loader {
-                        id:                 battery2FailsafeLoader
-                        anchors.margins:    _margins
-                        anchors.top:        parent.top
-                        anchors.left:       parent.left
-                        sourceComponent:    _batt2ParamsAvailable ? batteryFailsafeComponent : restartRequiredComponent
+            //         Loader {
+            //             id:                 battery2FailsafeLoader
+            //             anchors.margins:    _margins
+            //             anchors.top:        parent.top
+            //             anchors.left:       parent.left
+            //             sourceComponent:    _batt2ParamsAvailable ? batteryFailsafeComponent : restartRequiredComponent
 
-                        property Fact battMonitor:              _batt2Monitor
-                        property bool battParamsAvailable:      _batt2ParamsAvailable
-                        property Fact failsafeBattLowAct:       _failsafeBatt2LowAct
-                        property Fact failsafeBattCritAct:      _failsafeBatt2CritAct
-                        property Fact failsafeBattLowMah:       _failsafeBatt2LowMah
-                        property Fact failsafeBattCritMah:      _failsafeBatt2CritMah
-                        property Fact failsafeBattLowVoltage:   _failsafeBatt2LowVoltage
-                        property Fact failsafeBattCritVoltage:  _failsafeBatt2CritVoltage
-                    }
-                } // Rectangle
-            } // Column - Battery Failsafe Settings
+            //             property Fact battMonitor:              _batt2Monitor
+            //             property bool battParamsAvailable:      _batt2ParamsAvailable
+            //             property Fact failsafeBattLowAct:       _failsafeBatt2LowAct
+            //             property Fact failsafeBattCritAct:      _failsafeBatt2CritAct
+            //             property Fact failsafeBattLowMah:       _failsafeBatt2LowMah
+            //             property Fact failsafeBattCritMah:      _failsafeBatt2CritMah
+            //             property Fact failsafeBattLowVoltage:   _failsafeBatt2LowVoltage
+            //             property Fact failsafeBattCritVoltage:  _failsafeBatt2CritVoltage
+            //         }
+            //     } // Rectangle
+            // } // Column - Battery Failsafe Settings
 
             Component {
                 id: planeGeneralFS
@@ -258,9 +258,9 @@ SetupPage {
                 } // Column - Failsafe trigger settings
             }
 
-            Loader {
-                sourceComponent: controller.vehicle.fixedWing ? planeGeneralFS : undefined
-            }
+            // Loader {
+            //     sourceComponent: controller.vehicle.fixedWing ? planeGeneralFS : undefined
+            // }
 
             Component {
                 id: roverGeneralFS
@@ -324,9 +324,9 @@ SetupPage {
                 } // Column - Failsafe Settings
             }
 
-            Loader {
-                sourceComponent: _roverFirmware ? roverGeneralFS : undefined
-            }
+            // Loader {
+            //     sourceComponent: _roverFirmware ? roverGeneralFS : undefined
+            // }
 
             Component {
                 id: copterGeneralFS
@@ -392,9 +392,9 @@ SetupPage {
                 } // Column - General Failsafe Settings
             }
 
-            Loader {
-                sourceComponent: controller.vehicle.multiRotor ? copterGeneralFS : undefined
-            }
+            // Loader {
+            //     sourceComponent: controller.vehicle.multiRotor ? copterGeneralFS : undefined
+            // }
 
             Component {
                 id: copterGeoFence
@@ -718,47 +718,48 @@ SetupPage {
                 sourceComponent: controller.vehicle.fixedWing ? planeRTL : undefined
             }
 
-            Column {
-                spacing: _margins / 2
+            // Column {
+            //     spacing: _margins / 2
 
-                QGCLabel {
-                    text:           qsTr("Arming Checks")
-                    font.family:    ScreenTools.demiboldFontFamily
-                }
 
-                Rectangle {
-                    width:  flowLayout.width
-                    height: armingCheckInnerColumn.height + (_margins * 2)
-                    color:  ggcPal.windowShade
+            //     QGCLabel {
+            //         text:           qsTr("Arming Checks")
+            //         font.family:    ScreenTools.demiboldFontFamily
+            //     }
 
-                    Column {
-                        id:                 armingCheckInnerColumn
-                        anchors.margins:    _margins
-                        anchors.top:        parent.top
-                        anchors.left:       parent.left
-                        anchors.right:      parent.right
-                        spacing: _margins
+            //     Rectangle {
+            //         width:  flowLayout.width
+            //         height: armingCheckInnerColumn.height + (_margins * 2)
+            //         color:  ggcPal.windowShade
 
-                        FactBitmask {
-                            id:                 armingCheckBitmask
-                            anchors.left:       parent.left
-                            anchors.right:      parent.right
-                            firstEntryIsAll:    true
-                            fact:               _armingCheck
-                        }
+            //         Column {
+            //             id:                 armingCheckInnerColumn
+            //             anchors.margins:    _margins
+            //             anchors.top:        parent.top
+            //             anchors.left:       parent.left
+            //             anchors.right:      parent.right
+            //             spacing: _margins
 
-                        QGCLabel {
-                            id:             armingCheckWarning
-                            anchors.left:   parent.left
-                            anchors.right:  parent.right
-                            wrapMode:       Text.WordWrap
-                            color:          qgcPal.warningText
-                            text:            qsTr("Warning: Turning off arming checks can lead to loss of Vehicle control.")
-                            visible:        _armingCheck.value != 1
-                        }
-                    }
-                } // Rectangle - Arming checks
-            } // Column - Arming Checks
+            //             FactBitmask {
+            //                 id:                 armingCheckBitmask
+            //                 anchors.left:       parent.left
+            //                 anchors.right:      parent.right
+            //                 firstEntryIsAll:    true
+            //                 fact:               _armingCheck
+            //             }
+
+            //             QGCLabel {
+            //                 id:             armingCheckWarning
+            //                 anchors.left:   parent.left
+            //                 anchors.right:  parent.right
+            //                 wrapMode:       Text.WordWrap
+            //                 color:          qgcPal.warningText
+            //                 text:            qsTr("Warning: Turning off arming checks can lead to loss of Vehicle control.")
+            //                 visible:        _armingCheck.value != 1
+            //             }
+            //         }
+            //     } // Rectangle - Arming checks
+            // } // Column - Arming Checks
         } // Flow
     } // Component - safetyPageComponent
 } // SetupView

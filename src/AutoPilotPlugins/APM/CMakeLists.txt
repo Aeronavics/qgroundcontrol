@@ -25,6 +25,8 @@ SOURCES
     APMSafetyComponentSummaryPlane.qml
     APMSafetyComponentSummaryRover.qml
     APMSafetyComponentSummarySub.qml
+    APMSprayComponent.qml
+    APMSprayComponentSummary.qml
     APMSensorsComponent.qml
     APMSensorsComponentSummary.qml
     APMSubFrameComponent.qml

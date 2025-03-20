@@ -4,7 +4,7 @@
 
 const char* VehicleSprayFactGroup::_mesFlowrateFactName =       "mesFlowrate";
 const char* VehicleSprayFactGroup::_desFlowrateFactName =       "desFlowrate";
-const char* VehicleSprayFactGroup::_sprayeVolumeFactName =      "sprayeVolume";
+const char* VehicleSprayFactGroup::_sprayeVolumeFactName =      "sprayedVolume";
 const char* VehicleSprayFactGroup::_sprayRemainingFactName =    "sprayRemaining";
 const char* VehicleSprayFactGroup::_mesPressureFactName =       "mesPressure";
 const char* VehicleSprayFactGroup::_errorFactName =             "error";

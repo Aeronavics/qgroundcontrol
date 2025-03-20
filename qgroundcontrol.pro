@@ -1161,6 +1161,7 @@ APMFirmwarePlugin {
         src/AutoPilotPlugins/APM/APMPowerComponent.h \
         src/AutoPilotPlugins/APM/APMRadioComponent.h \
         src/AutoPilotPlugins/APM/APMSafetyComponent.h \
+        src/AutoPilotPlugins/APM/APMSprayComponent.h \
         src/AutoPilotPlugins/APM/APMSensorsComponent.h \
         src/AutoPilotPlugins/APM/APMSensorsComponentController.h \
         src/AutoPilotPlugins/APM/APMSubMotorComponentController.h \
@@ -1189,6 +1190,7 @@ APMFirmwarePlugin {
         src/AutoPilotPlugins/APM/APMPowerComponent.cc \
         src/AutoPilotPlugins/APM/APMRadioComponent.cc \
         src/AutoPilotPlugins/APM/APMSafetyComponent.cc \
+        src/AutoPilotPlugins/APM/APMSprayComponent.cc \
         src/AutoPilotPlugins/APM/APMSensorsComponent.cc \
         src/AutoPilotPlugins/APM/APMSensorsComponentController.cc \
         src/AutoPilotPlugins/APM/APMSubMotorComponentController.cc \
