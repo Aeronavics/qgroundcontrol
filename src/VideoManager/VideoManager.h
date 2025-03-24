@@ -52,8 +52,10 @@ public:
     Q_PROPERTY(bool             autoStreamConfigured    READ    autoStreamConfigured                        NOTIFY autoStreamConfiguredChanged)
     Q_PROPERTY(bool             hasThermal              READ    hasThermal                                  NOTIFY decodingChanged)
     Q_PROPERTY(QString          imageFile               READ    imageFile                                   NOTIFY imageFileChanged)
+    Q_PROPERTY(QString          secondaryImageFile      READ    secondaryImageFile                          NOTIFY secondaryImageFileChanged)
     Q_PROPERTY(bool             streaming               READ    streaming                                   NOTIFY streamingChanged)
     Q_PROPERTY(bool             decoding                READ    decoding                                    NOTIFY decodingChanged)
+    Q_PROPERTY(bool             secondaryDecoding       READ    secondaryDecoding                           NOTIFY secondaryDecodingChanged)
     Q_PROPERTY(bool             recording               READ    recording                                   NOTIFY recordingChanged)
     Q_PROPERTY(QSize            videoSize               READ    videoSize                                   NOTIFY videoSizeChanged)
     Q_PROPERTY(bool             secondaryStream         READ    secondaryStream                             NOTIFY secondaryStreamChanged)
@@ -71,6 +73,7 @@ public:
     virtual bool        autoStreamConfigured();
     virtual bool        hasThermal          ();
     virtual QString     imageFile           ();
+    virtual QString     secondaryImageFile  ();
     virtual bool        secondaryStream     () { return _secondaryStream; }
 
     bool streaming(void) {
@@ -79,6 +82,10 @@ public:
 
     bool decoding(void) {
         return _decoding;
+    }
+
+    bool secondaryDecoding(void) {
+        return _secondaryDecoding;
     }
 
     bool recording(void) {
@@ -93,6 +100,7 @@ public:
 // FIXME: AV: they should be removed after finishing multiple video stream support
 // new arcitecture does not assume direct access to video receiver from QML side, even if it works for now
     virtual VideoReceiver*  videoReceiver           () { return _videoReceiver[0]; }
+
     virtual VideoReceiver*  thermalVideoReceiver    () { return _videoReceiver[1]; }
 
 #if defined(QGC_DISABLE_UVC)
@@ -113,7 +121,8 @@ public:
     Q_INVOKABLE void startRecording (const QString& videoFile = QString());
     Q_INVOKABLE void stopRecording  ();
 
-    Q_INVOKABLE void grabImage      (const QString& imageFile = QString());
+    Q_INVOKABLE void grabImage          (const QString& imageFile = QString());
+    Q_INVOKABLE void secondaryGrabImage (const QString& secondaryImageFile = QString());
 
     Q_INVOKABLE void toggleStreams  ();
 
@@ -128,8 +137,10 @@ signals:
     void aspectRatioChanged         ();
     void autoStreamConfiguredChanged();
     void imageFileChanged           ();
+    void secondaryImageFileChanged   ();
     void streamingChanged           ();
     void decodingChanged            ();
+    void secondaryDecodingChanged   ();
     void recordingChanged           ();
     void recordingStarted           ();
     void videoSizeChanged           ();
@@ -161,6 +172,7 @@ protected:
 protected:
     QString                 _videoFile;
     QString                 _imageFile;
+    QString                 _secondaryImageFile;
     SubtitleWriter          _subtitleWriter;
     bool                    _isTaisync              = false;
     VideoReceiver*          _videoReceiver[2]       = { nullptr, nullptr };
@@ -177,6 +189,7 @@ protected:
     bool                    _lowLatencyStreaming[2] = { false, false };
     QAtomicInteger<bool>    _streaming              = false;
     QAtomicInteger<bool>    _decoding               = false;
+    QAtomicInteger<bool>    _secondaryDecoding      = false;
     QAtomicInteger<bool>    _recording              = false;
     QAtomicInteger<quint32> _videoSize              = 0;
     VideoSettings*          _videoSettings          = nullptr;

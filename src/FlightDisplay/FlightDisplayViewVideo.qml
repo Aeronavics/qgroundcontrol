@@ -102,39 +102,13 @@ Item {
                     target: QGroundControl.videoManager
                     function onImageFileChanged() {
                         videoContent.grabToImage(function(result) {
-                            if (!result.saveToFile(QGroundControl.videoManager.imageFile)) {
-                                console.error('Error capturing video frame');
+                            if (!QGroundControl.videoManager.secondaryStream) {
+                                if (!result.saveToFile(QGroundControl.videoManager.imageFile)) {
+                                    console.error('Error capturing video frame');
+                                }
                             }
                         });
                     }
-                }
-                Rectangle {
-                    color:  Qt.rgba(1,1,1,0.5)
-                    height: parent.height
-                    width:  1
-                    x:      parent.width * 0.33
-                    visible: _showGrid && !QGroundControl.videoManager.fullScreen
-                }
-                Rectangle {
-                    color:  Qt.rgba(1,1,1,0.5)
-                    height: parent.height
-                    width:  1
-                    x:      parent.width * 0.66
-                    visible: _showGrid && !QGroundControl.videoManager.fullScreen
-                }
-                Rectangle {
-                    color:  Qt.rgba(1,1,1,0.5)
-                    width:  parent.width
-                    height: 1
-                    y:      parent.height * 0.33
-                    visible: _showGrid && !QGroundControl.videoManager.fullScreen
-                }
-                Rectangle {
-                    color:  Qt.rgba(1,1,1,0.5)
-                    width:  parent.width
-                    height: 1
-                    y:      parent.height * 0.66
-                    visible: _showGrid && !QGroundControl.videoManager.fullScreen
                 }
             }
         }
@@ -148,6 +122,39 @@ Item {
             anchors.centerIn:   parent
             visible:            QGroundControl.videoManager.decoding
             sourceComponent:    videoBackgroundComponent
+
+            property bool videoDisabled: QGroundControl.settingsManager.videoSettings.videoSource.rawValue === QGroundControl.settingsManager.videoSettings.disabledVideoSource
+        }
+
+        Component {
+            id: secondVideoBackgroundComponent
+            QGCVideoBackground {
+                id:             secondVideoContent
+                objectName:     "secondVideoContent"
+                visible:        false
+
+                Connections {
+                    target: QGroundControl.videoManager
+                    function onSecondaryImageFileChanged() {
+                        secondVideoContent.grabToImage(function(result) {
+                            if (!result.saveToFile(QGroundControl.videoManager.secondaryImageFile)) {
+                                console.error('Error capturing video frame');
+                            }
+                        });
+                    }
+                }
+            }
+        }
+        Loader {
+            // GStreamer is causing crashes on Lenovo laptop OpenGL Intel drivers. In order to workaround this
+            // we don't load a QGCVideoBackground object when video is disabled. This prevents any video rendering
+            // code from running. Setting QGCVideoBackground.receiver = null does not work to prevent any
+            // video OpenGL from being generated. Hence the Loader to completely remove it.
+            height:             parent.getHeight()
+            width:              parent.getWidth()
+            anchors.centerIn:   parent
+            visible:            QGroundControl.videoManager.secondaryDecoding
+            sourceComponent:    secondVideoBackgroundComponent
 
             property bool videoDisabled: QGroundControl.settingsManager.videoSettings.videoSource.rawValue === QGroundControl.settingsManager.videoSettings.disabledVideoSource
         }

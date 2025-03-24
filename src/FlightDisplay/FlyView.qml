@@ -162,6 +162,16 @@ Item {
         id: videoControl
     }
 
+    PhotoVideoControl {
+        id:                     otherPhotoVideoControl
+        anchors.margins:        ScreenTools.defaultFontPixelWidth * 0.75
+        anchors.right:          parent.right
+        width:                  ScreenTools.defaultFontPixelWidth * 30
+        anchors.top:            undefined
+        anchors.verticalCenter: _root.verticalCenter
+        visible:                QGroundControl.videoManager.fullscreen
+    }
+
     QGCPipOverlay {
         id:                     _pipOverlay
         anchors.left:           parent.left

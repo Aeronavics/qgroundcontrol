@@ -44,7 +44,8 @@ Rectangle {
     property var    _videoStreamManager:                        QGroundControl.videoManager
     property bool   _videoStreamAllowsPhotoWhileRecording:      true
     property bool   _videoStreamIsStreaming:                    _videoStreamManager.streaming
-    property bool   _simplePhotoCaptureIsIdle:             true
+    property bool   _simplePhotoCaptureIsIdle:                  true
+    property bool   _streamChangeCooldownClear:                 true
     property bool   _videoStreamRecording:                      _videoStreamManager.recording
     property bool   _videoStreamCanShoot:                       _videoStreamIsStreaming
     property bool   _videoStreamIsShootingInCurrentMode:        _videoStreamInPhotoMode ? !_simplePhotoCaptureIsIdle : _videoStreamRecording
@@ -100,21 +101,43 @@ Rectangle {
     }
 
     function toggleCamera() {
-        console.log("toggleCamera", _anyVideoStreamAvailable)
+        if (_streamChangeCooldownClear)
+        {
+            console.log("toggleCamera", _anyVideoStreamAvailable);
 
-        _videoStreamManager.toggleStreams()
+            _streamChangeCooldownClear = false;
+            streamChangeTimer.start();
+            _videoStreamManager.toggleStreams();
+        }
     }
 
     function toggleShooting() {
-        console.log("toggleShooting", _anyVideoStreamAvailable)
-
-        _videoStreamManager.grabImage()
+        if (_simplePhotoCaptureIsIdle)
+        {
+            console.log("toggleShooting", _anyVideoStreamAvailable);
+            _simplePhotoCaptureIsIdle = false;
+            simplePhotoCaptureTimer.start();
+            if (!_videoStreamManager.secondaryStream)
+            {
+                _videoStreamManager.grabImage();
+            }
+            else
+            {
+                _videoStreamManager.secondaryGrabImage();
+            }
+        }
     }
 
     Timer {
         id:             simplePhotoCaptureTimer
-        interval:       500
+        interval:       1000
         onTriggered:    _simplePhotoCaptureIsIdle = true
+    }
+
+    Timer {
+        id:             streamChangeTimer
+        interval:       1000
+        onTriggered:    _streamChangeCooldownClear = true
     }
 
     QGCPalette { id: qgcPal; colorGroupEnabled: enabled }
@@ -122,7 +145,7 @@ Rectangle {
     ColumnLayout {
         id:                         mainLayout
         anchors.margins:            _margins
-        anchors.top:                parent.top
+        anchors.verticalCenter:     parent.verticalCenter
         anchors.horizontalCenter:   parent.horizontalCenter
         spacing:                    ScreenTools.defaultFontPixelHeight / 2
 
@@ -148,7 +171,7 @@ Rectangle {
                     source:             "/qmlimages/camera_photo.svg"
                     fillMode:           Image.PreserveAspectFit
                     sourceSize.height:  height
-                    color:              qgcPal.colorWhite
+                    color:              _simplePhotoCaptureIsIdle && _videoStreamManager.decoding ? qgcPal.colorGrey : qgcPal.colorWhite
                 }
 
                 MouseArea {
@@ -176,7 +199,7 @@ Rectangle {
                     source:             "/qmlimages/video_swap.svg"
                     fillMode:           Image.PreserveAspectFit
                     sourceSize.height:  height
-                    color:               qgcPal.colorWhite
+                    color:              _streamChangeCooldownClear && _videoStreamManager.decoding ? qgcPal.colorGrey : qgcPal.colorWhite
                 }
 
                 MouseArea {
@@ -189,76 +212,76 @@ Rectangle {
 
 
         // Tracking button
-        Rectangle {
-            Layout.alignment:   Qt.AlignHCenter
-            color:              _mavlinkCamera && _mavlinkCamera.trackingEnabled ? qgcPal.colorRed : qgcPal.windowShadeLight
-            width:              ScreenTools.defaultFontPixelWidth * 6
-            height:             width
-            radius:             width * 0.5
-            border.color:       qgcPal.buttonText
-            border.width:       3
-            visible:            _mavlinkCamera && _mavlinkCamera.hasTracking
-            QGCColoredImage {
-                height:             parent.height * 0.5
-                width:              height
-                anchors.centerIn:   parent
-                source:             "/qmlimages/TrackingIcon.svg"
-                fillMode:           Image.PreserveAspectFit
-                sourceSize.height:  height
-                color:              qgcPal.text
-                MouseArea {
-                    anchors.fill:   parent
-                    onClicked: {
-                        _mavlinkCamera.trackingEnabled = !_mavlinkCamera.trackingEnabled;
-                        if(!_mavlinkCamera.trackingEnabled) {
-                            !_mavlinkCamera.stopTracking()
-                        }
-                    }
-                }
-            }
-        }
-        QGCLabel {
-            Layout.alignment:   Qt.AlignHCenter
-            text:               qsTr("Camera Tracking")
-            font.pointSize:     ScreenTools.defaultFontPointSize
-            visible:            _mavlinkCamera && _mavlinkCamera.hasTracking
-        }
+        // Rectangle {
+        //     Layout.alignment:   Qt.AlignHCenter
+        //     color:              _mavlinkCamera && _mavlinkCamera.trackingEnabled ? qgcPal.colorRed : qgcPal.windowShadeLight
+        //     width:              ScreenTools.defaultFontPixelWidth * 6
+        //     height:             width
+        //     radius:             width * 0.5
+        //     border.color:       qgcPal.buttonText
+        //     border.width:       3
+        //     visible:            _mavlinkCamera && _mavlinkCamera.hasTracking
+        //     QGCColoredImage {
+        //         height:             parent.height * 0.5
+        //         width:              height
+        //         anchors.centerIn:   parent
+        //         source:             "/qmlimages/TrackingIcon.svg"
+        //         fillMode:           Image.PreserveAspectFit
+        //         sourceSize.height:  height
+        //         color:              qgcPal.text
+        //         MouseArea {
+        //             anchors.fill:   parent
+        //             onClicked: {
+        //                 _mavlinkCamera.trackingEnabled = !_mavlinkCamera.trackingEnabled;
+        //                 if(!_mavlinkCamera.trackingEnabled) {
+        //                     !_mavlinkCamera.stopTracking()
+        //                 }
+        //             }
+        //         }
+        //     }
+        // }
+        // QGCLabel {
+        //     Layout.alignment:   Qt.AlignHCenter
+        //     text:               qsTr("Camera Tracking")
+        //     font.pointSize:     ScreenTools.defaultFontPointSize
+        //     visible:            _mavlinkCamera && _mavlinkCamera.hasTracking
+        // }
 
         //-- Status Information
-        ColumnLayout {
-            Layout.alignment:   Qt.AlignHCenter
-            spacing:            0
+        // ColumnLayout {
+        //     Layout.alignment:   Qt.AlignHCenter
+        //     spacing:            0
 
-            QGCLabel {
-                Layout.alignment:   Qt.AlignHCenter
-                text:               _cameraName
-                visible:            _cameraName !== ""
-            }
-            QGCLabel {
-                Layout.alignment:   Qt.AlignHCenter
-                text:               (_mavlinkCameraInVideoMode && _mavlinkCamera.videoStatus === QGCCameraControl.VIDEO_CAPTURE_STATUS_RUNNING) ? _mavlinkCamera.recordTimeStr : "00:00:00"
-                font.pointSize:     ScreenTools.largeFontPointSize
-                visible:            _mavlinkCameraInVideoMode && _mavlinkCamera.capturesVideo
-            }
-            QGCLabel {
-                Layout.alignment:   Qt.AlignHCenter
-                text:               _activeVehicle ? ('00000' + _activeVehicle.cameraTriggerPoints.count).slice(-5) : "00000"
-                font.pointSize:     ScreenTools.largeFontPointSize
-                visible:            _modeIndicatorPhotoMode
-            }
-            QGCLabel {
-                Layout.alignment:   Qt.AlignHCenter
-                text:               _mavlinkCamera ? qsTr("Free Space: ") + _mavlinkCamera.storageFreeStr : ""
-                font.pointSize:     ScreenTools.defaultFontPointSize
-                visible:            _mavlinkCameraStorageReady
-            }
-            QGCLabel {
-                Layout.alignment:   Qt.AlignHCenter
-                text:               _mavlinkCamera ? qsTr("Battery: ") + _mavlinkCamera.batteryRemainingStr : ""
-                font.pointSize:     ScreenTools.defaultFontPointSize
-                visible:            _mavlinkCameraBatteryReady
-            }
-        }
+        //     QGCLabel {
+        //         Layout.alignment:   Qt.AlignHCenter
+        //         text:               _cameraName
+        //         visible:            _cameraName !== ""
+        //     }
+        //     QGCLabel {
+        //         Layout.alignment:   Qt.AlignHCenter
+        //         text:               (_mavlinkCameraInVideoMode && _mavlinkCamera.videoStatus === QGCCameraControl.VIDEO_CAPTURE_STATUS_RUNNING) ? _mavlinkCamera.recordTimeStr : "00:00:00"
+        //         font.pointSize:     ScreenTools.largeFontPointSize
+        //         visible:            _mavlinkCameraInVideoMode && _mavlinkCamera.capturesVideo
+        //     }
+        //     QGCLabel {
+        //         Layout.alignment:   Qt.AlignHCenter
+        //         text:               _activeVehicle ? ('00000' + _activeVehicle.cameraTriggerPoints.count).slice(-5) : "00000"
+        //         font.pointSize:     ScreenTools.largeFontPointSize
+        //         visible:            _modeIndicatorPhotoMode
+        //     }
+        //     QGCLabel {
+        //         Layout.alignment:   Qt.AlignHCenter
+        //         text:               _mavlinkCamera ? qsTr("Free Space: ") + _mavlinkCamera.storageFreeStr : ""
+        //         font.pointSize:     ScreenTools.defaultFontPointSize
+        //         visible:            _mavlinkCameraStorageReady
+        //     }
+        //     QGCLabel {
+        //         Layout.alignment:   Qt.AlignHCenter
+        //         text:               _mavlinkCamera ? qsTr("Battery: ") + _mavlinkCamera.batteryRemainingStr : ""
+        //         font.pointSize:     ScreenTools.defaultFontPointSize
+        //         visible:            _mavlinkCameraBatteryReady
+        //     }
+        // }
     }
 
     Component {
