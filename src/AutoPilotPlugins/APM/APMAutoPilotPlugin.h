@@ -20,6 +20,7 @@ class APMRadioComponent;
 class APMTuningComponent;
 class APMSafetyComponent;
 class APMSprayComponent;
+class APMGeneratorComponent;
 class APMSensorsComponent;
 class APMPowerComponent;
 class APMMotorComponent;
@@ -51,6 +52,7 @@ protected:
     APMLightsComponent*         _lightsComponent;
     APMSubFrameComponent*       _subFrameComponent;
     APMFlightModesComponent*    _flightModesComponent;
+    APMGeneratorComponent*      _generatorComponent;
     APMPowerComponent*          _powerComponent;
     APMMotorComponent*          _motorComponent;
     APMRadioComponent*          _radioComponent;

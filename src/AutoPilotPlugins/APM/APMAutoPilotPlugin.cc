@@ -17,6 +17,7 @@
 #include "VehicleComponent.h"
 #include "APMAirframeComponent.h"
 #include "APMFlightModesComponent.h"
+#include "APMGeneratorComponent.h"
 #include "APMRadioComponent.h"
 #include "APMSafetyComponent.h"
 #include "APMSprayComponent.h"
@@ -48,6 +49,7 @@ APMAutoPilotPlugin::APMAutoPilotPlugin(Vehicle* vehicle, QObject* parent)
     , _lightsComponent          (nullptr)
     , _subFrameComponent        (nullptr)
     , _flightModesComponent     (nullptr)
+    , _generatorComponent       (nullptr)
     , _powerComponent           (nullptr)
     , _motorComponent           (nullptr)
     , _radioComponent           (nullptr)
@@ -120,6 +122,10 @@ const QVariantList& APMAutoPilotPlugin::vehicleComponents(void)
             _safetyComponent = new APMSafetyComponent(_vehicle, this);
             _safetyComponent->setupTriggerSignals();
             _components.append(QVariant::fromValue((VehicleComponent*)_safetyComponent));
+
+            _generatorComponent = new APMGeneratorComponent(_vehicle, this);
+            _generatorComponent->setupTriggerSignals();
+            _components.append(QVariant::fromValue((VehicleComponent*)_generatorComponent));
 
             _sprayComponent = new APMSprayComponent(_vehicle, this);
             _sprayComponent->setupTriggerSignals();

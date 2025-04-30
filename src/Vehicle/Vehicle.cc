@@ -831,6 +831,9 @@ void Vehicle::_mavlinkMessageReceived(LinkInterface* link, mavlink_message_t mes
     case MAVLINK_MSG_ID_RANGEFINDER:
         _handleRangefinder(message);
         break;
+    case MAVLINK_MSG_ID_ANV_MSG_SPRAY_STATUS:
+        _handleSprayFeedback(message);
+        break;
 #endif
     }
 
@@ -860,6 +863,22 @@ void Vehicle::_handleRangefinder(mavlink_message_t& message)
     mavlink_msg_rangefinder_decode(&message, &rangefinder);
     _rangeFinderDistFact.setRawValue(qIsNaN(rangefinder.distance) ? 0 : rangefinder.distance);
 }
+
+void Vehicle::_handleSprayFeedback(mavlink_message_t& message)
+{
+    mavlink_anv_msg_spray_status_t spray_status;
+    mavlink_msg_anv_msg_spray_status_decode(&message, &spray_status);
+    if (!_spraying_status && spray_status.desired_flowrate > 0)
+    {
+        _spraying_status = true;
+        _sprayTriggerPoints.append(new QGCQGeoCoordinate(_coordinate, this));
+    }
+    else if (_spraying_status && spray_status.desired_flowrate == 0)
+    {
+        _spraying_status = false;
+    }
+}
+
 #endif
 
 void Vehicle::_handleOrbitExecutionStatus(const mavlink_message_t& message)
@@ -1573,6 +1592,7 @@ void Vehicle::_updateArmed(bool armed)
             _trajectoryPoints->start();
             _flightTimerStart();
             _clearCameraTriggerPoints();
+            _clearSprayTriggerPoints();
             // Reset battery warning
             _lowestBatteryChargeStateAnnouncedMap.clear();
         } else {
@@ -2416,6 +2436,11 @@ void Vehicle::_rallyPointManagerError(int errorCode, const QString& errorMsg)
 void Vehicle::_clearCameraTriggerPoints()
 {
     _cameraTriggerPoints.clearAndDeleteContents();
+}
+
+void Vehicle::_clearSprayTriggerPoints()
+{
+    _sprayTriggerPoints.clearAndDeleteContents();
 }
 
 void Vehicle::_flightTimerStart()

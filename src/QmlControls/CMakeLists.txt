@@ -106,6 +106,7 @@ add_custom_target(QmlControlsQml
 		QGCMovableItem.qml
 		QGCOptionsComboBox.qml
 		QGCPipOverlay.qml
+		QGCSecondaryOverlay.qml
 		QGCPipState.qml
 		QGCPopupDialogContainer.qml
 		QGCPopupDialog.qml

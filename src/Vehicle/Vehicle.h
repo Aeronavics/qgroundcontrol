@@ -172,6 +172,7 @@ public:
     Q_PROPERTY(QString              flightMode                  READ flightMode                 WRITE setFlightMode                 NOTIFY flightModeChanged)
     Q_PROPERTY(TrajectoryPoints*    trajectoryPoints            MEMBER _trajectoryPoints                                            CONSTANT)
     Q_PROPERTY(QmlObjectListModel*  cameraTriggerPoints         READ cameraTriggerPoints                                            CONSTANT)
+    Q_PROPERTY(QmlObjectListModel*  sprayTriggerPoints          READ sprayTriggerPoints                                             CONSTANT)
     Q_PROPERTY(float                latitude                    READ latitude                                                       NOTIFY coordinateChanged)
     Q_PROPERTY(float                longitude                   READ longitude                                                      NOTIFY coordinateChanged)
     Q_PROPERTY(bool                 messageTypeNone             READ messageTypeNone                                                NOTIFY messageTypeChanged)
@@ -570,6 +571,7 @@ public:
     void setPrearmError(const QString& prearmError);
 
     QmlObjectListModel* cameraTriggerPoints () { return &_cameraTriggerPoints; }
+    QmlObjectListModel* sprayTriggerPoints  () { return &_sprayTriggerPoints; }
 
     int  flowImageIndex() const{ return _flowImageIndex; }
 
@@ -1053,6 +1055,7 @@ private slots:
     void _firstRallyPointLoadComplete       ();
     void _sendMavCommandResponseTimeoutCheck();
     void _clearCameraTriggerPoints          ();
+    void _clearSprayTriggerPoints           ();
     void _updateDistanceHeadingToHome       ();
     void _updateMissionItemIndex            ();
     void _updateHeadingToNextWP             ();
@@ -1103,6 +1106,7 @@ private:
 #if !defined(NO_ARDUPILOT_DIALECT)
     void _handleCameraFeedback          (const mavlink_message_t& message);
     void _handleRangefinder             (mavlink_message_t& message);
+    void _handleSprayFeedback           (mavlink_message_t& message);
 #endif
     void _handleCameraImageCaptured     (const mavlink_message_t& message);
     void _handleADSBVehicle             (const mavlink_message_t& message);
@@ -1150,6 +1154,7 @@ private:
     QFile               _csvLogFile;
 
     bool            _joystickEnabled = false;
+    bool            _spraying_status = false;
 
     UAS* _uas = nullptr;
 
@@ -1241,6 +1246,7 @@ private:
     QTimer                          _flightTimeUpdater;
     TrajectoryPoints*               _trajectoryPoints = nullptr;
     QmlObjectListModel              _cameraTriggerPoints;
+    QmlObjectListModel              _sprayTriggerPoints;
     //QMap<QString, ADSBVehicle*>     _trafficVehicleMap;
 
     // Toolbox references

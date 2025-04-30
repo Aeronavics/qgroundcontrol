@@ -137,8 +137,10 @@ Item {
                     target: QGroundControl.videoManager
                     function onSecondaryImageFileChanged() {
                         secondVideoContent.grabToImage(function(result) {
-                            if (!result.saveToFile(QGroundControl.videoManager.secondaryImageFile)) {
-                                console.error('Error capturing video frame');
+                            if (QGroundControl.videoManager.secondaryStream) {
+                                if (!result.saveToFile(QGroundControl.videoManager.secondaryImageFile)) {
+                                    console.error('Error capturing video frame');
+                                }
                             }
                         });
                     }

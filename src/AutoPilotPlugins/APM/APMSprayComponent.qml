@@ -122,7 +122,7 @@ SetupPage {
 
             Column {
                 spacing: _margins / 2
-                visible: _batt1MonitorEnabled
+                visible: _SprayEnabled
 
                 QGCLabel {
                     text:       qsTr("Sprayer Settings")

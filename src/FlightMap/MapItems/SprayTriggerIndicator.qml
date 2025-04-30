@@ -1,0 +1,42 @@
+/****************************************************************************
+ *
+ * (c) 2009-2020 QGROUNDCONTROL PROJECT <http://www.qgroundcontrol.org>
+ *
+ * QGroundControl is licensed according to the terms in the file
+ * COPYING.md in the root of the source code directory.
+ *
+ ****************************************************************************/
+
+import QtQuick          2.3
+import QtLocation       5.3
+import QtQuick.Controls 1.2
+
+import QGroundControl.ScreenTools   1.0
+import QGroundControl.Controls      1.0
+import QGroundControl.Vehicle       1.0
+
+/// Marker for displaying a spray trigger on the map
+MapQuickItem {
+    anchorPoint.x:  sourceItem.width / 2
+    anchorPoint.y:  sourceItem.height / 2
+
+    sourceItem: Rectangle {
+        width:      _radius * 2
+        height:     _radius * 2
+        radius:     _radius
+        color:      qgcPal.orange
+        opacity:    0.4
+
+        readonly property real _radius: ScreenTools.defaultFontPixelHeight * 0.6
+
+        QGCColoredImage {
+            height:             parent.height * 0.75
+            width:              height
+            anchors.centerIn:   parent
+            source:             "/qmlimages/waterdrop.svg"
+            fillMode:           Image.PreserveAspectFit
+            sourceSize.height:  height
+            color:              qgcPal.colorWhite
+        }
+    }
+}

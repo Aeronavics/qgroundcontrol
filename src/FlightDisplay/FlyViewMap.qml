@@ -384,6 +384,16 @@ FlightMap {
         }
     }
 
+    // Spray trigger points
+    MapItemView {
+        model: _activeVehicle ? _activeVehicle.sprayTriggerPoints : 0
+
+        delegate: SprayTriggerIndicator {
+            coordinate:     object.coordinate
+            z:              QGroundControl.zOrderTopMost
+        }
+    }
+
     // GoTo Location visuals
     MapQuickItem {
         id:             gotoLocationItem

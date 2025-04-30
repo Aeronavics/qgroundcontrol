@@ -185,4 +185,12 @@ Item {
         show:                   !QGroundControl.videoManager.fullScreen &&
                                     (videoControl.pipState.state === videoControl.pipState.pipState || mapControl.pipState.state === mapControl.pipState.pipState)
     }
+
+    // QGCSecondaryOverlay {
+    //     id:                     _secondOverlay
+    //     anchors.right:          parent.right
+    //     anchors.bottom:         parent.bottom
+    //     anchors.margins:        _toolsMargin
+    //     show:                   !QGroundControl.videoManager.fullScreen
+    // }
 }
