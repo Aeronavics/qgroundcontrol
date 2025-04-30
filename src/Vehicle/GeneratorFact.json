@@ -10,52 +10,38 @@
     "decimalPlaces":    0
 },
 {
-    "name":             "genSpeed",
-    "shortDesc":        "Generator Speed",
+    "name":             "RPM",
+    "shortDesc":        "Generator RPM",
     "type":             "uint16",
     "units":            "rpm",
     "decimalPlaces":    0
 },
 {
-    "name":             "batteryCurrent",
-    "shortDesc":        "Battery Current",
+    "name":             "current",
+    "shortDesc":        "Generator Current",
     "type":             "float",
     "decimalPlaces":    1,
     "units":            "A"
 },
 {
-    "name":             "loadCurrent",
-    "shortDesc":        "Load Current",
-    "type":             "float",
-    "decimalPlaces":    1,
-    "units":            "A"
-},
-{
-    "name":             "powerGenerated",
+    "name":             "power",
     "shortDesc":        "Power Generated",
     "type":             "float",
     "decimalPlaces":    1,
     "units":            "W"
 },
 {
-    "name":             "busVoltage",
-    "shortDesc":        "Bus Voltage",
+    "name":             "voltage",
+    "shortDesc":        "Generator Voltage",
     "type":             "float",
     "decimalPlaces":    1,
     "units":            "V"
 },
 {
-    "name":             "rectifierTemp",
-    "shortDesc":        "Rectifier Temperature",
+    "name":             "coilTemp",
+    "shortDesc":        "Coil Temperature",
     "type":             "int16",
     "units":            "°C"
-},
-{
-    "name":             "batCurrentSetpoint",
-    "shortDesc":        "Battery Current Setpoint",
-    "type":             "float",
-    "decimalPlaces":    1,
-    "units":            "A"
 },
 {
     "name":             "genTemp",
@@ -70,7 +56,7 @@
     "type":             "string"
 },
 {
-    "name":             "timeMaintenance",
+    "name":             "timeToService",
     "shortDesc":        "Time until Maintenance",
     "type":             "string"
 },

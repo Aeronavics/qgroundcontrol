@@ -3,59 +3,51 @@
 #include <bitset>
 
 const char* VehicleGeneratorFactGroup::_statusFactName =                "status";
-const char* VehicleGeneratorFactGroup::_genSpeedFactName =              "genSpeed";
-const char* VehicleGeneratorFactGroup::_batteryCurrentFactName =        "batteryCurrent";
-const char* VehicleGeneratorFactGroup::_loadCurrentFactName =           "loadCurrent";
-const char* VehicleGeneratorFactGroup::_powerGeneratedFactName =        "powerGenerated";
-const char* VehicleGeneratorFactGroup::_busVoltageFactName =            "busVoltage";
-const char* VehicleGeneratorFactGroup::_rectifierTempFactName =         "rectifierTemp";
-const char* VehicleGeneratorFactGroup::_batCurrentSetpointFactName =    "batCurrentSetpoint";
+const char* VehicleGeneratorFactGroup::_rpmFactName =                   "RPM";
+const char* VehicleGeneratorFactGroup::_currentFactName =               "current";
+const char* VehicleGeneratorFactGroup::_powerFactName =                 "power";
+const char* VehicleGeneratorFactGroup::_voltageFactName =               "voltage";
+const char* VehicleGeneratorFactGroup::_coilTempFactName =              "coilTemp";
 const char* VehicleGeneratorFactGroup::_genTempFactName =               "genTemp";
 const char* VehicleGeneratorFactGroup::_runtimeFactName =               "runtime";
-const char* VehicleGeneratorFactGroup::_timeMaintenanceFactName =       "timeMaintenance";
-const char* VehicleGeneratorFactGroup::_fuelRemainingFactName =             "fuelRemaining";
+const char* VehicleGeneratorFactGroup::_timeToServiceFactName =         "timeToService";
+const char* VehicleGeneratorFactGroup::_fuelRemainingFactName =         "fuelRemaining";
 
 VehicleGeneratorFactGroup::VehicleGeneratorFactGroup(QObject* parent)
     : FactGroup(1000, ":/json/Vehicle/GeneratorFact.json", parent)
-    , _statusFact               (0, _statusFactName,                FactMetaData::valueTypeUint64)
-    , _genSpeedFact             (0, _genSpeedFactName,              FactMetaData::valueTypeUint16)
-    , _batteryCurrentFact       (0, _batteryCurrentFactName,        FactMetaData::valueTypeFloat)
-    , _loadCurrentFact          (0, _loadCurrentFactName,           FactMetaData::valueTypeFloat)
-    , _powerGeneratedFact       (0, _powerGeneratedFactName,        FactMetaData::valueTypeFloat)
-    , _busVoltageFact           (0, _busVoltageFactName,            FactMetaData::valueTypeFloat)
-    , _rectifierTempFact        (0, _rectifierTempFactName,         FactMetaData::valueTypeInt16)
-    , _batCurrentSetpointFact   (0, _batCurrentSetpointFactName,    FactMetaData::valueTypeFloat)
-    , _genTempFact              (0, _genTempFactName,               FactMetaData::valueTypeInt16)
-    , _runtimeFact              (0, _runtimeFactName,               FactMetaData::valueTypeString)
-    , _timeMaintenanceFact      (0, _timeMaintenanceFactName,       FactMetaData::valueTypeString)
-    , _fuelRemainingFact        (0, _fuelRemainingFactName,         FactMetaData::valueTypeUint8)
+    , _statusFact           (0, _statusFactName,            FactMetaData::valueTypeUint64)
+    , _rpmFact              (0, _rpmFactName,               FactMetaData::valueTypeUint16)
+    , _currentFact          (0, _currentFactName,           FactMetaData::valueTypeFloat)
+    , _powerFact            (0, _powerFactName,             FactMetaData::valueTypeFloat)
+    , _voltageFact          (0, _voltageFactName,           FactMetaData::valueTypeFloat)
+    , _coilTempFact         (0, _coilTempFactName,          FactMetaData::valueTypeInt16)
+    , _genTempFact          (0, _genTempFactName,           FactMetaData::valueTypeInt16)
+    , _runtimeFact          (0, _runtimeFactName,           FactMetaData::valueTypeString)
+    , _timeToServiceFact    (0, _timeToServiceFactName,     FactMetaData::valueTypeString)
+    , _fuelRemainingFact    (0, _fuelRemainingFactName,     FactMetaData::valueTypeUint8)
 {
-    _addFact(&_statusFact,              _statusFactName);
-    _addFact(&_genSpeedFact,            _genSpeedFactName);
-    _addFact(&_batteryCurrentFact,      _batteryCurrentFactName);
-    _addFact(&_loadCurrentFact,         _loadCurrentFactName);
-    _addFact(&_powerGeneratedFact,      _powerGeneratedFactName);
-    _addFact(&_busVoltageFact,          _busVoltageFactName);
-    _addFact(&_batCurrentSetpointFact,  _batCurrentSetpointFactName);
-    _addFact(&_rectifierTempFact,       _rectifierTempFactName);
-    _addFact(&_genTempFact,             _genTempFactName);
-    _addFact(&_runtimeFact,             _runtimeFactName);
-    _addFact(&_timeMaintenanceFact,     _timeMaintenanceFactName);
-    _addFact(&_fuelRemainingFact,       _fuelRemainingFactName);
+    _addFact(&_statusFact,          _statusFactName);
+    _addFact(&_rpmFact,             _rpmFactName);
+    _addFact(&_currentFact,         _currentFactName);
+    _addFact(&_powerFact,           _powerFactName);
+    _addFact(&_voltageFact,         _voltageFactName);
+    _addFact(&_coilTempFact,        _coilTempFactName);
+    _addFact(&_genTempFact,         _genTempFactName);
+    _addFact(&_runtimeFact,         _runtimeFactName);
+    _addFact(&_timeToServiceFact,   _timeToServiceFactName);
+    _addFact(&_fuelRemainingFact,   _fuelRemainingFactName);
 
     // Start out as not available "--.--"
     _statusFact.setRawValue(qQNaN());
-    _genSpeedFact.setRawValue(qQNaN());
-    _batteryCurrentFact.setRawValue(qQNaN());
-    _loadCurrentFact.setRawValue(qQNaN());
-    _powerGeneratedFact.setRawValue(qQNaN());
-    _busVoltageFact.setRawValue(qQNaN());
-    _batCurrentSetpointFact.setRawValue(qQNaN());
-    _rectifierTempFact.setRawValue(qQNaN());
+    _rpmFact.setRawValue(qQNaN());
+    _currentFact.setRawValue(qQNaN());
+    _powerFact.setRawValue(qQNaN());
+    _voltageFact.setRawValue(qQNaN());
+    _coilTempFact.setRawValue(qQNaN());
     _genTempFact.setRawValue(qQNaN());
     _runtimeFact.setRawValue(qQNaN());
-    _timeMaintenanceFact.setRawValue(qQNaN());
-    _fuelRemainingFact.setRawValue(qQNaN());
+    _timeToServiceFact.setRawValue("--:--");
+    _fuelRemainingFact.setRawValue("--:--");
 }
 
 void VehicleGeneratorFactGroup::handleMessage(Vehicle* /* vehicle */, mavlink_message_t& message)
@@ -77,27 +69,25 @@ void VehicleGeneratorFactGroup::_handleGeneratorStatus(mavlink_message_t& messag
     mavlink_generator_status_t generator;
     mavlink_msg_generator_status_decode(&message, &generator);
 
-    status()->setRawValue               (generator.status == UINT16_MAX ? qQNaN() : generator.status);
-    _updateGeneratorFlags();
-    genSpeed()->setRawValue             (generator.generator_speed == UINT16_MAX ? qQNaN() : generator.generator_speed);
-    batteryCurrent()->setRawValue       (generator.battery_current);
-    loadCurrent()->setRawValue          (generator.load_current);
-    powerGenerated()->setRawValue       (generator.power_generated);
-    busVoltage()->setRawValue           (generator.bus_voltage);
-    rectifierTemp()->setRawValue        (generator.rectifier_temperature == INT16_MAX ? qQNaN() : generator.rectifier_temperature);
-    batCurrentSetpoint()->setRawValue   (generator.bat_current_setpoint);
-    genTemp()->setRawValue              (generator.generator_temperature == INT16_MAX ? qQNaN() : generator.generator_temperature);
+    status()->setRawValue       (generator.status == UINT16_MAX ? qQNaN() : generator.status);
+    rpm()->setRawValue          (generator.generator_speed == UINT16_MAX ? qQNaN() : generator.generator_speed);
+    current()->setRawValue      (generator.load_current);
+    power()->setRawValue        (generator.power_generated);
+    voltage()->setRawValue      (generator.bus_voltage);
+    coilTemp()->setRawValue     (generator.rectifier_temperature == INT16_MAX ? qQNaN() : generator.rectifier_temperature);
+    genTemp()->setRawValue      (generator.generator_temperature == INT16_MAX ? qQNaN() : generator.generator_temperature);
 
+    _updateGeneratorFlags();
 
     uint32_t run_time_hours = generator.runtime / 3600;
     uint32_t run_time_minutes = (generator.runtime % 3600) / 60;
     std::string run_time_string = std::to_string(run_time_hours) + "h " + std::to_string(run_time_minutes) + "m";
-    runtime()->setRawValue              (run_time_string.c_str());
+    runtime()->setRawValue(run_time_string.c_str());
 
     uint32_t maintenance_time_hours = generator.time_until_maintenance / 3600;
     uint32_t maintenance_time_minutes = (generator.time_until_maintenance % 3600) / 60;
     std::string maintenance_time_string = std::to_string(maintenance_time_hours) + "h " + std::to_string(maintenance_time_minutes) + "m";
-    timeMaintenance()->setRawValue      (maintenance_time_string.c_str());
+    timeToService()->setRawValue(maintenance_time_string.c_str());
 }
 
 void VehicleGeneratorFactGroup::_handleFuelStatus(mavlink_message_t& message) {
