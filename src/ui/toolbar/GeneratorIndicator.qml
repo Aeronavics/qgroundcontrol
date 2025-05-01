@@ -131,8 +131,10 @@ Item {
                             QGCLabel { text: qsTr("Voltage") }
                             QGCLabel { text: qsTr("Current") }
                             QGCLabel { text: qsTr("RPM"); }
-                            QGCLabel { text: qsTr("Temperature"); }
+                            QGCLabel { text: qsTr("Engine Temp"); }
+                            QGCLabel { text: qsTr("Coil Temp"); }
                             QGCLabel { text: qsTr("Run Time"); }
+                            QGCLabel { text: qsTr("Time to Service"); }
                         }
                     }
 
@@ -157,11 +159,13 @@ Item {
                                         ((generator.status.rawValue & MAVLink.MAV_GENERATOR_STATUS_FLAG_MAINTENANCE_REQUIRED) === MAVLink.MAV_GENERATOR_STATUS_FLAG_MAINTENANCE_REQUIRED ? qsTr("Maintainance required") :
                                         qsTr("None")))))));
                             }
-                            QGCLabel { text: generator.busVoltage.valueString + " " + generator.busVoltage.units }
-                            QGCLabel { text: generator.loadCurrent.valueString + " " + generator.loadCurrent.units }
-                            QGCLabel { text: generator.genSpeed.valueString + " " + generator.genSpeed.units }
+                            QGCLabel { text: generator.voltage.valueString + " " + generator.voltage.units }
+                            QGCLabel { text: generator.current.valueString + " " + generator.current.units }
+                            QGCLabel { text: generator.rpm.valueString + " " + generator.rpm.units }
                             QGCLabel { text: generator.genTemp.valueString + " " + generator.genTemp.units }
-                            QGCLabel { text: generator.runtime.valueString}
+                            QGCLabel { text: generator.coilTemp.valueString + " " + generator.coilTemp.units }
+                            QGCLabel { text: generator.runtime.valueString }
+                            QGCLabel { text: generator.timeToService.valueString }
                         }
                     }
                 }
