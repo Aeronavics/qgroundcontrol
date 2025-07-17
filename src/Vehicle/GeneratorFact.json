@@ -2,70 +2,70 @@
     "version":              1,
     "fileType":             "FactMetaData",
     "QGC.MetaData.Facts":
-[
-{
-    "name":             "status",
-    "shortDesc":        "Status",
-    "type":             "uint64",
-    "decimalPlaces":    0
-},
-{
-    "name":             "RPM",
-    "shortDesc":        "Generator RPM",
-    "type":             "uint16",
-    "units":            "rpm",
-    "decimalPlaces":    0
-},
-{
-    "name":             "current",
-    "shortDesc":        "Generator Current",
-    "type":             "float",
-    "decimalPlaces":    1,
-    "units":            "A"
-},
-{
-    "name":             "power",
-    "shortDesc":        "Power Generated",
-    "type":             "float",
-    "decimalPlaces":    1,
-    "units":            "W"
-},
-{
-    "name":             "voltage",
-    "shortDesc":        "Generator Voltage",
-    "type":             "float",
-    "decimalPlaces":    1,
-    "units":            "V"
-},
-{
-    "name":             "coilTemp",
-    "shortDesc":        "Coil Temperature",
-    "type":             "int16",
-    "units":            "°C"
-},
-{
-    "name":             "genTemp",
-    "shortDesc":        "Generator Temperature",
-    "type":             "int16",
-    "units":            "°C",
-    "decimalPlaces":    0
-},
-{
-    "name":             "runtime",
-    "shortDesc":        "runtime",
-    "type":             "string"
-},
-{
-    "name":             "timeToService",
-    "shortDesc":        "Time until Maintenance",
-    "type":             "string"
-},
-{
-    "name":             "fuelRemaining",
-    "shortDesc":        "Fuel Remaining",
-    "type":             "uint8",
-    "units":            "%",
-    "decimalPlaces":    0
-}
-]
+    [
+        {
+            "name":             "status",
+            "shortDesc":        "Status",
+            "type":             "uint64",
+            "decimalPlaces":    0
+        },
+        {
+            "name":             "RPM",
+            "shortDesc":        "Generator RPM",
+            "type":             "uint16",
+            "units":            "rpm",
+            "decimalPlaces":    0
+        },
+        {
+            "name":             "current",
+            "shortDesc":        "Generator Current",
+            "type":             "float",
+            "decimalPlaces":    1,
+            "units":            "A"
+        },
+        {
+            "name":             "power",
+            "shortDesc":        "Power Generated",
+            "type":             "float",
+            "decimalPlaces":    1,
+            "units":            "W"
+        },
+        {
+            "name":             "voltage",
+            "shortDesc":        "Generator Voltage",
+            "type":             "float",
+            "decimalPlaces":    1,
+            "units":            "V"
+        },
+        {
+            "name":             "coilTemp",
+            "shortDesc":        "Coil Temperature",
+            "type":             "int16",
+            "units":            "°C"
+        },
+        {
+            "name":             "genTemp",
+            "shortDesc":        "Generator Temperature",
+            "type":             "int16",
+            "units":            "°C",
+            "decimalPlaces":    0
+        },
+        {
+            "name":             "runtime",
+            "shortDesc":        "runtime",
+            "type":             "string"
+        },
+        {
+            "name":             "timeToService",
+            "shortDesc":        "Time until Maintenance",
+            "type":             "string"
+        },
+        {
+            "name":             "fuelRemaining",
+            "shortDesc":        "Fuel Remaining",
+            "type":             "uint8",
+            "units":            "%",
+            "decimalPlaces":    0
+        }
+    ]
 }

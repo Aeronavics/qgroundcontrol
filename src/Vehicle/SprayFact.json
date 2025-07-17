@@ -2,43 +2,57 @@
     "version":              1,
     "fileType":             "FactMetaData",
     "QGC.MetaData.Facts":
-[
-{
-    "name":             "mesFlowrate",
-    "shortDesc":        "Measured Flowrate",
-    "type":             "uint16",
-    "units":            "ml/s"
-},
-{
-    "name":             "desFlowrate",
-    "shortDesc":        "Desired Flowrate",
-    "type":             "uint16",
-    "units":            "ml/s"
-},
-{
-    "name":             "sprayedVolume",
-    "shortDesc":        "Volume Sprayed",
-    "type":             "float",
-    "decimalPlaces":    2,
-    "units":            "l"
-},
-{
-    "name":             "sprayRemaining",
-    "shortDesc":        "Remaining Spray",
-    "type":             "float",
-    "decimalPlaces":    1,
-    "units":            "%"
-},
-{
-    "name":             "mesPressure",
-    "shortDesc":        "Measured Pressure",
-    "type":             "uint16",
-    "units":            "kpa"
-},
-{
-    "name":             "error",
-    "shortDesc":        "Spray Error",
-    "type":             "uint8"
-}
-]
+    [
+        {
+            "name":             "mesFlowrate",
+            "shortDesc":        "Measured Flowrate",
+            "type":             "uint16",
+            "units":            "ml/s"
+        },
+        {
+            "name":             "desFlowrate",
+            "shortDesc":        "Desired Flowrate",
+            "type":             "uint16",
+            "units":            "ml/s"
+        },
+        {
+            "name":             "totalVolume",
+            "shortDesc":        "Total Vol Sprayed",
+            "type":             "float",
+            "decimalPlaces":    2,
+            "units":            "l"
+        },
+        {
+            "name":             "armedVolume",
+            "shortDesc":        "Volume since Arm",
+            "type":             "float",
+            "decimalPlaces":    2,
+            "units":            "l"
+        },
+        {
+            "name":             "lastTreeVolume",
+            "shortDesc":        "Last Tree Volume",
+            "type":             "float",
+            "decimalPlaces":    3,
+            "units":            "l"
+        },
+        {
+            "name":             "sprayRemaining",
+            "shortDesc":        "Remaining Spray",
+            "type":             "float",
+            "decimalPlaces":    1,
+            "units":            "%"
+        },
+        {
+            "name":             "mesPressure",
+            "shortDesc":        "Measured Pressure",
+            "type":             "uint16",
+            "units":            "kpa"
+        },
+        {
+            "name":             "error",
+            "shortDesc":        "Spray Error",
+            "type":             "uint8"
+        }
+    ]
 }

@@ -4,31 +4,39 @@
 
 const char* VehicleSprayFactGroup::_mesFlowrateFactName =       "mesFlowrate";
 const char* VehicleSprayFactGroup::_desFlowrateFactName =       "desFlowrate";
-const char* VehicleSprayFactGroup::_sprayedVolumeFactName =    "sprayedVolume";
+const char* VehicleSprayFactGroup::_totalSprayedVolumeFactName =    "totalVolume";
+const char* VehicleSprayFactGroup::_armedSprayedVolumeFactName =    "armedVolume";
+const char* VehicleSprayFactGroup::_lastTreeVolumeFactName =    "lastTreeVolume";
 const char* VehicleSprayFactGroup::_sprayRemainingFactName =    "sprayRemaining";
 const char* VehicleSprayFactGroup::_mesPressureFactName =       "mesPressure";
 const char* VehicleSprayFactGroup::_errorFactName =             "error";
 
 VehicleSprayFactGroup::VehicleSprayFactGroup(QObject* parent)
     : FactGroup(1000, ":/json/Vehicle/SprayFact.json", parent)
-    , _mesFlowrateFact      (0, _mesFlowrateFactName,       FactMetaData::valueTypeUint16)
-    , _desFlowrateFact      (0, _desFlowrateFactName,       FactMetaData::valueTypeUint16)
-    , _sprayedVolumeFact    (0, _sprayedVolumeFactName,      FactMetaData::valueTypeFloat)
-    , _sprayRemainingFact   (0, _sprayRemainingFactName,    FactMetaData::valueTypeFloat)
-    , _mesPressureFact      (0, _mesPressureFactName,       FactMetaData::valueTypeUint16)
-    , _errorFact            (0, _errorFactName,             FactMetaData::valueTypeUint8)
+    , _mesFlowrateFact          (0, _mesFlowrateFactName,           FactMetaData::valueTypeUint16)
+    , _desFlowrateFact          (0, _desFlowrateFactName,           FactMetaData::valueTypeUint16)
+    , _totalSprayedVolumeFact   (0, _totalSprayedVolumeFactName,    FactMetaData::valueTypeFloat)
+    , _armedSprayedVolumeFact   (0, _armedSprayedVolumeFactName,    FactMetaData::valueTypeFloat)
+    , _lastTreeVolumeFact       (0, _lastTreeVolumeFactName,        FactMetaData::valueTypeFloat)
+    , _sprayRemainingFact       (0, _sprayRemainingFactName,        FactMetaData::valueTypeFloat)
+    , _mesPressureFact          (0, _mesPressureFactName,           FactMetaData::valueTypeUint16)
+    , _errorFact                (0, _errorFactName,                 FactMetaData::valueTypeUint8)
 {
-    _addFact(&_mesFlowrateFact,     _mesFlowrateFactName);
-    _addFact(&_desFlowrateFact,     _desFlowrateFactName);
-    _addFact(&_sprayedVolumeFact,   _sprayedVolumeFactName);
-    _addFact(&_sprayRemainingFact,  _sprayRemainingFactName);
-    _addFact(&_mesPressureFact,     _mesPressureFactName);
-    _addFact(&_errorFact,           _errorFactName);
+    _addFact(&_mesFlowrateFact,         _mesFlowrateFactName);
+    _addFact(&_desFlowrateFact,         _desFlowrateFactName);
+    _addFact(&_totalSprayedVolumeFact,  _totalSprayedVolumeFactName);
+    _addFact(&_armedSprayedVolumeFact,  _armedSprayedVolumeFactName);
+    _addFact(&_lastTreeVolumeFact,      _lastTreeVolumeFactName);
+    _addFact(&_sprayRemainingFact,      _sprayRemainingFactName);
+    _addFact(&_mesPressureFact,         _mesPressureFactName);
+    _addFact(&_errorFact,               _errorFactName);
 
     // Start out as not available "--.--"
     _mesFlowrateFact.setRawValue(qQNaN());
     _desFlowrateFact.setRawValue(qQNaN());
-    _sprayedVolumeFact.setRawValue(qQNaN());
+    _totalSprayedVolumeFact.setRawValue(qQNaN());
+    _armedSprayedVolumeFact.setRawValue(qQNaN());
+    _lastTreeVolumeFact.setRawValue(qQNaN());
     _sprayRemainingFact.setRawValue(qQNaN());
     _mesPressureFact.setRawValue(qQNaN());
     _errorFact.setRawValue(qQNaN());
@@ -50,10 +58,12 @@ void VehicleSprayFactGroup::_handleSprayStatus(mavlink_message_t& message)
     mavlink_anv_msg_spray_status_t spray;
     mavlink_msg_anv_msg_spray_status_decode(&message, &spray);
 
-    mesFlowrate()->setRawValue      (spray.measured_flowrate);
-    desFlowrate()->setRawValue      (spray.desired_flowrate);
-    sprayedVolume()->setRawValue     (spray.sprayed_volume);
-    sprayRemaining()->setRawValue   (spray.spray_remaining);
-    mesPressure()->setRawValue      (spray.pressure);
-    error()->setRawValue            (spray.error);
+    mesFlowrate()->setRawValue          (spray.measured_flowrate);
+    desFlowrate()->setRawValue          (spray.desired_flowrate);
+    totalSprayedVolume()->setRawValue   (spray.total_sprayed_volume);
+    armedSprayedVolume()->setRawValue   (spray.armed_sprayed_volume);
+    lastTreeVolume()->setRawValue       (spray.last_tree_volume);
+    sprayRemaining()->setRawValue       (spray.spray_remaining);
+    mesPressure()->setRawValue          (spray.pressure);
+    error()->setRawValue                (spray.error);
 }
