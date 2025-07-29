@@ -149,7 +149,9 @@ Item {
                             QGCLabel { text: qsTr("State"); }
                             QGCLabel { text: qsTr("Error"); }
                             QGCLabel { text: qsTr("Spray Remaining"); }
-                            QGCLabel { text: qsTr("Volume Sprayed") }
+                            QGCLabel { text: qsTr("Total Vol Sprayed") }
+                            QGCLabel { text: qsTr("Armed Vol Sprayed") }
+                            QGCLabel { text: qsTr("Last Tree Vol") }
                             QGCLabel { text: qsTr("Measured Flowrate") }
                             QGCLabel { text: qsTr("Desired Flowrate"); }
                             QGCLabel { text: qsTr("Pressure"); }
@@ -174,7 +176,9 @@ Item {
                                         qsTr("None")))))));
                             }
                             QGCLabel { text: sprayer.sprayRemaining.valueString + " " + sprayer.sprayRemaining.units }
-                            QGCLabel { text: sprayer.sprayedVolume.valueString + " " + sprayer.sprayedVolume.units }
+                            QGCLabel { text: sprayer.totalSprayedVolume.valueString + " " + sprayer.totalSprayedVolume.units }
+                            QGCLabel { text: sprayer.armedSprayedVolume.valueString + " " + sprayer.armedSprayedVolume.units }
+                            QGCLabel { text: sprayer.lastTreeVolume.valueString + " " + sprayer.lastTreeVolume.units }
                             QGCLabel { text: sprayer.mesFlowrate.valueString + " " + sprayer.mesFlowrate.units }
                             QGCLabel { text: sprayer.desFlowrate.valueString + " " + sprayer.desFlowrate.units }
                             QGCLabel { text: sprayer.mesPressure.valueString + " " + sprayer.mesPressure.units }

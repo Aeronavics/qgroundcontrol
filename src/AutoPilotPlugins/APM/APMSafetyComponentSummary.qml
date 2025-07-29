@@ -22,15 +22,6 @@ Item {
     property Fact _batt1FSCritAct:          controller.getParameterFact(-1, "BATT_FS_CRT_ACT", false /* reportMissing */)
     property bool _batt1FSCritActAvailable: controller.parameterExists(-1, "BATT_FS_CRT_ACT")
 
-    property Fact _genFSLowFuelLevel:       controller.getParameterFact(-1, "GEN_LOW_PER", false)
-    property Fact _genFSLowFuelAct:         controller.getParameterFact(-1, "GEN_LOW_FS", false)
-    property Fact _genFSCritFuelLevel:      controller.getParameterFact(-1, "GEN_CRIT_PER", false)
-    property Fact _genFSCritFuelAct:        controller.getParameterFact(-1, "GEN_CRIT_FS", false)
-    property Fact _genFSOffAct:             controller.getParameterFact(-1, "GEN_OFF_FS", false)
-    property Fact _genFSErrorAct:           controller.getParameterFact(-1, "GEN_ERROR_FS", false)
-    property Fact _genType:                 controller.getParameterFact(-1, "GEN_TYPE")
-    property bool _genEnabled:              _genType.rawValue !== 0
-
     property bool _roverFirmware:           controller.parameterExists(-1, "MODE1") // This catches all usage of ArduRover firmware vehicle types: Rover, Boat...
 
 
@@ -55,30 +46,6 @@ Item {
             labelText:  qsTr("Battery critical failsafe:")
             valueText:  _batt1FSCritActAvailable ? _batt1FSCritAct.enumStringValue : ""
             visible:    _batt1FSCritActAvailable
-        }
-
-        VehicleSummaryRow {
-            labelText:  qsTr("Gen low fuel failsafe:")
-            valueText:  _genEnabled ? _genFSLowFuelLevel.valueString + _genFSLowFuelLevel.units + "   " + _genFSLowFuelAct.enumStringValue : ""
-            visible:    _genEnabled
-        }
-
-        VehicleSummaryRow {
-            labelText:  qsTr("Gen crit fuel failsafe:")
-            valueText:  _genEnabled ? _genFSCritFuelLevel.valueString + _genFSCritFuelLevel.units + "   " + _genFSCritFuelAct.enumStringValue : ""
-            visible:    _genEnabled
-        }
-
-        VehicleSummaryRow {
-            labelText:  qsTr("Gen off failsafe:")
-            valueText:  _genEnabled ? _genFSOffAct.enumStringValue : ""
-            visible:    _genEnabled
-        }
-
-        VehicleSummaryRow {
-            labelText:  qsTr("Gen error failsafe:")
-            valueText:  _genEnabled ? _genFSErrorAct.enumStringValue : ""
-            visible:    _genEnabled
         }
 
 

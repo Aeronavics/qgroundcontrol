@@ -12,7 +12,7 @@ Item {
     FactPanelController { id: controller; }
 
     property Fact _generator:                       controller.getParameterFact(-1, "GEN_TYPE")
-    property bool _generatorEnabled:                _generator.rawValue == 4
+    property bool _generatorEnabled:                _generator.rawValue === 4
 
     property Fact _generatorLowFS:                  controller.getParameterFact(-1, "GEN_LOW_FS", false /* reportMissing */)
     property Fact _generatorCritFS:                 controller.getParameterFact(-1, "GEN_CRIT_FS", false /* reportMissing */)

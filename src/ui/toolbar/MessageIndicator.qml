@@ -118,31 +118,6 @@ Item {
                 visible:            messageText.length === 0
             }
 
-            //-- Clear Messages
-            QGCColoredImage {
-                anchors.bottom:     parent.bottom
-                anchors.right:      parent.right
-                anchors.margins:    ScreenTools.defaultFontPixelHeight * 0.5
-                height:             ScreenTools.isMobile ? ScreenTools.defaultFontPixelHeight * 1.5 : ScreenTools.defaultFontPixelHeight
-                width:              height
-                sourceSize.height:   height
-                source:             "/res/TrashDelete.svg"
-                fillMode:           Image.PreserveAspectFit
-                mipmap:             true
-                smooth:             true
-                color:              qgcPal.text
-                visible:            messageText.length !== 0
-                MouseArea {
-                    anchors.fill:   parent
-                    onClicked: {
-                        if (_activeVehicle) {
-                            _activeVehicle.clearMessages()
-                            mainWindow.hideIndicatorPopup()
-                        }
-                    }
-                }
-            }
-
             FactPanelController {
                 id: controller
             }
@@ -159,7 +134,7 @@ Item {
                     id:                 messageText
                     readOnly:           true
                     textFormat:         TextEdit.RichText
-                    selectByMouse:      true
+                    selectByMouse:      false
                     color:              qgcPal.text
                     selectionColor:     qgcPal.text
                     selectedTextColor:  qgcPal.window
@@ -183,6 +158,31 @@ Item {
                         title:          qsTr("Edit Parameter")
                         fact:           messageText.fact
                         destroyOnClose: true
+                    }
+                }
+            }
+
+            //-- Clear Messages
+            QGCColoredImage {
+                anchors.bottom:     parent.bottom
+                anchors.right:      parent.right
+                anchors.margins:    ScreenTools.defaultFontPixelHeight * 0.5
+                height:             ScreenTools.isMobile ? ScreenTools.defaultFontPixelHeight * 3 : ScreenTools.defaultFontPixelHeight
+                width:              height
+                sourceSize.height:   height
+                source:             "/res/TrashDelete.svg"
+                fillMode:           Image.PreserveAspectFit
+                mipmap:             true
+                smooth:             true
+                color:              qgcPal.text
+                visible:            messageText.length !== 0
+                MouseArea {
+                    anchors.fill:   parent
+                    onClicked: {
+                        if (_activeVehicle) {
+                            _activeVehicle.clearMessages()
+                            mainWindow.hideIndicatorPopup()
+                        }
                     }
                 }
             }

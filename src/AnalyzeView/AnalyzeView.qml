@@ -36,8 +36,8 @@ Rectangle {
         id: geoController
     }
 
-    LogDownloadController {
-        id: logController
+    DFLogDownloadController {
+        id: dflogController
     }
 
     QGCFlickable {
@@ -122,7 +122,7 @@ Rectangle {
         anchors.right:          parent.right
         anchors.top:            parent.top
         anchors.bottom:         parent.bottom
-        source:                 "LogDownloadPage.qml"
+        source:                 "DFLogDownloadPage.qml"
 
         property string title
 

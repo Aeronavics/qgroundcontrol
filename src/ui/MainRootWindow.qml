@@ -374,7 +374,11 @@ ApplicationWindow {
                                     if (mouse.modifiers & Qt.ControlModifier) {
                                         QGroundControl.corePlugin.showTouchAreas = !QGroundControl.corePlugin.showTouchAreas
                                         showTouchAreasNotification.open()
-                                    } else if (ScreenTools.isMobile || mouse.modifiers & Qt.ShiftModifier) {
+                                    } 
+                                }
+
+                                onDoubleClicked: {
+                                    if (ScreenTools.isMobile || mouse.modifiers & Qt.ShiftModifier) {
                                         if(!QGroundControl.corePlugin.showAdvancedUI) {
                                             advancedModeOnConfirmation.open()
                                         } else {
@@ -536,15 +540,17 @@ ApplicationWindow {
     //-- Critical Vehicle Message Popup
 
     function showCriticalVehicleMessage(message) {
-        indicatorPopup.close()
-        if (criticalVehicleMessagePopup.visible || QGroundControl.videoManager.fullScreen) {
-            // We received additional wanring message while an older warning message was still displayed.
-            // When the user close the older one drop the message indicator tool so they can see the rest of them.
-            criticalVehicleMessagePopup.dropMessageIndicatorOnClose = true
-        } else {
-            criticalVehicleMessagePopup.criticalVehicleMessage      = message
-            criticalVehicleMessagePopup.dropMessageIndicatorOnClose = false
-            criticalVehicleMessagePopup.open()
+        // indicatorPopup.close()
+        if (!indicatorPopup.visible) {
+            if (criticalVehicleMessagePopup.visible || QGroundControl.videoManager.fullScreen) {
+                // We received additional wanring message while an older warning message was still displayed.
+                // When the user close the older one drop the message indicator tool so they can see the rest of them.
+                criticalVehicleMessagePopup.dropMessageIndicatorOnClose = true
+            } else {
+                criticalVehicleMessagePopup.criticalVehicleMessage      = message
+                criticalVehicleMessagePopup.dropMessageIndicatorOnClose = false
+                criticalVehicleMessagePopup.open()
+            }
         }
     }
 
@@ -552,7 +558,7 @@ ApplicationWindow {
         id:                 criticalVehicleMessagePopup
         y:                  ScreenTools.defaultFontPixelHeight
         x:                  Math.round((mainWindow.width - width) * 0.5)
-        width:              mainWindow.width  * 0.55
+        width:              mainWindow.width  * 0.40
         height:             criticalVehicleMessageText.contentHeight + ScreenTools.defaultFontPixelHeight * 2
         modal:              false
         focus:              true
@@ -564,55 +570,56 @@ ApplicationWindow {
         background: Rectangle {
             anchors.fill:   parent
             color:          qgcPal.alertBackground
+            opacity:        0.8
             radius:         ScreenTools.defaultFontPixelHeight * 0.5
             border.color:   qgcPal.alertBorder
             border.width:   2
 
-            Rectangle {
-                anchors.horizontalCenter:   parent.horizontalCenter
-                anchors.top:                parent.top
-                anchors.topMargin:          -(height / 2)
-                color:                      qgcPal.alertBackground
-                radius:                     ScreenTools.defaultFontPixelHeight * 0.25
-                border.color:               qgcPal.alertBorder
-                border.width:               1
-                width:                      vehicleWarningLabel.contentWidth + _margins
-                height:                     vehicleWarningLabel.contentHeight + _margins
+            // Rectangle {
+            //     anchors.horizontalCenter:   parent.horizontalCenter
+            //     anchors.top:                parent.top
+            //     anchors.topMargin:          -(height / 2)
+            //     color:                      qgcPal.alertBackground
+            //     radius:                     ScreenTools.defaultFontPixelHeight * 0.25
+            //     border.color:               qgcPal.alertBorder
+            //     border.width:               1
+            //     width:                      vehicleWarningLabel.contentWidth + _margins
+            //     height:                     vehicleWarningLabel.contentHeight + _margins
 
-                property real _margins: ScreenTools.defaultFontPixelHeight * 0.25
+            //     property real _margins: ScreenTools.defaultFontPixelHeight * 0.25
 
-                QGCLabel {
-                    id:                 vehicleWarningLabel
-                    anchors.centerIn:   parent
-                    text:               qsTr("Vehicle Error")
-                    font.pointSize:     ScreenTools.smallFontPointSize
-                    color:              qgcPal.alertText
-                }
-            }
+            //     QGCLabel {
+            //         id:                 vehicleWarningLabel
+            //         anchors.centerIn:   parent
+            //         text:               qsTr("Vehicle Error")
+            //         font.pointSize:     ScreenTools.smallFontPointSize
+            //         color:              qgcPal.alertText
+            //     }
+            // }
 
-            Rectangle {
-                id:                         additionalErrorsIndicator
-                anchors.horizontalCenter:   parent.horizontalCenter
-                anchors.bottom:             parent.bottom
-                anchors.bottomMargin:       -(height / 2)
-                color:                      qgcPal.alertBackground
-                radius:                     ScreenTools.defaultFontPixelHeight * 0.25
-                border.color:               qgcPal.alertBorder
-                border.width:               1
-                width:                      additionalErrorsLabel.contentWidth + _margins
-                height:                     additionalErrorsLabel.contentHeight + _margins
-                visible:                    criticalVehicleMessagePopup.dropMessageIndicatorOnClose
+        //     Rectangle {
+        //         id:                         additionalErrorsIndicator
+        //         anchors.horizontalCenter:   parent.horizontalCenter
+        //         anchors.bottom:             parent.bottom
+        //         anchors.bottomMargin:       -(height / 2)
+        //         color:                      qgcPal.alertBackground
+        //         radius:                     ScreenTools.defaultFontPixelHeight * 0.25
+        //         border.color:               qgcPal.alertBorder
+        //         border.width:               1
+        //         width:                      additionalErrorsLabel.contentWidth + _margins
+        //         height:                     additionalErrorsLabel.contentHeight + _margins
+        //         visible:                    criticalVehicleMessagePopup.dropMessageIndicatorOnClose
 
-                property real _margins: ScreenTools.defaultFontPixelHeight * 0.25
+        //         property real _margins: ScreenTools.defaultFontPixelHeight * 0.25
 
-                QGCLabel {
-                    id:                 additionalErrorsLabel
-                    anchors.centerIn:   parent
-                    text:               qsTr("Additional errors received")
-                    font.pointSize:     ScreenTools.smallFontPointSize
-                    color:              qgcPal.alertText
-                }
-            }
+        //         QGCLabel {
+        //             id:                 additionalErrorsLabel
+        //             anchors.centerIn:   parent
+        //             text:               qsTr("Additional errors received")
+        //             font.pointSize:     ScreenTools.smallFontPointSize
+        //             color:              qgcPal.alertText
+        //         }
+        //     }
         }
 
         QGCLabel {
@@ -641,6 +648,7 @@ ApplicationWindow {
     //-- Indicator Popups
 
     function showIndicatorPopup(item, dropItem, dim = true) {
+        criticalVehicleMessagePopup.close()
         indicatorPopup.currentIndicator = dropItem
         indicatorPopup.currentItem = item
         indicatorPopup.dim = dim

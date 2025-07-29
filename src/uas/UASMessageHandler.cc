@@ -191,9 +191,13 @@ void UASMessageHandler::handleTextMessage(int, int compId, int severity, QString
     UASMessage* message = new UASMessage(compId, severity, text);
     QString compString;
     if (_multiComp) {
-        compString = QString(" COMP:%1").arg(compId);
+        compString = QString("COMP:%1").arg(compId);
+        message->_setFormatedText(QString("<font style=\"%1\">%2 %3</font><br/>").arg(style).arg(compString).arg(text));
     }
-    message->_setFormatedText(QString("<font style=\"%1\">[%2%3]%4 %5</font><br/>").arg(style).arg(dateString).arg(compString).arg(severityText).arg(text));
+    else 
+    {
+        message->_setFormatedText(QString("<font style=\"%1\">%2</font><br/>").arg(style).arg(text));
+    }
 
     _mutex.unlock();
 

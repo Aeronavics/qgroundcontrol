@@ -151,6 +151,37 @@ Rectangle {
 
         Row {
             spacing: 20
+
+            Rectangle {
+                Layout.alignment:   Qt.AlignHCenter
+                color:              Qt.rgba(0,0,0,0)
+                width:              ScreenTools.defaultFontPixelWidth * 8
+                height:             width
+                radius:             width * 0.5
+                border.color:       qgcPal.buttonText
+                border.width:       3
+
+                QGCColoredImage {
+                    id:                 changeCameraButton
+                    height:             parent.height * 0.65
+                    width:              height
+                    anchors.centerIn:   parent
+                    source:             "/qmlimages/video_swap.svg"
+                    fillMode:           Image.PreserveAspectFit
+                    sourceSize.height:  height
+                    color:              _streamChangeCooldownClear && _videoStreamManager.decoding ? qgcPal.colorGrey : qgcPal.colorWhite
+                }
+
+                MouseArea {
+                    anchors.fill:   parent
+                    enabled:        _canShootInCurrentMode
+                    onClicked:      toggleCamera()
+                }
+            }
+        }
+
+        Row {
+            spacing: 20
             // Take Photo, Start/Stop Video button
             // IMPORTANT: This control supports both mavlink cameras and simple video streams. Do no reference anything here which is not
             // using the unified properties/functions.
@@ -178,34 +209,6 @@ Rectangle {
                     anchors.fill:   parent
                     enabled:        _canShootInCurrentMode
                     onClicked:      toggleShooting()
-                }
-            }
-
-
-            Rectangle {
-                Layout.alignment:   Qt.AlignHCenter
-                color:              Qt.rgba(0,0,0,0)
-                width:              ScreenTools.defaultFontPixelWidth * 8
-                height:             width
-                radius:             width * 0.5
-                border.color:       qgcPal.buttonText
-                border.width:       3
-
-                QGCColoredImage {
-                    id:                 changeCameraButton
-                    height:             parent.height * 0.65
-                    width:              height
-                    anchors.centerIn:   parent
-                    source:             "/qmlimages/video_swap.svg"
-                    fillMode:           Image.PreserveAspectFit
-                    sourceSize.height:  height
-                    color:              _streamChangeCooldownClear && _videoStreamManager.decoding ? qgcPal.colorGrey : qgcPal.colorWhite
-                }
-
-                MouseArea {
-                    anchors.fill:   parent
-                    enabled:        _canShootInCurrentMode
-                    onClicked:      toggleCamera()
                 }
             }
         }

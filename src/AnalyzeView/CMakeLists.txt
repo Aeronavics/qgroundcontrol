@@ -31,7 +31,8 @@ add_custom_target(AnalyzeViewQml
 		AnalyzePage.qml
 		AnalyzeView.qml
 		GeoTagPage.qml
-		LogDownloadPage.qml
+		DFLogDownloadPage.qml
+
 		MavlinkConsolePage.qml
 		MAVLinkInspectorPage.qml
 		VibrationPage.qml

@@ -206,7 +206,8 @@ void MAVLinkProtocol::receiveBytes(LinkInterface* link, QByteArray b)
     uint8_t mavlinkChannel = link->mavlinkChannel();
 
     for (int position = 0; position < b.size(); position++) {
-        if (mavlink_parse_char(mavlinkChannel, static_cast<uint8_t>(b[position]), &_message, &_status)) {
+        uint8_t test = mavlink_parse_char(mavlinkChannel, static_cast<uint8_t>(b[position]), &_message, &_status);
+        if (test || _message.msgid == 5017) {
             // Got a valid message
             if (!link->decodedFirstMavlinkPacket()) {
                 link->setDecodedFirstMavlinkPacket(true);

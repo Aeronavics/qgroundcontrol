@@ -42,7 +42,6 @@ Item {
             (generator.status.rawValue & MAVLink.MAV_GENERATOR_STATUS_FLAG_BATTERY_OVERCHARGE_CURRENT_FAULT) ||
             (generator.status.rawValue & MAVLink.MAV_GENERATOR_STATUS_FLAG_OVERVOLTAGE_FAULT) ||
             (generator.status.rawValue & MAVLink.MAV_GENERATOR_STATUS_FLAG_BATTERY_UNDERVOLT_FAULT) ||
-            (generator.status.rawValue & MAVLink.MAV_GENERATOR_STATUS_FLAG_START_INHIBITED) ||
             (generator.status.rawValue & MAVLink.MAV_GENERATOR_STATUS_FLAG_OFF)
         ) {
             return qgcPal.colorRed
@@ -61,9 +60,9 @@ Item {
         }
         else if (
             (generator.status.rawValue & MAVLink.MAV_GENERATOR_STATUS_FLAG_READY) ||
-                 (generator.status.rawValue & MAVLink.MAV_GENERATOR_STATUS_FLAG_GENERATING) ||
-                 (generator.status.rawValue & MAVLink.MAV_GENERATOR_STATUS_FLAG_CHARGING) ||
-                 (generator.status.rawValue & MAVLink.MAV_GENERATOR_STATUS_FLAG_IDLE)
+            (generator.status.rawValue & MAVLink.MAV_GENERATOR_STATUS_FLAG_GENERATING) ||
+            (generator.status.rawValue & MAVLink.MAV_GENERATOR_STATUS_FLAG_CHARGING) ||
+            (generator.status.rawValue & MAVLink.MAV_GENERATOR_STATUS_FLAG_IDLE)
         ) {
             return qgcPal.text
         }
@@ -71,6 +70,16 @@ Item {
             return qgcPal.colorRed
         }
     }
+
+    function getGeneratorIcon() {
+        if (generator.status.rawValue & MAVLink.MAV_GENERATOR_STATUS_FLAG_START_INHIBITED) {
+            return "/qmlimages/engine.svg"
+        }
+        else {
+            return "/qmlimages/engine-powered.svg"
+        }
+    }
+    
 
     Row {
         id:             generatorRow
@@ -83,7 +92,7 @@ Item {
             anchors.bottom:     parent.bottom
             width:              height
             sourceSize.width:   width
-            source:             "/qmlimages/engine.svg"
+            source:             getGeneratorIcon()
             fillMode:           Image.PreserveAspectFit
             color:              getGeneratorColor()
         }
@@ -143,21 +152,21 @@ Item {
                         ColumnLayout {
                             spacing: 0
                             QGCLabel { text:
-                                    (generator.status.rawValue & MAVLink.MAV_GENERATOR_STATUS_FLAG_OFF) === MAVLink.MAV_GENERATOR_STATUS_FLAG_OFF ? qsTr("OFF") :
-                                        ((generator.status.rawValue & MAVLink.MAV_GENERATOR_STATUS_FLAG_WARMING_UP) === MAVLink.MAV_GENERATOR_STATUS_FLAG_WARMING_UP ? qsTr("Warming Up") :
-                                        (((generator.status.rawValue & MAVLink.MAV_GENERATOR_STATUS_FLAG_GENERATING) === MAVLink.MAV_GENERATOR_STATUS_FLAG_GENERATING) || ((generator.status.rawValue & MAVLink.MAV_GENERATOR_STATUS_FLAG_IDLE) === MAVLink.MAV_GENERATOR_STATUS_FLAG_IDLE) ? qsTr("Running") :
-                                        ((generator.status.rawValue & MAVLink.MAV_GENERATOR_STATUS_FLAG_START_INHIBITED) === MAVLink.MAV_GENERATOR_STATUS_FLAG_START_INHIBITED ? qsTr("Inhibited"):
-                                        qsTr("Unknown"))));
+                                (generator.status.rawValue & MAVLink.MAV_GENERATOR_STATUS_FLAG_OFF) === MAVLink.MAV_GENERATOR_STATUS_FLAG_OFF ? qsTr("OFF") :
+                                ((generator.status.rawValue & MAVLink.MAV_GENERATOR_STATUS_FLAG_WARMING_UP) === MAVLink.MAV_GENERATOR_STATUS_FLAG_WARMING_UP ? qsTr("Warming Up") :
+                                (((generator.status.rawValue & MAVLink.MAV_GENERATOR_STATUS_FLAG_GENERATING) === MAVLink.MAV_GENERATOR_STATUS_FLAG_GENERATING) || ((generator.status.rawValue & MAVLink.MAV_GENERATOR_STATUS_FLAG_IDLE) === MAVLink.MAV_GENERATOR_STATUS_FLAG_IDLE) ? qsTr("Running") :
+                                ((generator.status.rawValue & MAVLink.MAV_GENERATOR_STATUS_FLAG_START_INHIBITED) === MAVLink.MAV_GENERATOR_STATUS_FLAG_START_INHIBITED ? qsTr("Inhibited"):
+                                qsTr("Unknown"))));
                             }
                             QGCLabel { text:
-                                    (generator.status.rawValue & MAVLink.MAV_GENERATOR_STATUS_FLAG_OVERTEMP_WARNING) === MAVLink.MAV_GENERATOR_STATUS_FLAG_OVERTEMP_WARNING ? qsTr("Engine Over Temp") :
-                                        ((generator.status.rawValue & MAVLink.MAV_GENERATOR_STATUS_FLAG_REDUCED_POWER) === MAVLink.MAV_GENERATOR_STATUS_FLAG_REDUCED_POWER ? qsTr("Reduced Power") :
-                                        ((generator.status.rawValue & MAVLink.MAV_GENERATOR_STATUS_FLAG_ELECTRONICS_OVERTEMP_WARNING) === MAVLink.MAV_GENERATOR_STATUS_FLAG_ELECTRONICS_OVERTEMP_WARNING ? qsTr("Coil Over Temp") :
-                                        ((generator.status.rawValue & MAVLink.MAV_GENERATOR_STATUS_FLAG_COMMUNICATION_WARNING) === MAVLink.MAV_GENERATOR_STATUS_FLAG_COMMUNICATION_WARNING ? qsTr("Communication Error") :
-                                        ((generator.status.rawValue & MAVLink.MAV_GENERATOR_STATUS_FLAG_OVERCURRENT_FAULT) === MAVLink.MAV_GENERATOR_STATUS_FLAG_OVERCURRENT_FAULT ? qsTr("Over Current") :
-                                        ((generator.status.rawValue & MAVLink.MAV_GENERATOR_STATUS_FLAG_OVERVOLTAGE_FAULT) === MAVLink.MAV_GENERATOR_STATUS_FLAG_OVERVOLTAGE_FAULT ? qsTr("Over Voltage") :
-                                        ((generator.status.rawValue & MAVLink.MAV_GENERATOR_STATUS_FLAG_MAINTENANCE_REQUIRED) === MAVLink.MAV_GENERATOR_STATUS_FLAG_MAINTENANCE_REQUIRED ? qsTr("Maintainance required") :
-                                        qsTr("None")))))));
+                                (generator.status.rawValue & MAVLink.MAV_GENERATOR_STATUS_FLAG_OVERTEMP_WARNING) === MAVLink.MAV_GENERATOR_STATUS_FLAG_OVERTEMP_WARNING ? qsTr("Engine Over Temp") :
+                                ((generator.status.rawValue & MAVLink.MAV_GENERATOR_STATUS_FLAG_REDUCED_POWER) === MAVLink.MAV_GENERATOR_STATUS_FLAG_REDUCED_POWER ? qsTr("Reduced Power") :
+                                ((generator.status.rawValue & MAVLink.MAV_GENERATOR_STATUS_FLAG_ELECTRONICS_OVERTEMP_WARNING) === MAVLink.MAV_GENERATOR_STATUS_FLAG_ELECTRONICS_OVERTEMP_WARNING ? qsTr("Coil Over Temp") :
+                                ((generator.status.rawValue & MAVLink.MAV_GENERATOR_STATUS_FLAG_COMMUNICATION_WARNING) === MAVLink.MAV_GENERATOR_STATUS_FLAG_COMMUNICATION_WARNING ? qsTr("Communication Error") :
+                                ((generator.status.rawValue & MAVLink.MAV_GENERATOR_STATUS_FLAG_OVERCURRENT_FAULT) === MAVLink.MAV_GENERATOR_STATUS_FLAG_OVERCURRENT_FAULT ? qsTr("Over Current") :
+                                ((generator.status.rawValue & MAVLink.MAV_GENERATOR_STATUS_FLAG_OVERVOLTAGE_FAULT) === MAVLink.MAV_GENERATOR_STATUS_FLAG_OVERVOLTAGE_FAULT ? qsTr("Over Voltage") :
+                                ((generator.status.rawValue & MAVLink.MAV_GENERATOR_STATUS_FLAG_MAINTENANCE_REQUIRED) === MAVLink.MAV_GENERATOR_STATUS_FLAG_MAINTENANCE_REQUIRED ? qsTr("Maintainance required") :
+                                qsTr("None")))))));
                             }
                             QGCLabel { text: generator.voltage.valueString + " " + generator.voltage.units }
                             QGCLabel { text: generator.current.valueString + " " + generator.current.units }

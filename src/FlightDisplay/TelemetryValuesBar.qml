@@ -23,6 +23,7 @@ Rectangle {
     color:              qgcPal.window
     radius:             ScreenTools.defaultFontPixelWidth / 2
 
+
     property bool       bottomMode: true
 
     DeadMouseArea { anchors.fill: parent }

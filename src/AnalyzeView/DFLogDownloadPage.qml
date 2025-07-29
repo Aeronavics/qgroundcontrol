@@ -19,9 +19,9 @@ import QGroundControl.Controllers   1.0
 import QGroundControl.ScreenTools   1.0
 
 AnalyzePage {
-    id:                 logDownloadPage
+    id:                 dfLogDownloadPage
     pageComponent:      pageComponent
-    pageDescription:    qsTr("Log Download allows you to download binary log files from your vehicle. Click Refresh to get list of available logs.")
+    pageDescription:    qsTr("Download and manage log files from your vehicle.")
 
     property real _margin:          ScreenTools.defaultFontPixelWidth
     property real _butttonWidth:    ScreenTools.defaultFontPixelWidth * 10
@@ -36,11 +36,11 @@ AnalyzePage {
             height: availableHeight
 
             Connections {
-                target: logController
+                target: dflogController
                 onSelectionChanged: {
                     tableView.selection.clear()
-                    for(var i = 0; i < logController.model.count; i++) {
-                        var o = logController.model.get(i)
+                    for(var i = 0; i < dflogController.model.count; i++) {
+                        var o = dflogController.model.get(i)
                         if (o && o.selected) {
                             tableView.selection.select(i, i)
                         }
@@ -51,19 +51,19 @@ AnalyzePage {
             TableView {
                 id: tableView
                 Layout.fillHeight:  true
-                model:              logController.model
+                model:              dflogController.model
                 selectionMode:      SelectionMode.MultiSelection
                 Layout.fillWidth:   true
 
                 TableViewColumn {
-                    title: qsTr("Id")
+                    title: qsTr("ID")
                     width: ScreenTools.defaultFontPixelWidth * 6
                     horizontalAlignment: Text.AlignHCenter
                     delegate : Text  {
                         color: styleData.textColor
                         horizontalAlignment: Text.AlignHCenter
                         text: {
-                            var o = logController.model.get(0)
+                            var o = dflogController.model.get(0)
                             return o ? o.id : ""
                         }
                     }
@@ -76,11 +76,11 @@ AnalyzePage {
                     delegate: Text  {
                         color: styleData.textColor
                         text: {
-                            var o = logController.model.get(styleData.row)
+                            var o = dflogController.model.get(0)
                             if (o) {
                                 //-- Have we received this entry already?
-                                if(logController.model.get(styleData.row).received) {
-                                    var d = logController.model.get(styleData.row).time
+                                if(o.received) {
+                                    var d = o.time
                                     if(d.getUTCFullYear() < 2010)
                                         return qsTr("Date Unknown")
                                     else
@@ -100,7 +100,7 @@ AnalyzePage {
                         color: styleData.textColor
                         horizontalAlignment: Text.AlignRight
                         text: {
-                            var o = logController.model.get(styleData.row)
+                            var o = dflogController.model.get(0)
                             return o ? o.sizeStr : ""
                         }
                     }
@@ -114,7 +114,7 @@ AnalyzePage {
                         color: styleData.textColor
                         horizontalAlignment: Text.AlignHCenter
                         text: {
-                            var o = logController.model.get(styleData.row)
+                            var o = dflogController.model.get(0)
                             return o ? o.status : ""
                         }
                     }
@@ -124,65 +124,71 @@ AnalyzePage {
                 spacing:            _margin
                 Layout.alignment:   Qt.AlignTop | Qt.AlignLeft
                 QGCButton {
-                    enabled:    !logController.requestingList && !logController.downloadingLogs
+                    enabled:    !dflogController.requestingList && !dflogController.downloadingLogs
                     text:       qsTr("Refresh")
                     width:      _butttonWidth
                     onClicked: {
-                        if (!QGroundControl.multiVehicleManager.activeVehicle || QGroundControl.multiVehicleManager.activeVehicle.isOfflineEditingVehicle) {
-                            mainWindow.showMessageDialog(qsTr("Log Refresh"), qsTr("You must be connected to a vehicle in order to download logs."))
-                        } else {
-                            logController.refresh()
-                        }
+                        // if (!QGroundControl.multiVehicleManager.activeVehicle || QGroundControl.multiVehicleManager.activeVehicle.isOfflineEditingVehicle) {
+                        //     mainWindow.showMessageDialog(qsTr("Log Refresh"), qsTr("You must be connected to a vehicle in order to download logs."))
+                        // } else {
+                            dflogController.refresh()
+                        // }
                     }
                 }
                 QGCButton {
-                    enabled:    !logController.requestingList && !logController.downloadingLogs && tableView.selection.count > 0
+                    enabled:    !dflogController.requestingList && tableView.selection.count > 0
                     text:       qsTr("Download")
                     width:      _butttonWidth
                     onClicked: {
                         //-- Clear selection
-                        for(var i = 0; i < logController.model.count; i++) {
-                            var o = logController.model.get(i)
+                        for(var i = 0; i < dflogController.model.count; i++) {
+                            var o = dflogController.model.get(i)
                             if (o) o.selected = false
                         }
                         //-- Flag selected log files
                         tableView.selection.forEach(function(rowIndex){
-                            var o = logController.model.get(rowIndex)
+                            var o = dflogController.model.get(rowIndex)
                             if (o) o.selected = true
                         })
-                        if (ScreenTools.isMobile) {
-                            // You can't pick folders in mobile, only default location is used
-                            logController.download()
-                        } else {
-                            fileDialog.title =          qsTr("Select save directory")
-                            fileDialog.selectExisting = true
-                            fileDialog.folder =         QGroundControl.settingsManager.appSettings.logSavePath
-                            fileDialog.selectFolder =   true
-                            fileDialog.openForLoad()
-                        }
-                    }
-                    QGCFileDialog {
-                        id: fileDialog
-                        onAcceptedForLoad: {
-                            logController.download(file)
-                            close()
-                        }
+                        mainWindow.showMessageDialog(
+                            qsTr("Download Selected Log Files"),
+                            qsTr("All selected log files will downloaded. Are you sure?"),
+                            StandardButton.Yes | StandardButton.No,
+                            function() { dflogController.queueForDownload() }
+                        )
                     }
                 }
                 QGCButton {
-                    enabled:    !logController.requestingList && !logController.downloadingLogs && logController.model.count > 0
+                    enabled:    !dflogController.requestingList && !dflogController.downloadingLogs && tableView.selection.count > 0
+                    text:       qsTr("Erase")
+                    width:      _butttonWidth
+                    onClicked: {
+                        //-- Clear selection
+                        for(var i = 0; i < dflogController.model.count; i++) {
+                            var o = dflogController.model.get(i)
+                            if (o) o.selected = false
+                        }
+                        //-- Flag selected log files
+                        tableView.selection.forEach(function(rowIndex){
+                            var o = dflogController.model.get(rowIndex)
+                            if (o) o.selected = true
+                        })
+                        mainWindow.showMessageDialog(
+                            qsTr("Delete Selected Log Files"),
+                            qsTr("All selected log files will be erased permanently. Are you sure?"),
+                            StandardButton.Yes | StandardButton.No,
+                            function() { dflogController.erase() }
+                        )
+                    }
+                }
+                QGCButton {
+                    enabled:    !dflogController.requestingList && !dflogController.downloadingLogs && dflogController.model.count > 0
                     text:       qsTr("Erase All")
                     width:      _butttonWidth
                     onClicked:  mainWindow.showMessageDialog(qsTr("Delete All Log Files"),
                                                              qsTr("All log files will be erased permanently. Is this really what you want?"),
                                                              StandardButton.Yes | StandardButton.No,
-                                                             function() { logController.eraseAll() })
-                }
-                QGCButton {
-                    text:       qsTr("Cancel")
-                    width:      _butttonWidth
-                    enabled:    logController.requestingList || logController.downloadingLogs
-                    onClicked:  logController.cancel()
+                                                             function() { dflogController.eraseAll() })
                 }
             }
         }

@@ -133,7 +133,7 @@ Item {
         id:                     photoVideoControl
         anchors.margins:        _toolsMargin
         anchors.right:          parent.right
-        width:                  _rightPanelWidth
+        width:                  _rightPanelWidth / 3
 
         property real rightEdgeCenterInset: visible ? parent.width - x : 0
 
@@ -164,6 +164,7 @@ Item {
         id:                 telemetryPanel
         x:                  recalcXPosition()
         anchors.margins:    _toolsMargin
+        z:                  QGroundControl.zOrderTopMost + 1
 
         property real bottomEdgeCenterInset: 0
         property real rightEdgeCenterInset: 0
@@ -233,13 +234,7 @@ Item {
             var halfPanelWidth  = telemetryPanel.width / 2
             var leftX           = (halfRootWidth - halfPanelWidth) - _toolsMargin
             var rightX          = (halfRootWidth + halfPanelWidth) + _toolsMargin
-            if (leftX >= parentToolInsets.leftEdgeBottomInset || rightX <= parentToolInsets.rightEdgeBottomInset ) {
-                // It will fit in the horizontalCenter
-                return halfRootWidth - halfPanelWidth
-            } else {
-                // Anchor to left edge
-                return parentToolInsets.leftEdgeBottomInset + _toolsMargin
-            }
+            return halfRootWidth - halfPanelWidth
         }
     }
 

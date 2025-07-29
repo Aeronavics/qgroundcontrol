@@ -7,6 +7,8 @@ SOURCES
     APMCameraSubComponent.qml
     APMFlightModesComponent.qml
     APMFlightModesComponentSummary.qml
+    APMGeneratorComponent.qml
+    APMGeneratorComponentSummary.qml
     APMHeliComponent.qml
     APMLightsComponent.qml
     APMLightsComponentSummary.qml

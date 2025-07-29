@@ -69,7 +69,7 @@ Slider {
             implicitHeight: _radius * 2
             radius:         _radius
 
-            property real _radius: Math.round(_root.implicitHeight / 2)
+            property real _radius: Math.round(_root.implicitHeight / 5)
 
             Label {
                 text:               _root.value.toFixed( _root.maximumValue <= 1 ? 1 : 0)

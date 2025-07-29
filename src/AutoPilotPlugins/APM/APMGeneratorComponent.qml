@@ -35,7 +35,7 @@ SetupPage {
             QGCPalette { id: ggcPal; colorGroupEnabled: true }
 
             property Fact _generator:                       controller.getParameterFact(-1, "GEN_TYPE")
-            property bool _generatorEnabled:                _generator.rawValue == 4
+            property bool _generatorEnabled:                _generator.rawValue === 4
 
             property Fact _generatorLowFS:                  controller.getParameterFact(-1, "GEN_LOW_FS", false /* reportMissing */)
             property Fact _generatorCritFS:                 controller.getParameterFact(-1, "GEN_CRIT_FS", false /* reportMissing */)
@@ -59,28 +59,28 @@ SetupPage {
                         columns:        2
                         QGCLabel { text: qsTr("Low Fuel Failsafe:") }
                         FactComboBox {
-                            fact:               _generatorLowFS
+                            fact:               generatorLowFS
                             indexModel:         false
                             Layout.fillWidth:   true
                         }
 
                         QGCLabel { text: qsTr("Critical Fuel Failsafe:") }
                         FactComboBox {
-                            fact:               _generatorCritFS
+                            fact:               generatorCritFS
                             indexModel:         false
                             Layout.fillWidth:   true
                         }
 
                         QGCLabel { text: qsTr("Power Loss Failsafe:") }
                         FactComboBox {
-                            fact:               _generatorOffFS
+                            fact:               generatorOffFS
                             indexModel:         false
                             Layout.fillWidth:   true
                         }
 
                         QGCLabel { text: qsTr("Error Failsafe:") }
                         FactComboBox {
-                            fact:               _generatorErrorFS
+                            fact:               generatorErrorFS
                             indexModel:         false
                             Layout.fillWidth:   true
                         }
@@ -108,6 +108,11 @@ SetupPage {
                         anchors.top:        parent.top
                         anchors.left:       parent.left
                         sourceComponent:    generatorComponent
+
+                        property Fact generatorLowFS:   _generatorLowFS
+                        property Fact generatorCritFS:  _generatorCritFS
+                        property Fact generatorOffFS:   _generatorOffFS
+                        property Fact generatorErrorFS: _generatorErrorFS
                     }
                 } // Rectangle
             } // Column - generator Settings

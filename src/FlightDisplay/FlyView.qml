@@ -79,7 +79,7 @@ Item {
         anchors.bottom:         parent.bottom
         anchors.left:           parent.left
         anchors.right:          guidedValueSlider.visible ? guidedValueSlider.left : parent.right
-        z:                      _fullItemZorder + 1
+        z:                      _pipItemZorder + 1
         parentToolInsets:       _toolInsets
         mapControl:             _mapControl
         visible:                !QGroundControl.videoManager.fullScreen
@@ -89,7 +89,7 @@ Item {
     FlyViewCustomLayer {
         id:                 customOverlay
         anchors.fill:       widgetLayer
-        z:                  _fullItemZorder + 2
+        z:                  _fullItemZorder - 1
         parentToolInsets:   widgetLayer.totalToolInsets
         mapControl:         _mapControl
         visible:            !QGroundControl.videoManager.fullScreen
@@ -162,15 +162,15 @@ Item {
         id: videoControl
     }
 
-    PhotoVideoControl {
-        id:                     otherPhotoVideoControl
-        anchors.margins:        ScreenTools.defaultFontPixelWidth * 0.75
-        anchors.right:          parent.right
-        width:                  ScreenTools.defaultFontPixelWidth * 30
-        anchors.top:            undefined
-        anchors.verticalCenter: _root.verticalCenter
-        visible:                QGroundControl.videoManager.fullscreen
-    }
+    // PhotoVideoControl {
+    //     id:                     otherPhotoVideoControl
+    //     anchors.margins:        ScreenTools.defaultFontPixelWidth * 0.75
+    //     anchors.right:          parent.right
+    //     width:                  ScreenTools.defaultFontPixelWidth * 10
+    //     anchors.top:            undefined
+    //     anchors.verticalCenter: _root.verticalCenter
+    //     visible:                QGroundControl.videoManager.fullscreen
+    // }
 
     QGCPipOverlay {
         id:                     _pipOverlay
