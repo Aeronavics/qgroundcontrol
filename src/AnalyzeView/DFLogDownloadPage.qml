@@ -63,7 +63,7 @@ AnalyzePage {
                         color: styleData.textColor
                         horizontalAlignment: Text.AlignHCenter
                         text: {
-                            var o = dflogController.model.get(0)
+                            var o = dflogController.model.get(styleData.row)
                             return o ? o.id : ""
                         }
                     }
@@ -75,17 +75,12 @@ AnalyzePage {
                     horizontalAlignment: Text.AlignHCenter
                     delegate: Text  {
                         color: styleData.textColor
+                        horizontalAlignment: Text.AlignHCenter
                         text: {
-                            var o = dflogController.model.get(0)
+                            var o = dflogController.model.get(styleData.row)
                             if (o) {
-                                //-- Have we received this entry already?
-                                if(o.received) {
-                                    var d = o.time
-                                    if(d.getUTCFullYear() < 2010)
-                                        return qsTr("Date Unknown")
-                                    else
-                                        return d.toLocaleString(undefined, "short")
-                                }
+                                var d = o.time
+                                return d.toLocaleString(undefined, "short")
                             }
                             return ""
                         }
@@ -98,9 +93,9 @@ AnalyzePage {
                     horizontalAlignment: Text.AlignHCenter
                     delegate : Text  {
                         color: styleData.textColor
-                        horizontalAlignment: Text.AlignRight
+                        horizontalAlignment: Text.AlignHCenter
                         text: {
-                            var o = dflogController.model.get(0)
+                            var o = dflogController.model.get(styleData.row)
                             return o ? o.sizeStr : ""
                         }
                     }
@@ -114,7 +109,7 @@ AnalyzePage {
                         color: styleData.textColor
                         horizontalAlignment: Text.AlignHCenter
                         text: {
-                            var o = dflogController.model.get(0)
+                            var o = dflogController.model.get(styleData.row)
                             return o ? o.status : ""
                         }
                     }

@@ -315,7 +315,7 @@ QString
 QGCMapEngine::bigSizeToString(quint64 size)
 {
     if(size < 1024)
-        return kLocale.toString(size);
+        return kLocale.toString(size) + "B";
     else if(size < 1024 * 1024)
         return kLocale.toString(static_cast<double>(size) / 1024.0, 'f', 1) + "kB";
     else if(size < 1024 * 1024 * 1024)

@@ -33,20 +33,37 @@ QGC_LOGGING_CATEGORY(DFLogDownloadLog, "DFLogDownloadLog")
 
 
 //----------------------------------------------------------------------------------------
-QGCDFLogEntry::QGCDFLogEntry(uint logId, const QDateTime& dateTime, uint logSize, bool received)
-    : _logID(logId)
-    , _logSize(logSize)
-    , _logTimeUTC(dateTime)
-    , _received(received)
-    , _selected(false)
+QGCDFLogEntry::QGCDFLogEntry(QString logId, const QDateTime& dateTime, uint logSize)
 {
+    _logID = logId;
+    _logSize = logSize;
+    _logTimeUTC = dateTime;
+    _received = false;
+    _selected = false;
     _status = tr("");
+    _downloading = false;
+    _queuedDownload = false;
+    _isDownloaded = false;
+
+
+    QString dowloaded_path =qgcApp()->toolbox()->settingsManager()->appSettings()->logSavePath();
+    if(!dowloaded_path.endsWith(QDir::separator())) {
+        dowloaded_path += QDir::separator();
+    }
+    dowloaded_path += _logID + ".BIN";
+
+    if (QFile::exists(dowloaded_path))
+    {
+        _status = tr("Downloaded");
+        _isDownloaded = true;
+    }
+
 }
 
 
 //----------------------------------------------------------------------------------------
 QString
-QGCDFLogEntry::sizeStr() const
+QGCDFLogEntry::sizeStr()
 {
     return QGCMapEngine::bigSizeToString(_logSize);
 }
@@ -70,47 +87,46 @@ DFLogDownloadController::refresh(void)
 {
     QNetworkAccessManager *manager = new QNetworkAccessManager(this);
     QNetworkRequest request(QUrl("http://192.168.144.1/log"));
-    QNetworkReply *reply = manager->get(request);
-    QObject::connect(reply, &QNetworkReply::readyRead, [&]() {
-        QJsonDocument jsonDoc = QJsonDocument::fromJson(reply->readAll());
-        if (jsonDoc.isArray()) {
-            _logEntriesModel.clear();
-            QJsonArray log_list = jsonDoc.array();
-            for(int i = 0; i < log_list.size(); i++)
-            {
-                QJsonObject logItem = log_list.at(i).toObject();
-                QDateTime logTime = QDateTime::fromSecsSinceEpoch((int)logItem.value("date").toDouble());
-                QGCDFLogEntry logEntry = QGCDFLogEntry(logItem.value("id").toInt(), logTime, logItem.value("size").toInt());
-                _logEntriesModel.append(&logEntry);
-            }
-        }
-    });
-    QObject::connect(reply, &QNetworkReply::finished, [&]() {
+    manager->get(request);
+    QObject::connect(manager, &QNetworkAccessManager::finished, this, [=](QNetworkReply *reply) {
         if (reply->error() == QNetworkReply::NoError) {
+            QByteArray response = reply->readAll();
+            QJsonDocument jsonDoc = QJsonDocument::fromJson(response);
+            if (jsonDoc.isArray()) {
+                _logEntriesModel.clear();
+                QJsonArray log_list = jsonDoc.array();
+                for(int i = 0; i < log_list.size(); i++)
+                {
+                    QJsonObject logItem = log_list.at(i).toObject();
+                    QDateTime logTime = QDateTime::fromSecsSinceEpoch(logItem.value("date").toDouble());
+                    QGCDFLogEntry* logEntry = new QGCDFLogEntry(QString::number(logItem.value("id").toInt()), logTime, logItem.value("size").toInt());
+                    _logEntriesModel.append(logEntry);
+                }
+            }
             qDebug() << "Request finished successfully";
         } else {
             qDebug() << "Error:" << reply->errorString();
+            qDebug() << "Error:" << reply->error();
         }
         reply->deleteLater(); // Ensure the reply object is deleted
     });
 }
 
-
 //----------------------------------------------------------------------------------------
 void
 DFLogDownloadController::_delete(QGCDFLogEntry* entry)
 {
-    QNetworkAccessManager manager;
-    QNetworkRequest request(QUrl("192.168.144.1/log/" + QString::number(entry->id())));
-    QNetworkReply *reply = manager.deleteResource(request);
-    QObject::connect(reply, &QNetworkReply::finished, [&]() {
+    QNetworkAccessManager *manager = new QNetworkAccessManager(this);
+    QNetworkRequest request(QUrl("http://192.168.144.1/log/" + entry->id()));
+    manager->deleteResource(request);
+    QObject::connect(manager, &QNetworkAccessManager::finished, [=](QNetworkReply *reply) {
         if (reply->error() == QNetworkReply::NoError) {
-            
             qDebug() << "Request finished successfully";
         } else {
             qDebug() << "Error:" << reply->errorString();
         }
         reply->deleteLater(); // Ensure the reply object is deleted
+        refresh();
     });
 }
 
@@ -137,18 +153,18 @@ DFLogDownloadController::erase()
 void
 DFLogDownloadController::eraseAll(void)
 {
-    QNetworkAccessManager manager;
-    QNetworkRequest request(QUrl("192.168.144.1/log"));
-    QNetworkReply *reply = manager.deleteResource(request);
-    QObject::connect(reply, &QNetworkReply::finished, [&]() {
+    QNetworkAccessManager *manager = new QNetworkAccessManager(this);
+    QNetworkRequest request(QUrl("http://192.168.144.1/log"));
+    manager->deleteResource(request);
+    QObject::connect(manager, &QNetworkAccessManager::finished, [=](QNetworkReply *reply) {
         if (reply->error() == QNetworkReply::NoError) {
             qDebug() << "Request finished successfully";
         } else {
             qDebug() << "Error:" << reply->errorString();
         }
         reply->deleteLater(); // Ensure the reply object is deleted
+        refresh();
     });
-    refresh();
 }
 
 
@@ -159,13 +175,14 @@ DFLogDownloadController::download(QGCDFLogEntry* entry)
     entry->setQueued(false);
     entry->setDownloading(true);
     _downloadInProgress = true;
-    QNetworkAccessManager manager;
-    QNetworkRequest request(QUrl("192.168.144.1/log/" + QString::number(entry->id())));
-    _reply = manager.get(request); // Manager is my QNetworkAccessManager
+    entry->setStatus("Downloading");
+    QNetworkAccessManager *manager = new QNetworkAccessManager(this);
+    QNetworkRequest request(QUrl("http://192.168.144.1/log/" + entry->id()));
+    _reply = manager->get(request); // Manager is my QNetworkAccessManager
     connect(_reply, SIGNAL(error(QNetworkReply::NetworkError)),
                 this, SLOT(error(QNetworkReply::NetworkError)));
-    connect(_reply, SIGNAL(downloadProgress(qint64, qint64)),
-                this, SLOT(updateProgress(qint64, qint64)));
+    connect(_reply, SIGNAL(downloadProgress(qint64,qint64)),
+                this, SLOT(updateProgress(qint64,qint64)));
     connect(_reply, SIGNAL(finished()),
                 this, SLOT(downloadFinished()));
 }
@@ -178,7 +195,7 @@ DFLogDownloadController::error(QNetworkReply::NetworkError err)
     // Manage error here.
     QGCDFLogEntry* entry = _getDownloading();
     entry->setStatus("Error");
-    _reply->deleteLater();
+    // _reply->deleteLater();
 }
 
 
@@ -201,21 +218,28 @@ DFLogDownloadController::updateProgress(qint64 read, qint64 total)
 void
 DFLogDownloadController::downloadFinished()
 {
-    _downloadPath = qgcApp()->toolbox()->settingsManager()->appSettings()->logSavePath();
-    if(!_downloadPath.endsWith(QDir::separator())) {
-        _downloadPath += QDir::separator();
-    }
-
     QGCDFLogEntry* entry = _getDownloading();
-    QByteArray b = _reply->readAll();
-    QFile file(_downloadPath + QString::number(entry->id()) + ".bin");
-    file.open(QIODevice::WriteOnly);
-    QDataStream out(&file);
-    out << b;
+    if (_reply->error() == QNetworkReply::NoError) {
+        _downloadPath = qgcApp()->toolbox()->settingsManager()->appSettings()->logSavePath();
+        if(!_downloadPath.endsWith(QDir::separator())) {
+            _downloadPath += QDir::separator();
+        }
+        QByteArray b = _reply->readAll();
+        qDebug() << "byte array lenght" << b.length();
+        QFile file(_downloadPath + entry->id() + ".BIN");
+        file.open(QIODevice::WriteOnly);
+        QDataStream out(&file);
+        out << b;
+        entry->setStatus("Downloaded");
+        _downloadInProgress = false;
+        entry->setDownloading(false);
+    }
+    else {
+        qDebug() << "Error:" << _reply->errorString();
+        qDebug() << "Error:" << _reply->error();
+        entry->setStatus("Error");
+    }
     _reply->deleteLater();
-    entry->setStatus("Downloaded");
-    _downloadInProgress = false;
-    entry->setDownloading(false);
 
     checkForDownloads();
 }
@@ -282,8 +306,10 @@ DFLogDownloadController::queueForDownload()
         QGCDFLogEntry* entry = _logEntriesModel[i];
         if(entry) {
             if(entry->selected()) {
-               entry->setQueued(true);
-               entry->setStatus("Pending");
+                if (!entry->isDownloaded()) {
+                    entry->setQueued(true);
+                    entry->setStatus("Pending");
+                }
             }
         }
     }
@@ -304,6 +330,7 @@ QGCDFLogEntry*
 QGCDFLogModel::get(int index)
 {
     if (index < 0 || index >= _logEntries.count()) {
+        qDebug() << "returning nullptr";
         return nullptr;
     }
     return _logEntries[index];
@@ -322,7 +349,12 @@ QGCDFLogModel::count() const
 void
 QGCDFLogModel::append(QGCDFLogEntry* object)
 {
+    // _logEntries.append(object);
+    // emit countChanged();
+    beginInsertRows(QModelIndex(), rowCount(), rowCount());
+    QQmlEngine::setObjectOwnership(object, QQmlEngine::CppOwnership);
     _logEntries.append(object);
+    endInsertRows();
     emit countChanged();
 }
 
@@ -331,9 +363,19 @@ QGCDFLogModel::append(QGCDFLogEntry* object)
 void
 QGCDFLogModel::clear(void)
 {
-    if (!_logEntries.empty())
-    {
-        _logEntries.clear();
+    // if (!_logEntries.empty())
+    // {
+    //     _logEntries.clear();
+    //     emit countChanged();
+    // }
+    if(!_logEntries.isEmpty()) {
+        beginRemoveRows(QModelIndex(), 0, _logEntries.count());
+        while (_logEntries.count()) {
+            QGCDFLogEntry* entry = _logEntries.last();
+            if(entry) entry->deleteLater();
+            _logEntries.removeLast();
+        }
+        endRemoveRows();
         emit countChanged();
     }
 }

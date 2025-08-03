@@ -68,37 +68,40 @@ private:
 //-----------------------------------------------------------------------------
 class QGCDFLogEntry : public QObject {
     Q_OBJECT
-    Q_PROPERTY(uint         id              READ id                                 CONSTANT)
-    Q_PROPERTY(QDateTime    time            READ time                               NOTIFY timeChanged)
-    Q_PROPERTY(uint         size            READ size                               NOTIFY sizeChanged)
-    Q_PROPERTY(QString      sizeStr         READ sizeStr                            NOTIFY sizeChanged)
-    Q_PROPERTY(bool         received        READ received                           NOTIFY receivedChanged)
-    Q_PROPERTY(bool         selected        READ selected       WRITE setSelected   NOTIFY selectedChanged)
-    Q_PROPERTY(QString      status          READ status                             NOTIFY statusChanged)
-    Q_PROPERTY(bool         downloading     READ downloading                        NOTIFY statusChanged)
-    Q_PROPERTY(bool         queuedDownload  READ queuedDownload                     NOTIFY statusChanged)
 
 public:
-    QGCDFLogEntry(uint logId, const QDateTime& dateTime = QDateTime(), uint logSize = 0, bool received = false);
+    QGCDFLogEntry(QString logId, const QDateTime& dateTime = QDateTime(), uint logSize = 0);
 
-    uint        id              () const { return _logID; }
-    uint        size            () const { return _logSize; }
-    QString     sizeStr         () const;
-    QDateTime   time            () const { return _logTimeUTC; }
-    bool        received        () const { return _received; }
-    bool        selected        () const { return _selected; }
-    QString     status          () const { return _status; }
-    bool        downloading     () const { return _downloading; }
-    bool        queuedDownload  () const { return _queuedDownload; }
+    Q_PROPERTY(QString      id              READ id             WRITE setId)
+    Q_PROPERTY(QDateTime    time            READ time           WRITE setTime           NOTIFY timeChanged)
+    Q_PROPERTY(uint         size            READ size           WRITE setSize           NOTIFY sizeChanged)
+    Q_PROPERTY(QString      sizeStr         READ sizeStr                                NOTIFY sizeChanged)
+    Q_PROPERTY(bool         received        READ received       WRITE setReceived       NOTIFY receivedChanged)
+    Q_PROPERTY(bool         selected        READ selected       WRITE setSelected       NOTIFY selectedChanged)
+    Q_PROPERTY(QString      status          READ status         WRITE setStatus         NOTIFY statusChanged)
+    Q_PROPERTY(bool         downloading     READ downloading    WRITE setDownloading    NOTIFY statusChanged)
+    Q_PROPERTY(bool         queuedDownload  READ queuedDownload WRITE setQueued         NOTIFY statusChanged)
 
-    void        setId           (uint id_)          { _logID = id_; }
+    QString     id              () { return _logID; }
+    uint        size            () { return _logSize; }
+    QString     sizeStr         () ;
+    QDateTime   time            () { return _logTimeUTC; }
+    bool        received        () { return _received; }
+    bool        selected        () { return _selected; }
+    QString     status          () { return _status; }
+    bool        downloading     () { return _downloading; }
+    bool        queuedDownload  () { return _queuedDownload; }
+    bool        isDownloaded    () { return _isDownloaded; }
+
+    void        setId           (QString id_)       { _logID = id_; }
     void        setSize         (uint size_)        { _logSize = size_;     emit sizeChanged(); }
     void        setTime         (QDateTime date_)   { _logTimeUTC = date_;  emit timeChanged(); }
     void        setReceived     (bool rec_)         { _received = rec_;     emit receivedChanged(); }
     void        setSelected     (bool sel_)         { _selected = sel_;     emit selectedChanged(); }
     void        setStatus       (QString stat_)     { _status = stat_;      emit statusChanged(); }
-    void        setDownloading  (bool download_)    { _downloading = download_; emit statusChanged(); }
-    void        setQueued       (bool queue_)       { _queuedDownload = queue_; emit statusChanged(); }
+    void        setDownloading  (bool download_)    { _downloading = download_; emit downloadingChanged(); }
+    void        setQueued       (bool queue_)       { _queuedDownload = queue_; emit queuedChanged(); }
+    void        setDownloaded   (bool downloaded_)  { _isDownloaded = downloaded_; }
 
 signals:
     void        idChanged       ();
@@ -107,9 +110,11 @@ signals:
     void        receivedChanged ();
     void        selectedChanged ();
     void        statusChanged   ();
+    void        downloadingChanged();
+    void        queuedChanged   ();
 
 private:
-    uint        _logID;
+    QString     _logID;
     uint        _logSize;
     QDateTime   _logTimeUTC;
     bool        _received;
@@ -117,6 +122,7 @@ private:
     QString     _status;
     bool        _downloading;
     bool        _queuedDownload;
+    bool        _isDownloaded;
 };
 
 
@@ -187,6 +193,7 @@ private:
     QString             _downloadPath;
     bool                _downloadInProgress = false;
     QNetworkReply*      _reply;
+    bool                _awaiting_response = false;
 
 
 };
