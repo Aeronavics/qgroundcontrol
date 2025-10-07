@@ -84,8 +84,14 @@ void VehicleGeneratorFactGroup::_handleGeneratorStatus(mavlink_message_t& messag
     std::string run_time_string = std::to_string(run_time_hours) + "h " + std::to_string(run_time_minutes) + "m";
     runtime()->setRawValue(run_time_string.c_str());
 
-    uint32_t maintenance_time_hours = generator.time_until_maintenance / 3600;
-    uint32_t maintenance_time_minutes = (generator.time_until_maintenance % 3600) / 60;
+    uint32_t maintenance_time_hours = 0;
+    uint32_t maintenance_time_minutes = 0;
+    if (generator.time_until_maintenance < 0)
+    {
+        maintenance_time_hours = generator.time_until_maintenance / 3600;
+        maintenance_time_minutes = (generator.time_until_maintenance % 3600) / 60;
+    }
+
     std::string maintenance_time_string = std::to_string(maintenance_time_hours) + "h " + std::to_string(maintenance_time_minutes) + "m";
     timeToService()->setRawValue(maintenance_time_string.c_str());
 }

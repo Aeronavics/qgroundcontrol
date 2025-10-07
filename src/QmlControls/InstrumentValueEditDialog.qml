@@ -232,6 +232,9 @@ QGCPopupDialog {
                 var newColors = instrumentValueData.rangeColors
                 newColors[index] = color
                 instrumentValueData.rangeColors = newColors
+                root.opacity = 1
+                root.modal = Qt.ApplicationModal
+                root.enabled = true
             }
 
             ColorDialog {
@@ -316,6 +319,9 @@ QGCPopupDialog {
                                     onClicked: {
                                         colorPickerDialog.colorIndex = index
                                         colorPickerDialog.open()
+                                        root.opacity = 0
+                                        root.modal = Qt.NonModal
+                                        root.enabled = false
                                     }
                                 }
                             }

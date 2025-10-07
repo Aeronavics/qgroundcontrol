@@ -225,7 +225,7 @@ DFLogDownloadController::downloadFinished()
             _downloadPath += QDir::separator();
         }
         QByteArray b = _reply->readAll();
-        qDebug() << "byte array lenght" << b.length();
+        qDebug() << "byte array length" << b.length();
         QFile file(_downloadPath + entry->id() + ".BIN");
         file.open(QIODevice::WriteOnly);
         QDataStream out(&file);
@@ -233,8 +233,7 @@ DFLogDownloadController::downloadFinished()
         entry->setStatus("Downloaded");
         _downloadInProgress = false;
         entry->setDownloading(false);
-    }
-    else {
+    } else {
         qDebug() << "Error:" << _reply->errorString();
         qDebug() << "Error:" << _reply->error();
         entry->setStatus("Error");
