@@ -103,6 +103,7 @@ DFLogDownloadController::refresh(void)
                     _logEntriesModel.append(logEntry);
                 }
             }
+            _logEntriesModel.sort_by_id();
             qDebug() << "Request finished successfully";
         } else {
             qDebug() << "Error:" << reply->errorString();
@@ -413,4 +414,14 @@ QGCDFLogModel::roleNames() const {
     QHash<int, QByteArray> roles;
     roles[ObjectRole] = "logEntry";
     return roles;
+}
+
+//-----------------------------------------------------------------------------
+void
+    QGCDFLogModel::sort_by_id()
+{
+    std::sort(_logEntries.begin(), _logEntries.end(), [](QGCDFLogEntry* e1, QGCDFLogEntry* e2)
+    {
+        return e1->sort_id() < e2->sort_id();
+    });
 }

@@ -117,6 +117,7 @@ const char* Vehicle::_terrainFactGroupName =            "terrain";
 const char* Vehicle::_hygrometerFactGroupName =         "hygrometer";
 const char* Vehicle::_generatorFactGroupName =          "generator";
 const char* Vehicle::_sprayFactGroupName =              "spray";
+const char* Vehicle::_summedBatteryFactGroupName =      "summedBattery";
 const char* Vehicle::_efiFactGroupName =                "efi";
 
 // Standard connected vehicle
@@ -184,6 +185,7 @@ Vehicle::Vehicle(LinkInterface*             link,
     , _hygrometerFactGroup          (this)
     , _generatorFactGroup           (this)
     , _sprayFactGroup               (this)
+    , _summedBatteryFactGroup       (this)
     , _efiFactGroup                 (this)
     , _terrainFactGroup             (this)
     , _terrainProtocolHandler       (new TerrainProtocolHandler(this, &_terrainFactGroup, this))
@@ -478,6 +480,7 @@ void Vehicle::_commonInit()
     _addFactGroup(&_hygrometerFactGroup,        _hygrometerFactGroupName);
     _addFactGroup(&_generatorFactGroup,         _generatorFactGroupName);
     _addFactGroup(&_sprayFactGroup,             _sprayFactGroupName);
+    _addFactGroup(&_summedBatteryFactGroup,     _summedBatteryFactGroupName);
     _addFactGroup(&_efiFactGroup,               _efiFactGroupName);
     _addFactGroup(&_terrainFactGroup,           _terrainFactGroupName);
 

@@ -51,6 +51,11 @@
     "name":             "count",
     "shortDesc": "Sat Count",
     "type":             "uint32"
+},
+{
+    "name":             "count2",
+    "shortDesc": "2nd GPS Sat Count",
+    "type":             "uint32"
 }
 ]
 }

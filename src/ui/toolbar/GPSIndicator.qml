@@ -60,8 +60,10 @@ Item {
                     anchors.horizontalCenter: parent.horizontalCenter
                     columns: 2
 
-                    QGCLabel { text: qsTr("GPS Count:") }
+                    QGCLabel { text: qsTr("1st GPS Count:") }
                     QGCLabel { text: _activeVehicle ? _activeVehicle.gps.count.valueString : qsTr("N/A", "No data to display") }
+                    QGCLabel { text: qsTr("2nd GPS Count:") }
+                    QGCLabel { text: _activeVehicle ? _activeVehicle.gps.count2.valueString : qsTr("N/A", "No data to display") }
                     QGCLabel { text: qsTr("GPS Lock:") }
                     QGCLabel { text: _activeVehicle ? _activeVehicle.gps.lock.enumStringValue : qsTr("N/A", "No data to display") }
                     QGCLabel { text: qsTr("HDOP:") }
@@ -97,7 +99,7 @@ Item {
             anchors.horizontalCenter:   hdopValue.horizontalCenter
             visible:                    _activeVehicle && !isNaN(_activeVehicle.gps.hdop.value)
             color:                      qgcPal.buttonText
-            text:                       _activeVehicle ? _activeVehicle.gps.count.valueString : ""
+            text:                       _activeVehicle ? _activeVehicle.gps.count.valueString + "/" + _activeVehicle.gps.count2.valueString : ""
         }
 
         QGCLabel {

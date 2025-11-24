@@ -18,6 +18,7 @@ const char* VehicleGPSFactGroup::_hdopFactName =                "hdop";
 const char* VehicleGPSFactGroup::_vdopFactName =                "vdop";
 const char* VehicleGPSFactGroup::_courseOverGroundFactName =    "courseOverGround";
 const char* VehicleGPSFactGroup::_countFactName =               "count";
+const char* VehicleGPSFactGroup::_count2FactName =              "count2ndGPS";
 const char* VehicleGPSFactGroup::_lockFactName =                "lock";
 
 VehicleGPSFactGroup::VehicleGPSFactGroup(QObject* parent)
@@ -29,6 +30,7 @@ VehicleGPSFactGroup::VehicleGPSFactGroup(QObject* parent)
     , _vdopFact             (0, _vdopFactName,              FactMetaData::valueTypeDouble)
     , _courseOverGroundFact (0, _courseOverGroundFactName,  FactMetaData::valueTypeDouble)
     , _countFact            (0, _countFactName,             FactMetaData::valueTypeInt32)
+    , _count2Fact           (0, _count2FactName,            FactMetaData::valueTypeInt32)
     , _lockFact             (0, _lockFactName,              FactMetaData::valueTypeInt32)
 {
     _addFact(&_latFact,                 _latFactName);
@@ -39,6 +41,7 @@ VehicleGPSFactGroup::VehicleGPSFactGroup(QObject* parent)
     _addFact(&_courseOverGroundFact,    _courseOverGroundFactName);
     _addFact(&_lockFact,                _lockFactName);
     _addFact(&_countFact,               _countFactName);
+    _addFact(&_count2Fact,              _count2FactName);
 
     _latFact.setRawValue(std::numeric_limits<float>::quiet_NaN());
     _lonFact.setRawValue(std::numeric_limits<float>::quiet_NaN());
@@ -60,6 +63,9 @@ void VehicleGPSFactGroup::handleMessage(Vehicle* /* vehicle */, mavlink_message_
     case MAVLINK_MSG_ID_HIGH_LATENCY2:
         _handleHighLatency2(message);
         break;
+    case MAVLINK_MSG_ID_GPS2_RAW:
+        _handleGps2Raw(message);
+        break;
     default:
         break;
     }
@@ -78,6 +84,15 @@ void VehicleGPSFactGroup::_handleGpsRawInt(mavlink_message_t& message)
     vdop()->setRawValue             (gpsRawInt.epv == UINT16_MAX ? qQNaN() : gpsRawInt.epv / 100.0);
     courseOverGround()->setRawValue (gpsRawInt.cog == UINT16_MAX ? qQNaN() : gpsRawInt.cog / 100.0);
     lock()->setRawValue             (gpsRawInt.fix_type);
+}
+
+void VehicleGPSFactGroup::_handleGps2Raw(mavlink_message_t& message)
+{
+    mavlink_gps2_raw_t gps2RawInt;
+    mavlink_msg_gps2_raw_decode(&message, &gps2RawInt);
+
+    count2()->setRawValue            (gps2RawInt.satellites_visible == 255 ? 0 : gps2RawInt.satellites_visible);
+
 }
 
 void VehicleGPSFactGroup::_handleHighLatency(mavlink_message_t& message)

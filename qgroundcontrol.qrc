@@ -22,6 +22,7 @@
         <file alias="GeneratorIndicator.qml">src/ui/toolbar/GeneratorIndicator.qml</file>
         <file alias="SprayIndicator.qml">src/ui/toolbar/SprayIndicator.qml</file>
         <file alias="FuelIndicator.qml">src/ui/toolbar/FuelIndicator.qml</file>
+        <file alias="SingleBatteryIndicator.qml">src/ui/toolbar/SingleBatteryIndicator.qml</file>
     </qresource>
     <qresource prefix="/checklists">
         <file alias="DefaultChecklist.qml">src/FlightDisplay/DefaultChecklist.qml</file>
@@ -361,6 +362,7 @@
         <file alias="VTOLLandingPattern.FactMetaData.json">src/MissionManager/VTOLLandingPattern.FactMetaData.json</file>
         <file alias="GimbalController.SettingsGroup.json">src/Settings/GimbalController.SettingsGroup.json</file>
         <file alias="Vehicle/SprayFact.json">src/Vehicle/SprayFact.json</file>
+        <file alias="Vehicle/SummedBatteryFact.json">src/Vehicle/SummedBatteryFact.json</file>
     </qresource>
     <qresource prefix="/MockLink">
         <file alias="APMArduSubMockLink.params">src/comm/APMArduSubMockLink.params</file>

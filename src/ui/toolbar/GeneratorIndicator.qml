@@ -42,7 +42,7 @@ Item {
             (generator.status.rawValue & MAVLink.MAV_GENERATOR_STATUS_FLAG_BATTERY_OVERCHARGE_CURRENT_FAULT) ||
             (generator.status.rawValue & MAVLink.MAV_GENERATOR_STATUS_FLAG_OVERVOLTAGE_FAULT) ||
             (generator.status.rawValue & MAVLink.MAV_GENERATOR_STATUS_FLAG_BATTERY_UNDERVOLT_FAULT) ||
-            (generator.status.rawValue & MAVLink.MAV_GENERATOR_STATUS_FLAG_OFF)
+            (generator.status.rawValue & MAVLink.MAV_GENERATOR_STATUS_FLAG_OFF && _activeVehicle.armed())
         ) {
             return qgcPal.colorRed
         }
@@ -62,7 +62,8 @@ Item {
             (generator.status.rawValue & MAVLink.MAV_GENERATOR_STATUS_FLAG_READY) ||
             (generator.status.rawValue & MAVLink.MAV_GENERATOR_STATUS_FLAG_GENERATING) ||
             (generator.status.rawValue & MAVLink.MAV_GENERATOR_STATUS_FLAG_CHARGING) ||
-            (generator.status.rawValue & MAVLink.MAV_GENERATOR_STATUS_FLAG_IDLE)
+            (generator.status.rawValue & MAVLink.MAV_GENERATOR_STATUS_FLAG_IDLE) ||
+            (generator.status.rawValue & MAVLink.MAV_GENERATOR_STATUS_FLAG_OFF && !_activeVehicle.armed())
         ) {
             return qgcPal.text
         }

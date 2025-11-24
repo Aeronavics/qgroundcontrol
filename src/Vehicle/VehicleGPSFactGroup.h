@@ -26,6 +26,7 @@ public:
     Q_PROPERTY(Fact* vdop               READ vdop               CONSTANT)
     Q_PROPERTY(Fact* courseOverGround   READ courseOverGround   CONSTANT)
     Q_PROPERTY(Fact* count              READ count              CONSTANT)
+    Q_PROPERTY(Fact* count2             READ count2             CONSTANT)
     Q_PROPERTY(Fact* lock               READ lock               CONSTANT)
 
     Fact* lat               () { return &_latFact; }
@@ -35,6 +36,7 @@ public:
     Fact* vdop              () { return &_vdopFact; }
     Fact* courseOverGround  () { return &_courseOverGroundFact; }
     Fact* count             () { return &_countFact; }
+    Fact* count2            () { return &_count2Fact; }
     Fact* lock              () { return &_lockFact; }
 
     // Overrides from FactGroup
@@ -47,12 +49,14 @@ public:
     static const char* _vdopFactName;
     static const char* _courseOverGroundFactName;
     static const char* _countFactName;
+    static const char* _count2FactName;
     static const char* _lockFactName;
 
 protected:
     void _handleGpsRawInt   (mavlink_message_t& message);
     void _handleHighLatency (mavlink_message_t& message);
     void _handleHighLatency2(mavlink_message_t& message);
+    void _handleGps2Raw     (mavlink_message_t& message);
 
     Fact _latFact;
     Fact _lonFact;
@@ -61,5 +65,6 @@ protected:
     Fact _vdopFact;
     Fact _courseOverGroundFact;
     Fact _countFact;
+    Fact _count2Fact;
     Fact _lockFact;
 };

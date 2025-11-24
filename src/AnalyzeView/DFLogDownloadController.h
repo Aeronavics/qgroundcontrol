@@ -20,6 +20,7 @@
 #include <QNetworkRequest>
 #include <QNetworkReply>
 #include <QUrl>
+#include <algorithm>
 
 #include "UASInterface.h"
 #include "AutoPilotPlugin.h"
@@ -54,6 +55,7 @@ public:
 
     int             rowCount        (const QModelIndex & parent = QModelIndex()) const;
     QVariant        data            (const QModelIndex & index, int role = Qt::DisplayRole) const;
+    void            sort_by_id      (void);
 
 signals:
     void            countChanged    ();
@@ -92,6 +94,8 @@ public:
     bool        downloading     () { return _downloading; }
     bool        queuedDownload  () { return _queuedDownload; }
     bool        isDownloaded    () { return _isDownloaded; }
+
+    int         sort_id         () const { return _logID.toInt(); }
 
     void        setId           (QString id_)       { _logID = id_; }
     void        setSize         (uint size_)        { _logSize = size_;     emit sizeChanged(); }

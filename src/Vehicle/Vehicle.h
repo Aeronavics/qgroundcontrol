@@ -51,6 +51,7 @@
 #include "StandardModes.h"
 #include "VehicleGeneratorFactGroup.h"
 #include "VehicleSprayFactGroup.h"
+#include "VehicleSummedBatteryFactGroup.h"
 #include "VehicleEFIFactGroup.h"
 
 class Actuators;
@@ -328,6 +329,7 @@ public:
     Q_PROPERTY(FactGroup*           hygrometer      READ hygrometerFactGroup        CONSTANT)
     Q_PROPERTY(FactGroup*           generator       READ generatorFactGroup         CONSTANT)
     Q_PROPERTY(FactGroup*           spray           READ sprayFactGroup             CONSTANT)
+    Q_PROPERTY(FactGroup*           summedBattery   READ summedBatteryFactGroup     CONSTANT)
     Q_PROPERTY(FactGroup*           efi             READ efiFactGroup               CONSTANT)
     Q_PROPERTY(QmlObjectListModel*  batteries       READ batteries                  CONSTANT)
     Q_PROPERTY(Actuators*           actuators       READ actuators                  CONSTANT)
@@ -727,6 +729,7 @@ public:
     FactGroup* hygrometerFactGroup          () { return &_hygrometerFactGroup; }
     FactGroup* generatorFactGroup           () { return &_generatorFactGroup; }
     FactGroup* sprayFactGroup               () { return &_sprayFactGroup; }
+    FactGroup* summedBatteryFactGroup       () { return &_summedBatteryFactGroup; }
     FactGroup* efiFactGroup                 () { return &_efiFactGroup; }
     QmlObjectListModel* batteries           () { return &_batteryFactGroupListModel; }
 
@@ -1439,6 +1442,7 @@ private:
     VehicleHygrometerFactGroup      _hygrometerFactGroup;
     VehicleGeneratorFactGroup       _generatorFactGroup;
     VehicleSprayFactGroup           _sprayFactGroup;
+    VehicleSummedBatteryFactGroup   _summedBatteryFactGroup;
     VehicleEFIFactGroup             _efiFactGroup;
     TerrainFactGroup                _terrainFactGroup;
     QmlObjectListModel              _batteryFactGroupListModel;
@@ -1501,6 +1505,7 @@ private:
     static const char* _hygrometerFactGroupName;
     static const char* _generatorFactGroupName;
     static const char* _sprayFactGroupName;
+    static const char* _summedBatteryFactGroupName;
     static const char* _efiFactGroupName;
     static const char* _terrainFactGroupName;
 
