@@ -297,6 +297,8 @@
         <file alias="QGroundControl/Controls/MockLinkOptionsDlg.qml">src/comm/MockLinkOptionsDlg.qml</file>
         <file alias="QGroundControl/FlightDisplay/FlyViewInsetViewer.qml">src/FlightDisplay/FlyViewInsetViewer.qml</file>
         <file alias="DFLogDownloadPage.qml">src/AnalyzeView/DFLogDownloadPage.qml</file>
+        <file alias="SprayLogDownloadPage.qml">src/AnalyzeView/SprayLogDownloadPage.qml</file>
+        <file alias="QGroundControl/FlightMap/SprayingIndicator.qml">src/FlightMap/MapItems/SprayingIndicator.qml</file>
     </qresource>
     <qresource prefix="/FirstRunPromptDialogs">
         <file alias="UnitsFirstRunPrompt.qml">src/FirstRunPromptDialogs/UnitsFirstRunPrompt.qml</file>

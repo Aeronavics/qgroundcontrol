@@ -834,7 +834,7 @@ void Vehicle::_mavlinkMessageReceived(LinkInterface* link, mavlink_message_t mes
     case MAVLINK_MSG_ID_RANGEFINDER:
         _handleRangefinder(message);
         break;
-    case MAVLINK_MSG_ID_ANV_MSG_SPRAY_STATUS:
+    case MAVLINK_MSG_ID_ANV_SPRAY_STATUS:
         _handleSprayFeedback(message);
         break;
 #endif
@@ -869,12 +869,18 @@ void Vehicle::_handleRangefinder(mavlink_message_t& message)
 
 void Vehicle::_handleSprayFeedback(mavlink_message_t& message)
 {
-    mavlink_anv_msg_spray_status_t spray_status;
-    mavlink_msg_anv_msg_spray_status_decode(&message, &spray_status);
+    mavlink_anv_spray_status_t spray_status;
+    mavlink_msg_anv_spray_status_decode(&message, &spray_status);
     if (!_spraying_status && spray_status.desired_flowrate > 0)
     {
         _spraying_status = true;
-        _sprayTriggerPoints.append(new QGCQGeoCoordinate(_coordinate, this));
+        QGeoCoordinate sprayPoint(_coordinate.latitude(), _coordinate.longitude(), 0.0);
+        _sprayTriggerPoints.append(new QGCQGeoCoordinate(sprayPoint, this));
+    }
+    else if (_spraying_status && spray_status.desired_flowrate > 0)
+    {
+        QGeoCoordinate sprayPoint(_coordinate.latitude(), _coordinate.longitude(), 0.0);
+        _sprayingPoints.append(new QGCQGeoCoordinate(sprayPoint, this));
     }
     else if (_spraying_status && spray_status.desired_flowrate == 0)
     {
@@ -1595,7 +1601,6 @@ void Vehicle::_updateArmed(bool armed)
             _trajectoryPoints->start();
             _flightTimerStart();
             _clearCameraTriggerPoints();
-            _clearSprayTriggerPoints();
             // Reset battery warning
             _lowestBatteryChargeStateAnnouncedMap.clear();
         } else {
@@ -2441,9 +2446,20 @@ void Vehicle::_clearCameraTriggerPoints()
     _cameraTriggerPoints.clearAndDeleteContents();
 }
 
-void Vehicle::_clearSprayTriggerPoints()
+void Vehicle::clearSprayTriggerPoints()
 {
     _sprayTriggerPoints.clearAndDeleteContents();
+    _sprayingPoints.clearAndDeleteContents();
+}
+
+void Vehicle::addSprayTriggerPoint(QGeoCoordinate point)
+{
+    _sprayTriggerPoints.append(new QGCQGeoCoordinate(point, this));
+}
+
+void Vehicle::addSprayingPoint(QGeoCoordinate point)
+{
+    _sprayingPoints.append(new QGCQGeoCoordinate(point, this));
 }
 
 void Vehicle::_flightTimerStart()

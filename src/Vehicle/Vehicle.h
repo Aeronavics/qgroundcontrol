@@ -174,6 +174,7 @@ public:
     Q_PROPERTY(TrajectoryPoints*    trajectoryPoints            MEMBER _trajectoryPoints                                            CONSTANT)
     Q_PROPERTY(QmlObjectListModel*  cameraTriggerPoints         READ cameraTriggerPoints                                            CONSTANT)
     Q_PROPERTY(QmlObjectListModel*  sprayTriggerPoints          READ sprayTriggerPoints                                             CONSTANT)
+    Q_PROPERTY(QmlObjectListModel*  sprayingPoints              READ sprayingPoints                                                 CONSTANT)
     Q_PROPERTY(float                latitude                    READ latitude                                                       NOTIFY coordinateChanged)
     Q_PROPERTY(float                longitude                   READ longitude                                                      NOTIFY coordinateChanged)
     Q_PROPERTY(bool                 messageTypeNone             READ messageTypeNone                                                NOTIFY messageTypeChanged)
@@ -476,6 +477,12 @@ public:
     /// Save the joystick enable setting to the settings group
     Q_INVOKABLE void saveJoystickSettings(void);
 
+    /// Clear the Spray marker on the map
+    Q_INVOKABLE void clearSprayTriggerPoints(void);
+
+    void addSprayTriggerPoint(QGeoCoordinate point);
+    void addSprayingPoint(QGeoCoordinate point);
+
     bool    isInitialConnectComplete() const;
     bool    guidedModeSupported     () const;
     bool    pauseVehicleSupported   () const;
@@ -574,6 +581,7 @@ public:
 
     QmlObjectListModel* cameraTriggerPoints () { return &_cameraTriggerPoints; }
     QmlObjectListModel* sprayTriggerPoints  () { return &_sprayTriggerPoints; }
+    QmlObjectListModel* sprayingPoints      () { return &_sprayingPoints; }
 
     int  flowImageIndex() const{ return _flowImageIndex; }
 
@@ -1058,7 +1066,6 @@ private slots:
     void _firstRallyPointLoadComplete       ();
     void _sendMavCommandResponseTimeoutCheck();
     void _clearCameraTriggerPoints          ();
-    void _clearSprayTriggerPoints           ();
     void _updateDistanceHeadingToHome       ();
     void _updateMissionItemIndex            ();
     void _updateHeadingToNextWP             ();
@@ -1250,6 +1257,7 @@ private:
     TrajectoryPoints*               _trajectoryPoints = nullptr;
     QmlObjectListModel              _cameraTriggerPoints;
     QmlObjectListModel              _sprayTriggerPoints;
+    QmlObjectListModel              _sprayingPoints;
     //QMap<QString, ADSBVehicle*>     _trafficVehicleMap;
 
     // Toolbox references

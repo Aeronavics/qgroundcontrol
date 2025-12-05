@@ -386,6 +386,14 @@ FlightMap {
 
     // Spray trigger points
     MapItemView {
+        model: _activeVehicle ? _activeVehicle.sprayingPoints : 0
+
+        delegate: SprayingIndicator {
+            coordinate:     object.coordinate
+            z:              QGroundControl.zOrderTopMost
+        }
+    }
+    MapItemView {
         model: _activeVehicle ? _activeVehicle.sprayTriggerPoints : 0
 
         delegate: SprayTriggerIndicator {
@@ -668,6 +676,16 @@ FlightMap {
                         popup.close()
                     }
                     globals.guidedControllerFlyView.confirmAction(globals.guidedControllerFlyView.actionSetHome, mapClickCoord)
+                }
+            }
+            QGCButton {
+                Layout.fillWidth:   true
+                text:               qsTr("Clear Spray Points")
+                onClicked: {
+                    if (popup.opened) {
+                        popup.close()
+                    }
+                    _activeVehicle.clearSprayTriggerPoints()
                 }
             }
         }

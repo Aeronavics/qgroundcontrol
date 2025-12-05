@@ -28,16 +28,6 @@ MapQuickItem {
        color:      qgcPal.colorGreen
        opacity:    0.4
 
-       readonly property real _radius: ScreenTools.defaultFontPixelHeight * 0.6
-
-       QGCColoredImage {
-           height:             parent.height * 0.75
-           width:              height
-           anchors.centerIn:   parent
-           source:             "/qmlimages/waterdrop.svg"
-           fillMode:           Image.PreserveAspectFit
-           sourceSize.height:  height
-           color:              qgcPal.colorWhite
-       }
+       readonly property real _radius: ScreenTools.defaultFontPixelHeight * 0.15
    }
 }

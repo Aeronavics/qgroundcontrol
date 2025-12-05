@@ -50,7 +50,7 @@ QGCDFLogEntry::QGCDFLogEntry(QString logId, const QDateTime& dateTime, uint logS
     if(!dowloaded_path.endsWith(QDir::separator())) {
         dowloaded_path += QDir::separator();
     }
-    dowloaded_path += _logID + ".BIN";
+    dowloaded_path += "flight_logs/" + _logID + ".BIN";
 
     if (QFile::exists(dowloaded_path))
     {
@@ -86,7 +86,7 @@ void
 DFLogDownloadController::refresh(void)
 {
     QNetworkAccessManager *manager = new QNetworkAccessManager(this);
-    QNetworkRequest request(QUrl("http://192.168.144.1/log"));
+    QNetworkRequest request(QUrl("http://192.168.144.1/flight_log"));
     manager->get(request);
     QObject::connect(manager, &QNetworkAccessManager::finished, this, [=](QNetworkReply *reply) {
         if (reply->error() == QNetworkReply::NoError) {
@@ -118,7 +118,7 @@ void
 DFLogDownloadController::_delete(QGCDFLogEntry* entry)
 {
     QNetworkAccessManager *manager = new QNetworkAccessManager(this);
-    QNetworkRequest request(QUrl("http://192.168.144.1/log/" + entry->id()));
+    QNetworkRequest request(QUrl("http://192.168.144.1/flight_log/" + entry->id()));
     manager->deleteResource(request);
     QObject::connect(manager, &QNetworkAccessManager::finished, [=](QNetworkReply *reply) {
         if (reply->error() == QNetworkReply::NoError) {
@@ -155,7 +155,7 @@ void
 DFLogDownloadController::eraseAll(void)
 {
     QNetworkAccessManager *manager = new QNetworkAccessManager(this);
-    QNetworkRequest request(QUrl("http://192.168.144.1/log"));
+    QNetworkRequest request(QUrl("http://192.168.144.1/flight_log"));
     manager->deleteResource(request);
     QObject::connect(manager, &QNetworkAccessManager::finished, [=](QNetworkReply *reply) {
         if (reply->error() == QNetworkReply::NoError) {
@@ -178,7 +178,7 @@ DFLogDownloadController::download(QGCDFLogEntry* entry)
     _downloadInProgress = true;
     entry->setStatus("Downloading");
     QNetworkAccessManager *manager = new QNetworkAccessManager(this);
-    QNetworkRequest request(QUrl("http://192.168.144.1/log/" + entry->id()));
+    QNetworkRequest request(QUrl("http://192.168.144.1/flight_log/" + entry->id()));
     _reply = manager->get(request); // Manager is my QNetworkAccessManager
     connect(_reply, SIGNAL(error(QNetworkReply::NetworkError)),
                 this, SLOT(error(QNetworkReply::NetworkError)));
@@ -227,7 +227,13 @@ DFLogDownloadController::downloadFinished()
         }
         QByteArray b = _reply->readAll();
         qDebug() << "byte array length" << b.length();
-        QFile file(_downloadPath + entry->id() + ".BIN");
+
+        if (!QDir(_downloadPath + "flight_logs").exists())
+        {
+            QDir().mkdir(_downloadPath + "flight_logs");
+        }
+
+        QFile file(_downloadPath + "flight_logs/" + entry->id() + ".BIN");
         file.open(QIODevice::WriteOnly);
         QDataStream out(&file);
         out << b;

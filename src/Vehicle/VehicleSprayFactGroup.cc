@@ -45,7 +45,7 @@ VehicleSprayFactGroup::VehicleSprayFactGroup(QObject* parent)
 void VehicleSprayFactGroup::handleMessage(Vehicle* /* vehicle */, mavlink_message_t& message)
 {
     switch (message.msgid) {
-    case MAVLINK_MSG_ID_ANV_MSG_SPRAY_STATUS:
+    case MAVLINK_MSG_ID_ANV_SPRAY_STATUS:
         _handleSprayStatus(message);
         break;
     default:
@@ -55,8 +55,8 @@ void VehicleSprayFactGroup::handleMessage(Vehicle* /* vehicle */, mavlink_messag
 
 void VehicleSprayFactGroup::_handleSprayStatus(mavlink_message_t& message)
 {
-    mavlink_anv_msg_spray_status_t spray;
-    mavlink_msg_anv_msg_spray_status_decode(&message, &spray);
+    mavlink_anv_spray_status_t spray;
+    mavlink_msg_anv_spray_status_decode(&message, &spray);
 
     mesFlowrate()->setRawValue          (spray.measured_flowrate);
     desFlowrate()->setRawValue          (spray.desired_flowrate);

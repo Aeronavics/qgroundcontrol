@@ -581,6 +581,7 @@ HEADERS += \
     src/ADSB/ADSBVehicleManager.h \
     src/AnalyzeView/LogDownloadController.h \
     src/AnalyzeView/DFLogDownloadController.h \
+    src/AnalyzeView/SprayLogDownloadController.h \
     src/AnalyzeView/PX4LogParser.h \
     src/AnalyzeView/ULogParser.h \
     src/AnalyzeView/MavlinkConsoleController.h \
@@ -847,6 +848,7 @@ SOURCES += \
     src/ADSB/ADSBVehicleManager.cc \
     src/AnalyzeView/LogDownloadController.cc \
     src/AnalyzeView/DFLogDownloadController.cc \
+    src/AnalyzeView/SprayLogDownloadController.cc \
     src/AnalyzeView/PX4LogParser.cc \
     src/AnalyzeView/ULogParser.cc \
     src/AnalyzeView/MavlinkConsoleController.cc \

@@ -28,6 +28,8 @@ AnalyzePage {
 
     QGCPalette { id: palette; colorGroupEnabled: enabled }
 
+    Component.completed: dflogController.refresh()
+
     Component {
         id: pageComponent
 

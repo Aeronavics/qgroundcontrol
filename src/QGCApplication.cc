@@ -67,6 +67,7 @@
 #include "VideoReceiver.h"
 #include "LogDownloadController.h"
 #include "DFLogDownloadController.h"
+#include "SprayLogDownloadController.h"
 #if !defined(QGC_DISABLE_MAVLINK_INSPECTOR)
 #include "MAVLinkInspectorController.h"
 #endif
@@ -516,6 +517,7 @@ void QGCApplication::_initCommon()
     qmlRegisterType<JoystickConfigController>       (kQGCControllers,                       1, 0, "JoystickConfigController");
     qmlRegisterType<LogDownloadController>          (kQGCControllers,                       1, 0, "LogDownloadController");
     qmlRegisterType<DFLogDownloadController>        (kQGCControllers,                       1, 0, "DFLogDownloadController");
+    qmlRegisterType<SprayLogDownloadController>     (kQGCControllers,                       1, 0, "SprayLogDownloadController");
     qmlRegisterType<SyslinkComponentController>     (kQGCControllers,                       1, 0, "SyslinkComponentController");
     qmlRegisterType<EditPositionDialogController>   (kQGCControllers,                       1, 0, "EditPositionDialogController");
     qmlRegisterType<RCToParamDialogController>      (kQGCControllers,                       1, 0, "RCToParamDialogController");
