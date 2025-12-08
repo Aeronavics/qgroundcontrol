@@ -25,11 +25,11 @@ Item {
     anchors.bottom: parent.bottom
     width: generatorRow.width * 1.1
 
-    property bool showIndicator: true
+    property var generator: _activeVehicle.generator
+
+    property bool showIndicator: generator.generatorSeen.value
 
     property var _activeVehicle: QGroundControl.multiVehicleManager.activeVehicle
-
-    property var generator: _activeVehicle.generator
 
     function getGeneratorColor() {
         if (

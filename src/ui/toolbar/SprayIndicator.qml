@@ -25,11 +25,11 @@ Item {
     anchors.bottom: parent.bottom
     width: (sprayValuesColumn.x + sprayValuesColumn.width) * 1.1
 
-    property bool showIndicator: true
+    property var sprayer: _activeVehicle.spray
+
+    property bool showIndicator: sprayer.sprayerSeen.value
 
     property var _activeVehicle: QGroundControl.multiVehicleManager.activeVehicle
-
-    property var sprayer: _activeVehicle.spray
 
     function getSprayColor() {
         if (sprayer.mesFlowrate.rawValue > 0)

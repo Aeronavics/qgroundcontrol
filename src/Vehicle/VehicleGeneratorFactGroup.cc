@@ -12,6 +12,7 @@ const char* VehicleGeneratorFactGroup::_genTempFactName =               "genTemp
 const char* VehicleGeneratorFactGroup::_runtimeFactName =               "runtime";
 const char* VehicleGeneratorFactGroup::_timeToServiceFactName =         "timeToService";
 const char* VehicleGeneratorFactGroup::_fuelRemainingFactName =         "fuelRemaining";
+const char* VehicleGeneratorFactGroup::_generatorSeenFactName =         "genEnabled";
 
 VehicleGeneratorFactGroup::VehicleGeneratorFactGroup(QObject* parent)
     : FactGroup(1000, ":/json/Vehicle/GeneratorFact.json", parent)
@@ -25,6 +26,7 @@ VehicleGeneratorFactGroup::VehicleGeneratorFactGroup(QObject* parent)
     , _runtimeFact          (0, _runtimeFactName,           FactMetaData::valueTypeString)
     , _timeToServiceFact    (0, _timeToServiceFactName,     FactMetaData::valueTypeString)
     , _fuelRemainingFact    (0, _fuelRemainingFactName,     FactMetaData::valueTypeUint8)
+    , _generatorSeenFact    (0, _generatorSeenFactName,     FactMetaData::valueTypeBool)
 {
     _addFact(&_statusFact,          _statusFactName);
     _addFact(&_rpmFact,             _rpmFactName);
@@ -48,6 +50,7 @@ VehicleGeneratorFactGroup::VehicleGeneratorFactGroup(QObject* parent)
     _runtimeFact.setRawValue(qQNaN());
     _timeToServiceFact.setRawValue("--:--");
     _fuelRemainingFact.setRawValue("--:--");
+    _generatorSeenFact.setRawValue(false);
 }
 
 void VehicleGeneratorFactGroup::handleMessage(Vehicle* /* vehicle */, mavlink_message_t& message)
@@ -94,6 +97,8 @@ void VehicleGeneratorFactGroup::_handleGeneratorStatus(mavlink_message_t& messag
 
     std::string maintenance_time_string = std::to_string(maintenance_time_hours) + "h " + std::to_string(maintenance_time_minutes) + "m";
     timeToService()->setRawValue(maintenance_time_string.c_str());
+
+    generatorSeen()->setRawValue(true);
 }
 
 void VehicleGeneratorFactGroup::_handleFuelStatus(mavlink_message_t& message) {

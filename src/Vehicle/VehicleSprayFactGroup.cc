@@ -10,6 +10,7 @@ const char* VehicleSprayFactGroup::_lastTreeVolumeFactName =    "lastTreeVolume"
 const char* VehicleSprayFactGroup::_sprayRemainingFactName =    "sprayRemaining";
 const char* VehicleSprayFactGroup::_mesPressureFactName =       "mesPressure";
 const char* VehicleSprayFactGroup::_errorFactName =             "error";
+const char* VehicleSprayFactGroup::_sprayerSeenFactName =             "sprayerEnabled";
 
 VehicleSprayFactGroup::VehicleSprayFactGroup(QObject* parent)
     : FactGroup(1000, ":/json/Vehicle/SprayFact.json", parent)
@@ -21,6 +22,7 @@ VehicleSprayFactGroup::VehicleSprayFactGroup(QObject* parent)
     , _sprayRemainingFact       (0, _sprayRemainingFactName,        FactMetaData::valueTypeFloat)
     , _mesPressureFact          (0, _mesPressureFactName,           FactMetaData::valueTypeUint16)
     , _errorFact                (0, _errorFactName,                 FactMetaData::valueTypeUint8)
+    , _sprayerSeenFact          (0, _sprayerSeenFactName,           FactMetaData::valueTypeBool)
 {
     _addFact(&_mesFlowrateFact,         _mesFlowrateFactName);
     _addFact(&_desFlowrateFact,         _desFlowrateFactName);
@@ -30,6 +32,7 @@ VehicleSprayFactGroup::VehicleSprayFactGroup(QObject* parent)
     _addFact(&_sprayRemainingFact,      _sprayRemainingFactName);
     _addFact(&_mesPressureFact,         _mesPressureFactName);
     _addFact(&_errorFact,               _errorFactName);
+    _addFact(&_sprayerSeenFact,         _sprayerSeenFactName);
 
     // Start out as not available "--.--"
     _mesFlowrateFact.setRawValue(qQNaN());
@@ -40,6 +43,7 @@ VehicleSprayFactGroup::VehicleSprayFactGroup(QObject* parent)
     _sprayRemainingFact.setRawValue(qQNaN());
     _mesPressureFact.setRawValue(qQNaN());
     _errorFact.setRawValue(qQNaN());
+    _sprayerSeenFact.setRawValue(false);
 }
 
 void VehicleSprayFactGroup::handleMessage(Vehicle* /* vehicle */, mavlink_message_t& message)
@@ -66,4 +70,5 @@ void VehicleSprayFactGroup::_handleSprayStatus(mavlink_message_t& message)
     sprayRemaining()->setRawValue       (spray.spray_remaining);
     mesPressure()->setRawValue          (spray.pressure);
     error()->setRawValue                (spray.error);
+    sprayerSeen()->setRawValue          (true);
 }

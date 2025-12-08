@@ -18,6 +18,7 @@ public:
     Q_PROPERTY(Fact* sprayRemaining     READ sprayRemaining     CONSTANT)
     Q_PROPERTY(Fact* mesPressure        READ mesPressure        CONSTANT)
     Q_PROPERTY(Fact* error              READ error              CONSTANT)
+    Q_PROPERTY(Fact* sprayerSeen        READ sprayerSeen        CONSTANT)
 
     Fact* mesFlowrate       () { return &_mesFlowrateFact; }
     Fact* desFlowrate       () { return &_desFlowrateFact; }
@@ -27,6 +28,7 @@ public:
     Fact* sprayRemaining    () { return &_sprayRemainingFact; }
     Fact* mesPressure       () { return &_mesPressureFact; }
     Fact* error             () { return &_errorFact; }
+    Fact* sprayerSeen       () { return &_sprayerSeenFact; }
 
     // Overrides from FactGroup
     virtual void handleMessage(Vehicle* vehicle, mavlink_message_t& message) override;
@@ -39,6 +41,7 @@ public:
     static const char* _sprayRemainingFactName;
     static const char* _mesPressureFactName;
     static const char* _errorFactName;
+    static const char* _sprayerSeenFactName;
 
 protected:
     void _handleSprayStatus(mavlink_message_t& message);
@@ -51,4 +54,5 @@ protected:
     Fact _sprayRemainingFact;
     Fact _mesPressureFact;
     Fact _errorFact;
+    Fact _sprayerSeenFact;
 };

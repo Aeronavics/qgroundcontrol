@@ -21,6 +21,7 @@ public:
     Q_PROPERTY(Fact* timeToService              READ timeToService      CONSTANT)
     Q_PROPERTY(Fact* fuelRemaining              READ fuelRemaining      CONSTANT)
     Q_PROPERTY(QVariantList flagsListGenerator  READ flagsListGenerator  NOTIFY flagsListGeneratorChanged)
+    Q_PROPERTY(Fact* generatorSeen              READ generatorSeen      CONSTANT)
 
     Fact* status                    () { return &_statusFact; }
     Fact* rpm                       () { return &_rpmFact; }
@@ -32,7 +33,8 @@ public:
     Fact* runtime                   () { return &_runtimeFact; }
     Fact* timeToService             () { return &_timeToServiceFact; }
     Fact* fuelRemaining             () { return &_fuelRemainingFact; }
-    QVariantList& flagsListGenerator() {return _flagsListGenerator; }
+    QVariantList& flagsListGenerator() { return _flagsListGenerator; }
+    Fact* generatorSeen             () { return &_generatorSeenFact; }
 
     // Overrides from FactGroup
     virtual void handleMessage(Vehicle* vehicle, mavlink_message_t& message) override;
@@ -47,6 +49,7 @@ public:
     static const char* _runtimeFactName;
     static const char* _timeToServiceFactName;
     static const char* _fuelRemainingFactName;
+    static const char* _generatorSeenFactName;
 
 signals:
     void flagsListGeneratorChanged();
@@ -67,6 +70,7 @@ protected:
     Fact _runtimeFact;
     Fact _timeToServiceFact;
     Fact _fuelRemainingFact;
+    Fact _generatorSeenFact;
 
     QVariantList _flagsListGenerator;
     int _prevFlag;
