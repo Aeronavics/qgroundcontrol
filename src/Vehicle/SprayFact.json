@@ -16,6 +16,12 @@
             "units":            "ml/s"
         },
         {
+            "name":             "setFlowrate",
+            "shortDesc":        "Set Flowrate",
+            "type":             "uint16",
+            "units":            "ml/s"
+        },
+        {
             "name":             "totalVolume",
             "shortDesc":        "Total Vol Sprayed",
             "type":             "float",

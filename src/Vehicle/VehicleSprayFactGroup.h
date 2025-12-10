@@ -12,6 +12,7 @@ public:
 
     Q_PROPERTY(Fact* mesFlowrate        READ mesFlowrate        CONSTANT)
     Q_PROPERTY(Fact* desFlowrate        READ desFlowrate        CONSTANT)
+    Q_PROPERTY(Fact* setFlowrate        READ setFlowrate        CONSTANT)
     Q_PROPERTY(Fact* totalSprayedVolume READ totalSprayedVolume CONSTANT)
     Q_PROPERTY(Fact* armedSprayedVolume READ armedSprayedVolume CONSTANT)
     Q_PROPERTY(Fact* lastTreeVolume     READ lastTreeVolume     CONSTANT)
@@ -22,6 +23,7 @@ public:
 
     Fact* mesFlowrate       () { return &_mesFlowrateFact; }
     Fact* desFlowrate       () { return &_desFlowrateFact; }
+    Fact* setFlowrate       () { return &_setFlowrateFact; }
     Fact* totalSprayedVolume() { return &_totalSprayedVolumeFact; }
     Fact* armedSprayedVolume() { return &_armedSprayedVolumeFact; }
     Fact* lastTreeVolume    () { return &_lastTreeVolumeFact; }
@@ -35,6 +37,7 @@ public:
 
     static const char* _mesFlowrateFactName;
     static const char* _desFlowrateFactName;
+    static const char* _setFlowrateFactName;
     static const char* _totalSprayedVolumeFactName;
     static const char* _armedSprayedVolumeFactName;
     static const char* _lastTreeVolumeFactName;
@@ -48,6 +51,7 @@ protected:
 
     Fact _mesFlowrateFact;
     Fact _desFlowrateFact;
+    Fact _setFlowrateFact;
     Fact _totalSprayedVolumeFact;
     Fact _armedSprayedVolumeFact;
     Fact _lastTreeVolumeFact;

@@ -34,7 +34,7 @@ AnalyzePage {
 
     QGCPalette { id: palette; colorGroupEnabled: enabled }
 
-    Component.completed: spraylogController.refresh()
+    // Component.completed: spraylogController.refresh()
 
     Component {
         id: pageComponent

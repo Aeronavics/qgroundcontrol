@@ -4,6 +4,7 @@
 
 const char* VehicleSprayFactGroup::_mesFlowrateFactName =       "mesFlowrate";
 const char* VehicleSprayFactGroup::_desFlowrateFactName =       "desFlowrate";
+const char* VehicleSprayFactGroup::_setFlowrateFactName =       "setFlowrate";
 const char* VehicleSprayFactGroup::_totalSprayedVolumeFactName =    "totalVolume";
 const char* VehicleSprayFactGroup::_armedSprayedVolumeFactName =    "armedVolume";
 const char* VehicleSprayFactGroup::_lastTreeVolumeFactName =    "lastTreeVolume";
@@ -16,6 +17,7 @@ VehicleSprayFactGroup::VehicleSprayFactGroup(QObject* parent)
     : FactGroup(1000, ":/json/Vehicle/SprayFact.json", parent)
     , _mesFlowrateFact          (0, _mesFlowrateFactName,           FactMetaData::valueTypeUint16)
     , _desFlowrateFact          (0, _desFlowrateFactName,           FactMetaData::valueTypeUint16)
+    , _setFlowrateFact          (0, _setFlowrateFactName,           FactMetaData::valueTypeUint16)
     , _totalSprayedVolumeFact   (0, _totalSprayedVolumeFactName,    FactMetaData::valueTypeFloat)
     , _armedSprayedVolumeFact   (0, _armedSprayedVolumeFactName,    FactMetaData::valueTypeFloat)
     , _lastTreeVolumeFact       (0, _lastTreeVolumeFactName,        FactMetaData::valueTypeFloat)
@@ -26,6 +28,7 @@ VehicleSprayFactGroup::VehicleSprayFactGroup(QObject* parent)
 {
     _addFact(&_mesFlowrateFact,         _mesFlowrateFactName);
     _addFact(&_desFlowrateFact,         _desFlowrateFactName);
+    _addFact(&_setFlowrateFact,         _setFlowrateFactName);
     _addFact(&_totalSprayedVolumeFact,  _totalSprayedVolumeFactName);
     _addFact(&_armedSprayedVolumeFact,  _armedSprayedVolumeFactName);
     _addFact(&_lastTreeVolumeFact,      _lastTreeVolumeFactName);
@@ -37,6 +40,7 @@ VehicleSprayFactGroup::VehicleSprayFactGroup(QObject* parent)
     // Start out as not available "--.--"
     _mesFlowrateFact.setRawValue(qQNaN());
     _desFlowrateFact.setRawValue(qQNaN());
+    _setFlowrateFact.setRawValue(qQNaN());
     _totalSprayedVolumeFact.setRawValue(qQNaN());
     _armedSprayedVolumeFact.setRawValue(qQNaN());
     _lastTreeVolumeFact.setRawValue(qQNaN());
@@ -64,6 +68,7 @@ void VehicleSprayFactGroup::_handleSprayStatus(mavlink_message_t& message)
 
     mesFlowrate()->setRawValue          (spray.measured_flowrate);
     desFlowrate()->setRawValue          (spray.desired_flowrate);
+    setFlowrate()->setRawValue          (spray.set_flowrate);
     totalSprayedVolume()->setRawValue   (spray.total_sprayed_volume);
     armedSprayedVolume()->setRawValue   (spray.armed_sprayed_volume);
     lastTreeVolume()->setRawValue       (spray.last_tree_volume);
