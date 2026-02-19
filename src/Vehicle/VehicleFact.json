@@ -163,6 +163,11 @@
     "shortDesc": "Imu temperature",
     "type":             "int16",
     "units":            "°C"
+},
+{
+    "name":             "rSSIPercent",
+    "shortDesc": "RSSI Percentage",
+    "type":             "string"
 }
 ]
 }

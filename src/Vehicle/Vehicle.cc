@@ -100,6 +100,7 @@ const char* Vehicle::_distanceToGCSFactName =       "distanceToGCS";
 const char* Vehicle::_hobbsFactName =               "hobbs";
 const char* Vehicle::_throttlePctFactName =         "throttlePct";
 const char* Vehicle::_imuTempFactName =             "imuTemp";
+const char* Vehicle::_rSSIPercentFactName =         "rSSIPercent";
 
 const char* Vehicle::_gpsFactGroupName =                "gps";
 const char* Vehicle::_gps2FactGroupName =               "gps2";
@@ -170,6 +171,7 @@ Vehicle::Vehicle(LinkInterface*             link,
     , _hobbsFact                    (0, _hobbsFactName,             FactMetaData::valueTypeString)
     , _throttlePctFact              (0, _throttlePctFactName,       FactMetaData::valueTypeUint16)
     , _imuTempFact                  (0, _imuTempFactName,           FactMetaData::valueTypeInt16)
+    , _rSSIPercentFact              (0, _rSSIPercentFactName,       FactMetaData::valueTypeString)
     , _gpsFactGroup                 (this)
     , _gps2FactGroup                (this)
     , _windFactGroup                (this)
@@ -324,6 +326,7 @@ Vehicle::Vehicle(MAV_AUTOPILOT              firmwareType,
     , _hobbsFact                        (0, _hobbsFactName,             FactMetaData::valueTypeString)
     , _throttlePctFact                  (0, _throttlePctFactName,       FactMetaData::valueTypeUint16)
     , _imuTempFact                      (0, _imuTempFactName,           FactMetaData::valueTypeInt16)
+    , _rSSIPercentFact                  (0, _rSSIPercentFactName,       FactMetaData::valueTypeString)
     , _gpsFactGroup                     (this)
     , _gps2FactGroup                    (this)
     , _windFactGroup                    (this)
@@ -461,6 +464,7 @@ void Vehicle::_commonInit()
     _addFact(&_distanceToGCSFact,       _distanceToGCSFactName);
     _addFact(&_throttlePctFact,         _throttlePctFactName);
     _addFact(&_imuTempFact,             _imuTempFactName);
+    _addFact(&_rSSIPercentFact,         _rSSIPercentFactName);
 
     _hobbsFact.setRawValue(QVariant(QString("0000:00:00")));
     _addFact(&_hobbsFact,               _hobbsFactName);
@@ -1900,6 +1904,8 @@ void Vehicle::_handleRadioStatus(mavlink_message_t& message)
         _telemetryRNoise = rnoise;
         emit telemetryRNoiseChanged(_telemetryRNoise);
     }
+    std::string rssi_percentage = std::to_string(rstatus.rssi) + "%";
+    _rSSIPercentFact.setRawValue(rssi_percentage.c_str());
 }
 
 void Vehicle::_handleRCChannels(mavlink_message_t& message)

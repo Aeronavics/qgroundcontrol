@@ -32,36 +32,73 @@ Item {
     property var _activeVehicle: QGroundControl.multiVehicleManager.activeVehicle
 
     function getSprayColor() {
-        if (sprayer.mesFlowrate.rawValue > 0)
+        if (sprayer.mesFlowrate.rawValue === 65535)
         {
-            return qgcPal.colorGreen
-        }
-        else if (sprayer.sprayRemaining.rawValue < 10)
-        {
-            return qgcPal.colorRed
-        }
-        else if (sprayer.error.rawValue > 0)
-        {
-            if (sprayer.sprayRemaining.rawValue >= 10)
+            if (sprayer.desFlowrate.rawValue > 0)
             {
-                return qgcPal.colorOrange
+                return qgcPal.colorGreen
+            }
+            else if (sprayer.sprayRemaining.rawValue < 10)
+            {
+                return qgcPal.colorRed
+            }
+            else if (sprayer.error.rawValue > 0)
+            {
+                if (sprayer.sprayRemaining.rawValue >= 10)
+                {
+                    return qgcPal.colorOrange
+                }
+                else
+                {
+                    return qgcPal.colorRed
+                }
+            }
+            else if (sprayer.sprayRemaining.rawValue < 25)
+            {
+                    return qgcPal.colorOrange
+            }
+            else if (sprayer.sprayRemaining.rawValue >= 25)
+            {
+                    return qgcPal.text
             }
             else
             {
                 return qgcPal.colorRed
             }
         }
-        else if (sprayer.sprayRemaining.rawValue < 25)
-        {
-                return qgcPal.colorOrange
-        }
-        else if (sprayer.sprayRemaining.rawValue >= 25)
-        {
-                return qgcPal.text
-        }
         else
         {
-            return qgcPal.colorRed
+            if (sprayer.mesFlowrate.rawValue > 0 && sprayer.desFlowrate.rawValue > 0)
+            {
+                return qgcPal.colorGreen
+            }
+            else if (sprayer.sprayRemaining.rawValue < 10)
+            {
+                return qgcPal.colorRed
+            }
+            else if (sprayer.error.rawValue > 0)
+            {
+                if (sprayer.sprayRemaining.rawValue >= 10)
+                {
+                    return qgcPal.colorOrange
+                }
+                else
+                {
+                    return qgcPal.colorRed
+                }
+            }
+            else if (sprayer.sprayRemaining.rawValue < 25)
+            {
+                    return qgcPal.colorOrange
+            }
+            else if (sprayer.sprayRemaining.rawValue >= 25)
+            {
+                    return qgcPal.text
+            }
+            else
+            {
+                return qgcPal.colorRed
+            }
         }
     }
 
@@ -74,7 +111,14 @@ Item {
 
     function getSprayFlowrateText() {
         if (!isNaN(sprayer.mesFlowrate.rawValue)) {
-            return sprayer.mesFlowrate.valueString + sprayer.mesFlowrate.units
+            if (sprayer.mesFlowrate.rawValue === 65535)
+            {
+                return ""
+            }
+            else
+            {
+                return sprayer.mesFlowrate.valueString + sprayer.mesFlowrate.units
+            }
         }
         return "__.__ ml/s"
     }

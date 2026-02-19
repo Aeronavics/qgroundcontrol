@@ -720,6 +720,7 @@ public:
     Fact* hobbs                             () { return &_hobbsFact; }
     Fact* throttlePct                       () { return &_throttlePctFact; }
     Fact* imuTemp                           () { return &_imuTempFact; }
+    Fact* rSSIPercentFact                   () { return &_rSSIPercentFact; }
 
     FactGroup* gpsFactGroup                 () { return &_gpsFactGroup; }
     FactGroup* gps2FactGroup                () { return &_gps2FactGroup; }
@@ -1202,6 +1203,7 @@ private:
     uint32_t        _telemetryTXBuffer = 0;
     int             _telemetryLNoise = 0;
     int             _telemetryRNoise = 0;
+    uint8_t         _telemetryRSSIPercent = 0;
     bool            _mavlinkProtocolRequestComplete         = false;
     unsigned        _mavlinkProtocolRequestMaxProtoVersion  = 0;
     unsigned        _maxProtoVersion                        = 0;
@@ -1434,6 +1436,7 @@ private:
     Fact _hobbsFact;
     Fact _throttlePctFact;
     Fact _imuTempFact;
+    Fact _rSSIPercentFact;
 
     VehicleGPSFactGroup             _gpsFactGroup;
     VehicleGPS2FactGroup            _gps2FactGroup;
@@ -1497,6 +1500,7 @@ private:
     static const char* _hobbsFactName;
     static const char* _throttlePctFactName;
     static const char* _imuTempFactName;
+    static const char* _rSSIPercentFactName;
 
     static const char* _gpsFactGroupName;
     static const char* _gps2FactGroupName;

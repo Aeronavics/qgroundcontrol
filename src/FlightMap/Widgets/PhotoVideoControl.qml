@@ -86,7 +86,7 @@ Rectangle {
     property bool   _switchToPhotoModeAllowed:                  !_modeIndicatorPhotoMode && (_mavlinkCamera ? !_mavlinkCameraIsShooting : true)
     property bool   _switchToVideoModeAllowed:                  _modeIndicatorPhotoMode && (_mavlinkCamera ? !_mavlinkCameraIsShooting : true)
     property bool   _videoIsRecording:                          _mavlinkCamera ? _mavlinkCameraIsShooting : _videoStreamRecording
-    property bool   _canShootInCurrentMode:                     _mavlinkCamera ? _mavlinkCameraCanShoot : _videoStreamCanShoot || _simpleCameraAvailable
+    property bool   _canShootInCurrentMode:                     true
     property bool   _isShootingInCurrentMode:                   _mavlinkCamera ? _mavlinkCameraIsShooting : _videoStreamIsShootingInCurrentMode || _simpleCameraIsShootingInCurrentMode
 
     function setCameraMode(photoMode) {
@@ -130,13 +130,13 @@ Rectangle {
 
     Timer {
         id:             simplePhotoCaptureTimer
-        interval:       1000
+        interval:       500
         onTriggered:    _simplePhotoCaptureIsIdle = true
     }
 
     Timer {
         id:             streamChangeTimer
-        interval:       1000
+        interval:       500
         onTriggered:    _streamChangeCooldownClear = true
     }
 
@@ -169,7 +169,7 @@ Rectangle {
                     source:             "/qmlimages/video_swap.svg"
                     fillMode:           Image.PreserveAspectFit
                     sourceSize.height:  height
-                    color:              _streamChangeCooldownClear && _videoStreamManager.decoding ? qgcPal.colorGrey : qgcPal.colorWhite
+                    color:              _streamChangeCooldownClear ? qgcPal.colorWhite : qgcPal.colorGrey
                 }
 
                 MouseArea {
@@ -202,7 +202,7 @@ Rectangle {
                     source:             "/qmlimages/camera_photo.svg"
                     fillMode:           Image.PreserveAspectFit
                     sourceSize.height:  height
-                    color:              _simplePhotoCaptureIsIdle && _videoStreamManager.decoding ? qgcPal.colorGrey : qgcPal.colorWhite
+                    color:              _simplePhotoCaptureIsIdle ? qgcPal.colorWhite : qgcPal.colorGrey
                 }
 
                 MouseArea {

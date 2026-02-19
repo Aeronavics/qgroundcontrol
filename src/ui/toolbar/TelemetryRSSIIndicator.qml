@@ -27,7 +27,8 @@ Item {
     property bool showIndicator: _hasTelemetry
 
     property var  _activeVehicle:   QGroundControl.multiVehicleManager.activeVehicle
-    property bool _hasTelemetry:    _activeVehicle ? _activeVehicle.telemetryLRSSI !== 0 : false
+    // property bool _hasTelemetry:    _activeVehicle ? _activeVehicle.telemetryLRSSI !== 0 : false
+    property bool _hasTelemetry:    false
 
     Component {
         id: telemRSSIInfo
