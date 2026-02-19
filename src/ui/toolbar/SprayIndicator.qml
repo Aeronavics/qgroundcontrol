@@ -123,33 +123,40 @@ Item {
         return "__.__ ml/s"
     }
 
-    QGCColoredImage {
-        id:                 sprayImage
-        anchors.top:        parent.top
-        anchors.bottom:     parent.bottom
-        width:              height
-        sourceSize.height:  height
-        source:             "/qmlimages/spray.svg"
-        fillMode:           Image.PreserveAspectFit
-        color:              getSprayColor()
-    }
+    Row {
+        id:             fuelRow
+        anchors.top:    parent.top
+        anchors.bottom: parent.bottom
+        spacing:        ScreenTools.defaultFontPixelWidth
 
-    Column {
-        id:                     sprayValuesColumn
-        anchors.verticalCenter: parent.verticalCenter
-        anchors.leftMargin:     ScreenTools.defaultFontPixelWidth / 2
-        anchors.left:           sprayImage.right
-
-        QGCLabel {
-            anchors.horizontalCenter:   flowrateValue.horizontalCenter
-            text:                       getSprayPercentageText()
-            color:                      getSprayColor()
+        QGCColoredImage {
+            id:                 sprayImage
+            anchors.top:        parent.top
+            anchors.bottom:     parent.bottom
+            width:              height
+            sourceSize.height:  height
+            source:             "/qmlimages/spray.svg"
+            fillMode:           Image.PreserveAspectFit
+            color:              getSprayColor()
         }
 
-        QGCLabel {
-            id:                     flowrateValue
-            text:                   getSprayFlowrateText()
-            color:                  getSprayColor()
+        Column {
+            id:                     sprayValuesColumn
+            anchors.verticalCenter: parent.verticalCenter
+            anchors.leftMargin:     ScreenTools.defaultFontPixelWidth / 2
+            anchors.left:           sprayImage.right
+
+            QGCLabel {
+                anchors.horizontalCenter:   flowrateValue.horizontalCenter
+                text:                       getSprayPercentageText()
+                color:                      getSprayColor()
+            }
+
+            QGCLabel {
+                id:                     flowrateValue
+                text:                   getSprayFlowrateText()
+                color:                  getSprayColor()
+            }
         }
     }
 
