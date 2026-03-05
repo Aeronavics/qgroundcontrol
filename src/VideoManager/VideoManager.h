@@ -22,6 +22,10 @@
 #include "QGCToolbox.h"
 #include "SubtitleWriter.h"
 
+#include <thread>
+#include <chrono>
+#include <mutex>
+
 Q_DECLARE_LOGGING_CATEGORY(VideoManagerLog)
 
 class VideoSettings;
@@ -53,12 +57,15 @@ public:
     Q_PROPERTY(bool             hasThermal              READ    hasThermal                                  NOTIFY decodingChanged)
     Q_PROPERTY(QString          imageFile               READ    imageFile                                   NOTIFY imageFileChanged)
     Q_PROPERTY(QString          secondaryImageFile      READ    secondaryImageFile                          NOTIFY secondaryImageFileChanged)
+    Q_PROPERTY(QString          tertiaryImageFile       READ    tertiaryImageFile                           NOTIFY tertiaryImageFileChanged)
     Q_PROPERTY(bool             streaming               READ    streaming                                   NOTIFY streamingChanged)
     Q_PROPERTY(bool             decoding                READ    decoding                                    NOTIFY decodingChanged)
     Q_PROPERTY(bool             secondaryDecoding       READ    secondaryDecoding                           NOTIFY secondaryDecodingChanged)
+    Q_PROPERTY(bool             tertiaryDecoding        READ    tertiaryDecoding                            NOTIFY tertiaryDecodingChanged)
     Q_PROPERTY(bool             recording               READ    recording                                   NOTIFY recordingChanged)
     Q_PROPERTY(QSize            videoSize               READ    videoSize                                   NOTIFY videoSizeChanged)
     Q_PROPERTY(bool             secondaryStream         READ    secondaryStream                             NOTIFY secondaryStreamChanged)
+    Q_PROPERTY(bool             tertiaryStream          READ    tertiaryStream                              NOTIFY tertiaryStreamChanged)
 
     virtual bool        hasVideo            ();
     virtual bool        isGStreamer         ();
@@ -74,7 +81,9 @@ public:
     virtual bool        hasThermal          ();
     virtual QString     imageFile           ();
     virtual QString     secondaryImageFile  ();
-    virtual bool        secondaryStream     () { return _secondaryStream; }
+    virtual QString     tertiaryImageFile   ();
+    virtual bool        secondaryStream     () { return _currentStream == 1; }
+    virtual bool        tertiaryStream      () { return _currentStream == 2; }
 
     bool streaming(void) {
         return _streaming;
@@ -86,6 +95,10 @@ public:
 
     bool secondaryDecoding(void) {
         return _secondaryDecoding;
+    }
+
+    bool tertiaryDecoding(void) {
+        return _tertiaryDecoding;
     }
 
     bool recording(void) {
@@ -123,6 +136,7 @@ public:
 
     Q_INVOKABLE void grabImage          (const QString& imageFile = QString());
     Q_INVOKABLE void secondaryGrabImage (const QString& secondaryImageFile = QString());
+    Q_INVOKABLE void tertiaryGrabImage  (const QString& tertiaryImageFile = QString());
 
     Q_INVOKABLE void toggleStreams  ();
 
@@ -137,14 +151,17 @@ signals:
     void aspectRatioChanged         ();
     void autoStreamConfiguredChanged();
     void imageFileChanged           ();
-    void secondaryImageFileChanged   ();
+    void secondaryImageFileChanged  ();
+    void tertiaryImageFileChanged   ();
     void streamingChanged           ();
     void decodingChanged            ();
     void secondaryDecodingChanged   ();
+    void tertiaryDecodingChanged    ();
     void recordingChanged           ();
     void recordingStarted           ();
     void videoSizeChanged           ();
     void secondaryStreamChanged     ();
+    void tertiaryStreamChanged      ();
 
 protected slots:
     void _videoSourceChanged        ();
@@ -168,34 +185,40 @@ protected:
     void _restartVideo              (unsigned id);
     void _startReceiver             (unsigned id);
     void _stopReceiver              (unsigned id);
+    void checkForTertiaryStream     (bool* connected);
 
 protected:
     QString                 _videoFile;
     QString                 _imageFile;
     QString                 _secondaryImageFile;
+    QString                 _tertiaryImageFile;
     SubtitleWriter          _subtitleWriter;
     bool                    _isTaisync              = false;
-    VideoReceiver*          _videoReceiver[2]       = { nullptr, nullptr };
-    void*                   _videoSink[2]           = { nullptr, nullptr };
-    QString                 _videoUri[2];
-    bool                    _secondaryStream        = false;
+    VideoReceiver*          _videoReceiver[3]       = { nullptr, nullptr, nullptr };
+    void*                   _videoSink[3]           = { nullptr, nullptr, nullptr };
+    QString                 _videoUri[3];
+    uint8_t                 _currentStream          = 0;
+    bool                    _tertiaryStreamAvailable = false;
 
     // FIXME: AV: _videoStarted seems to be access from 3 different threads, from time to time
     // 1) Video Receiver thread
     // 2) Video Manager/main app thread
     // 3) Qt rendering thread (during video sink creation process which should happen in this thread)
     // It works for now but...
-    bool                    _videoStarted[2]        = { false, false };
-    bool                    _lowLatencyStreaming[2] = { false, false };
+    bool                    _videoStarted[3]        = { false, false, false };
+    bool                    _lowLatencyStreaming[3] = { false, false, false };
     QAtomicInteger<bool>    _streaming              = false;
     QAtomicInteger<bool>    _decoding               = false;
     QAtomicInteger<bool>    _secondaryDecoding      = false;
+    QAtomicInteger<bool>    _tertiaryDecoding       = false;
     QAtomicInteger<bool>    _recording              = false;
     QAtomicInteger<quint32> _videoSize              = 0;
     VideoSettings*          _videoSettings          = nullptr;
     QString                 _uvcVideoSourceID;
     bool                    _fullScreen             = false;
     Vehicle*                _activeVehicle          = nullptr;
+    std::thread             tertiaryVideoChecker;
+    std::mutex              tertiaryCheckerMutex;
 };
 
 #endif

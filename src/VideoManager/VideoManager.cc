@@ -14,6 +14,7 @@
 #include <QUrl>
 #include <QDir>
 #include <QQuickWindow>
+#include <QTcpSocket>
 
 #ifndef QGC_DISABLE_UVC
 #include <QCameraInfo>
@@ -52,7 +53,8 @@ static const char* kFileExtension[VideoReceiver::FILE_FORMAT_MAX - VideoReceiver
 
 //-----------------------------------------------------------------------------
 VideoManager::VideoManager(QGCApplication* app, QGCToolbox* toolbox)
-    : QGCTool(app, toolbox)
+    : QGCTool(app, toolbox),
+    tertiaryCheckerMutex()
 {
 #if !defined(QGC_GST_STREAMING)
     static bool once = false;
@@ -61,12 +63,16 @@ VideoManager::VideoManager(QGCApplication* app, QGCToolbox* toolbox)
         once = true;
     }
 #endif
+    // Start thread checking for third camera
+    tertiaryVideoChecker = std::thread(&VideoManager::checkForTertiaryStream, this, &_tertiaryStreamAvailable);
 }
 
 //-----------------------------------------------------------------------------
 VideoManager::~VideoManager()
 {
-    for (int i = 0; i < 2; i++) {
+    tertiaryVideoChecker.join();
+
+    for (int i = 0; i < 3; i++) {
         if (_videoReceiver[i] != nullptr) {
             delete _videoReceiver[i];
             _videoReceiver[i] = nullptr;
@@ -117,7 +123,12 @@ VideoManager::setToolbox(QGCToolbox *toolbox)
 #if defined(QGC_GST_STREAMING)
     _videoReceiver[0] = toolbox->corePlugin()->createVideoReceiver(this);
     _videoReceiver[1] = toolbox->corePlugin()->createVideoReceiver(this);
+    _videoReceiver[2] = toolbox->corePlugin()->createVideoReceiver(this);
 
+
+    ///////////////////////////////////////////////////////////////////////////////////////
+    /////////////////////////////////////   Video 0   /////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////////////////////
     connect(_videoReceiver[0], &VideoReceiver::streamingChanged, this, [this](bool active){
         _streaming = active;
         emit streamingChanged();
@@ -179,13 +190,9 @@ VideoManager::setToolbox(QGCToolbox *toolbox)
         emit videoSizeChanged();
     });
 
-    //connect(_videoReceiver, &VideoReceiver::onTakeScreenshotComplete, this, [this](VideoReceiver::STATUS status){
-    //    if (status == VideoReceiver::STATUS_OK) {
-    //    }
-    //});
-
-    // FIXME: AV: I believe _thermalVideoReceiver should be handled just like _videoReceiver in terms of event
-    // and I expect that it will be changed during multiple video stream activity
+    ///////////////////////////////////////////////////////////////////////////////////////
+    /////////////////////////////////////   Video 1   /////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////////////////////
     connect(_videoReceiver[1], &VideoReceiver::streamingChanged, this, [this](bool active){
         _streaming = active;
         emit streamingChanged();
@@ -247,6 +254,70 @@ VideoManager::setToolbox(QGCToolbox *toolbox)
         emit videoSizeChanged();
     });
 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    /////////////////////////////////////   Video 2   /////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////////////////////
+    connect(_videoReceiver[2], &VideoReceiver::streamingChanged, this, [this](bool active){
+        _streaming = active;
+        emit streamingChanged();
+    });
+
+    connect(_videoReceiver[2], &VideoReceiver::onStartComplete, this, [this](VideoReceiver::STATUS status) {
+        qCDebug(VideoManagerLog) << "Video 2 Start complete, status: " << status;
+        if (status == VideoReceiver::STATUS_OK) {
+            _videoStarted[2] = true;
+            if (_videoSink[2] != nullptr) {
+                qCDebug(VideoManagerLog) << "Video 2 start decoding";
+                // It is absolutely ok to have video receiver active (streaming) and decoding not active
+                // It should be handy for cases when you have many streams and want to show only some of them
+                // NOTE that even if decoder did not start it is still possible to record video
+                _videoReceiver[2]->startDecoding(_videoSink[2]);
+            }
+        } else if (status == VideoReceiver::STATUS_INVALID_URL) {
+            // Invalid URL - don't restart
+        } else if (status == VideoReceiver::STATUS_INVALID_STATE) {
+            // Already running
+        } else {
+            _restartVideo(2);
+        }
+    });
+
+    connect(_videoReceiver[2], &VideoReceiver::onStopComplete, this, [this](VideoReceiver::STATUS status) {
+        qCDebug(VideoManagerLog) << "Video 2 Stop complete, status: " << status;
+        _videoStarted[2] = false;
+        if (status == VideoReceiver::STATUS_INVALID_URL) {
+            qCDebug(VideoManagerLog) << "Invalid video URL. Not restarting";
+        } else {
+            _startReceiver(2);
+        }
+    });
+
+    connect(_videoReceiver[2], &VideoReceiver::decodingChanged, this, [this](bool active){
+        qCDebug(VideoManagerLog) << "Video 2 decoding changed, active: " << (active ? "yes" : "no");
+        _tertiaryDecoding = active;
+        emit tertiaryDecodingChanged();
+    });
+
+    connect(_videoReceiver[2], &VideoReceiver::recordingChanged, this, [this](bool active){
+        qCDebug(VideoManagerLog) << "Video 2 recording changed, active: " << (active ? "yes" : "no");
+        _recording = active;
+        if (!active) {
+            _subtitleWriter.stopCapturingTelemetry();
+        }
+        emit recordingChanged();
+    });
+
+    connect(_videoReceiver[2], &VideoReceiver::recordingStarted, this, [this](){
+        qCDebug(VideoManagerLog) << "Video 2 recording started";
+        _subtitleWriter.startCapturingTelemetry(_videoFile);
+    });
+
+    connect(_videoReceiver[2], &VideoReceiver::videoSizeChanged, this, [this](QSize size){
+        qCDebug(VideoManagerLog) << "Video 2 resized. New resolution: " << size.width() << "x" << size.height();
+        _videoSize = ((quint32)size.width() << 16) | (quint32)size.height();
+        emit videoSizeChanged();
+    });
+
     // if (_videoReceiver[1] != nullptr) {
     //     connect(_videoReceiver[1], &VideoReceiver::onStartComplete, this, [this](VideoReceiver::STATUS status) {
     //         if (status == VideoReceiver::STATUS_OK) {
@@ -271,6 +342,8 @@ VideoManager::setToolbox(QGCToolbox *toolbox)
 #endif
     _updateSettings(0);
     _updateSettings(1);
+    _updateSettings(2);
+
     if(isGStreamer()) {
         startVideo();
     } else {
@@ -336,6 +409,7 @@ VideoManager::startVideo()
 
     _startReceiver(0);
     _startReceiver(1);
+    _startReceiver(2);
 }
 
 //-----------------------------------------------------------------------------
@@ -346,6 +420,7 @@ VideoManager::stopVideo()
         return;
     }
 
+    _stopReceiver(2);
     _stopReceiver(1);
     _stopReceiver(0);
 }
@@ -384,6 +459,7 @@ VideoManager::startRecording(const QString& videoFile)
             + (videoFile.isEmpty() ? QDateTime::currentDateTime().toString("yyyy-MM-dd_hh.mm.ss") : videoFile)
             + ".";
     QString videoFile2 = _videoFile + "2." + ext;
+    QString videoFile3 = _videoFile + "3." + ext;
     _videoFile += ext;
 
     if (_videoReceiver[0] && _videoStarted[0]) {
@@ -391,6 +467,9 @@ VideoManager::startRecording(const QString& videoFile)
     }
     if (_videoReceiver[1] && _videoStarted[1]) {
         _videoReceiver[1]->startRecording(videoFile2, fileFormat);
+    }
+    if (_videoReceiver[2] && _videoStarted[2]) {
+        _videoReceiver[2]->startRecording(videoFile3, fileFormat);
     }
 
 #else
@@ -406,38 +485,11 @@ VideoManager::stopRecording()
     }
 #if defined(QGC_GST_STREAMING)
 
-    for (int i = 0; i < 2; i++) {
+    for (int i = 0; i < 3; i++) {
         if (_videoReceiver[i]) {
             _videoReceiver[i]->stopRecording();
         }
     }
-#endif
-}
-
-void
-VideoManager::secondaryGrabImage(const QString& secondaryImageFile)
-{
-    if (qgcApp()->runningUnitTests()) {
-        return;
-    }
-#if defined(QGC_GST_STREAMING)
-    if (!_videoReceiver[0]) {
-        return;
-    }
-
-    if (secondaryImageFile.isEmpty()) {
-        _secondaryImageFile = qgcApp()->toolbox()->settingsManager()->appSettings()->photoSavePath();
-        _secondaryImageFile += + "/" + QDateTime::currentDateTime().toString("yyyy-MM-dd_hh.mm.ss.zzz") + ".jpg";
-    } else {
-        _secondaryImageFile = secondaryImageFile;
-    }
-
-    emit secondaryImageFileChanged();
-    _videoReceiver[1]->takeScreenshot(_imageFile);
-
-
-#else
-    Q_UNUSED(imageFile)
 #endif
 }
 
@@ -462,6 +514,60 @@ VideoManager::grabImage(const QString& imageFile)
     emit imageFileChanged();
     _videoReceiver[0]->takeScreenshot(_imageFile);
 
+
+
+#else
+    Q_UNUSED(imageFile)
+#endif
+}
+
+void
+VideoManager::secondaryGrabImage(const QString& secondaryImageFile)
+{
+    if (qgcApp()->runningUnitTests()) {
+        return;
+    }
+#if defined(QGC_GST_STREAMING)
+    if (!_videoReceiver[1]) {
+        return;
+    }
+
+    if (secondaryImageFile.isEmpty()) {
+        _secondaryImageFile = qgcApp()->toolbox()->settingsManager()->appSettings()->photoSavePath();
+        _secondaryImageFile += + "/" + QDateTime::currentDateTime().toString("yyyy-MM-dd_hh.mm.ss.zzz") + ".jpg";
+    } else {
+        _secondaryImageFile = secondaryImageFile;
+    }
+
+    emit secondaryImageFileChanged();
+    _videoReceiver[1]->takeScreenshot(_secondaryImageFile);
+
+
+#else
+    Q_UNUSED(imageFile)
+#endif
+}
+
+void
+VideoManager::tertiaryGrabImage(const QString& tertiaryImageFile)
+{
+    if (qgcApp()->runningUnitTests()) {
+        return;
+    }
+#if defined(QGC_GST_STREAMING)
+    if (!_videoReceiver[2]) {
+        return;
+    }
+
+    if (tertiaryImageFile.isEmpty()) {
+        _tertiaryImageFile = qgcApp()->toolbox()->settingsManager()->appSettings()->photoSavePath();
+        _tertiaryImageFile += + "/" + QDateTime::currentDateTime().toString("yyyy-MM-dd_hh.mm.ss.zzz") + ".jpg";
+    } else {
+        _tertiaryImageFile = tertiaryImageFile;
+    }
+
+    emit tertiaryImageFileChanged();
+    _videoReceiver[2]->takeScreenshot(_tertiaryImageFile);
 
 
 #else
@@ -545,6 +651,13 @@ QString
 VideoManager::secondaryImageFile()
 {
     return _secondaryImageFile;
+}
+
+//-----------------------------------------------------------------------------
+QString
+VideoManager::tertiaryImageFile()
+{
+    return _tertiaryImageFile;
 }
 
 //-----------------------------------------------------------------------------
@@ -746,6 +859,21 @@ VideoManager::_initVideo()
     } else {
         qCDebug(VideoManagerLog) << "second video receiver disabled";
     }
+
+    widget = root->findChild<QQuickItem*>("thirdVideoContent");
+
+    if (widget != nullptr && _videoReceiver[2] != nullptr) {
+        _videoSink[2] = qgcApp()->toolbox()->corePlugin()->createVideoSink(this, widget);
+        if (_videoSink[2] != nullptr) {
+            if (_videoStarted[2]) {
+                _videoReceiver[2]->startDecoding(_videoSink[2]);
+            }
+        } else {
+            qCDebug(VideoManagerLog) << "createVideoSink() failed";
+        }
+    } else {
+        qCDebug(VideoManagerLog) << "third video receiver disabled";
+    }
 #endif
 }
 
@@ -829,6 +957,7 @@ VideoManager::_updateSettings(unsigned id)
     // {
         settingsChanged |= _updateVideoUri(0, QStringLiteral("rtsp://192.168.144.53/stream1"));
         settingsChanged |= _updateVideoUri(1, QStringLiteral("rtsp://192.168.144.54/stream1"));
+        settingsChanged |= _updateVideoUri(2, QStringLiteral("rtsp://192.168.144.55/stream1"));
     // }
     // else
     // {
@@ -942,6 +1071,7 @@ VideoManager::_restartAllVideos()
 {
     _restartVideo(0);
     _restartVideo(1);
+    _restartVideo(2);
 }
 
 //----------------------------------------------------------------------------------------
@@ -955,7 +1085,7 @@ VideoManager::_startReceiver(unsigned id)
        So we should allow for some negotiation time for rtsp */
     const unsigned timeout = (source == VideoSettings::videoSourceRTSP ? rtsptimeout : 2 );
 
-    if (id > 1) {
+    if (id > 2) {
         qCDebug(VideoManagerLog) << "Unsupported receiver id" << id;
     } else if (_videoReceiver[id] != nullptr/* && _videoSink[id] != nullptr*/) {
         if (!_videoUri[id].isEmpty()) {
@@ -972,7 +1102,7 @@ void
 VideoManager::_stopReceiver(unsigned id)
 {
 #if defined(QGC_GST_STREAMING)
-    if (id > 1) {
+    if (id > 2) {
         qCDebug(VideoManagerLog) << "Unsupported receiver id" << id;
     } else if (_videoReceiver[id] != nullptr) {
         _videoReceiver[id]->stop();
@@ -1035,22 +1165,71 @@ VideoManager::_aspectRatioChanged()
 void
 VideoManager::toggleStreams()
 {
-    _secondaryStream = !_secondaryStream;
     QQuickWindow* root = qgcApp()->mainRootWindow();
-    if (_secondaryStream)
+    if (_currentStream == 0)
     {
         QQuickItem* widget = root->findChild<QQuickItem*>("videoContent");
         widget->setVisible(false);
         widget = root->findChild<QQuickItem*>("secondVideoContent");
         widget->setVisible(true);
+        widget = root->findChild<QQuickItem*>("thirdVideoContent");
+        widget->setVisible(false);
+        _currentStream = 1;
     }
-    else
+    else if (_currentStream == 1)
+    {
+        if (_tertiaryStreamAvailable)
+        {
+            QQuickItem* widget = root->findChild<QQuickItem*>("videoContent");
+            widget->setVisible(false);
+            widget = root->findChild<QQuickItem*>("secondVideoContent");
+            widget->setVisible(false);
+            widget = root->findChild<QQuickItem*>("thirdVideoContent");
+            widget->setVisible(true);
+            _currentStream = 2;
+        }
+        else
+        {
+            QQuickItem* widget = root->findChild<QQuickItem*>("videoContent");
+            widget->setVisible(true);
+            widget = root->findChild<QQuickItem*>("secondVideoContent");
+            widget->setVisible(false);
+            widget = root->findChild<QQuickItem*>("thirdVideoContent");
+            widget->setVisible(false);
+            _currentStream = 0;
+        }
+    }
+    else if (_currentStream == 2)
     {
         QQuickItem* widget = root->findChild<QQuickItem*>("videoContent");
         widget->setVisible(true);
         widget = root->findChild<QQuickItem*>("secondVideoContent");
         widget->setVisible(false);
+        widget = root->findChild<QQuickItem*>("thirdVideoContent");
+        widget->setVisible(false);
+        _currentStream = 0;
     }
 
     // _restartAllVideos();
+}
+
+//----------------------------------------------------------------------------------------
+void
+VideoManager::checkForTertiaryStream(bool* connected)
+{
+    while (true)
+    {
+        QTcpSocket socket;
+        socket.connectToHost("192.168.144.55", 80);
+        if (socket.waitForConnected(1000)) { // 1 second timeout
+            if (!*connected)
+            {
+                _restartVideo(2);
+            }
+            *connected = true;
+        } else {
+            *connected = false;
+        }
+        std::this_thread::sleep_for(std::chrono::seconds(5));
+    }
 }

@@ -117,13 +117,17 @@ Rectangle {
             console.log("toggleShooting", _anyVideoStreamAvailable);
             _simplePhotoCaptureIsIdle = false;
             simplePhotoCaptureTimer.start();
-            if (!_videoStreamManager.secondaryStream)
+            if (_videoStreamManager.secondaryStream)
             {
-                _videoStreamManager.grabImage();
+                _videoStreamManager.secondaryGrabImage();
+            }
+            else if (_videoStreamManager.tertiaryStream)
+            {
+                _videoStreamManager.tertiaryGrabImage();
             }
             else
             {
-                _videoStreamManager.secondaryGrabImage();
+                _videoStreamManager.grabImage();
             }
         }
     }
