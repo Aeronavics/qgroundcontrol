@@ -24,6 +24,12 @@ Item {
 
     property bool _roverFirmware:           controller.parameterExists(-1, "MODE1") // This catches all usage of ArduRover firmware vehicle types: Rover, Boat...
 
+    property Fact _avoidance: controller.getParameterFact(-1, "AVOID_ENABLE")
+    property bool _avoidance_enabled: _avoidance.rawValue !== 0
+
+    property Fact _proximityMargin: controller.getParameterFact(-1, "AVOID_MARGIN", false)
+    property Fact _proximityNoGPSDist: controller.getParameterFact(-1, "AVOID_DIST_MAX", false)
+
 
     Column {
         anchors.fill:       parent
@@ -84,6 +90,18 @@ Item {
             visible:    controller.vehicle.multiRotor
 
             property Fact fact: controller.getParameterFact(-1, "RTL_ALT", false /* reportMissing */)
+        }
+
+        VehicleSummaryRow {
+            labelText:  qsTr("Proximity GPS Avoid Dist:")
+            valueText:  _proximityMargin.valueString + " " + _proximityMargin.units
+            visible:    _avoidance_enabled
+        }
+
+        VehicleSummaryRow {
+            labelText:  qsTr("Proximity Non-GPS Avoid Dist:")
+            valueText:  _proximityNoGPSDist.valueString + " " + _proximityNoGPSDist.units
+            visible:    _avoidance_enabled
         }
     }
 }

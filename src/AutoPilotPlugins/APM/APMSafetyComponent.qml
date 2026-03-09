@@ -25,7 +25,7 @@ SetupPage {
     Component {
         id: safetyPageComponent
 
-        Flow {
+        Column {
             id:         flowLayout
             width:      availableWidth
             spacing:    _margins
@@ -61,6 +61,9 @@ SetupPage {
             property real _innerMargin:     _margins / 2
             property bool _showIcon:        !ScreenTools.isTinyScreen
             property bool _roverFirmware:   controller.parameterExists(-1, "MODE1") // This catches all usage of ArduRover firmware vehicle types: Rover, Boat...
+
+            property Fact _avoidance: controller.getParameterFact(-1, "AVOID_ENABLE")
+            property bool _avoidance_enabled: _avoidance.rawValue !== 0
 
 
             property string _restartRequired: qsTr("Requires vehicle reboot")
@@ -659,6 +662,69 @@ SetupPage {
 
             Loader {
                 sourceComponent: controller.vehicle.multiRotor ? copterRTL : undefined
+            }
+
+            Component {
+                id: copterProxAvoid
+
+                Column {
+                    spacing: _margins / 2
+
+                    property Fact _proximityMargin: controller.getParameterFact(-1, "AVOID_MARGIN", false)
+                    property Fact _proximityNoGPSDist: controller.getParameterFact(-1, "AVOID_DIST_MAX", false)
+
+                    QGCLabel {
+                        text:           qsTr("Collision Avoidance")
+                        font.family:    ScreenTools.demiboldFontFamily
+                    }
+
+                    Rectangle {
+                        id:     proxSettings
+                        width:  proxDistField.x + proxDistField.width + _margins
+                        height: proxDistField.y + proxDistField.height + _margins
+                        color:  ggcPal.windowShade
+
+
+                        QGCLabel {
+                            id:                 proxMarginLabel
+                            anchors.margins:    _innerMargin
+                            anchors.left:       parent.left
+                            anchors.baseline:   proxMarginField.baseline
+
+                            text:               qsTr("Loiter Avoidance Margin:")
+                        }
+
+                        FactTextField {
+                            id:                 proxMarginField
+                            anchors.margins:    _innerMargin
+                            anchors.top:        parent.top
+                            anchors.left:       proxMaxDistLabel.right
+                            fact:               _proximityMargin
+                            showUnits:          true
+                        }
+
+                        QGCLabel {
+                            id:                 proxMaxDistLabel
+                            anchors.margins:    _innerMargin
+                            anchors.left:       parent.left
+                            anchors.baseline:   proxDistField.baseline
+                            text:               qsTr("AltHold Avoidance Distance:")
+                        }
+
+                        FactTextField {
+                            id:                 proxDistField
+                            anchors.margins:    _innerMargin
+                            anchors.left:       proxMaxDistLabel.right
+                            anchors.top:        proxMarginField.bottom
+                            fact:               _proximityNoGPSDist
+                            showUnits:          true
+                        }
+                    } // Rectangle - Proximity Settings
+                } // Column - Proximity Settings
+            }
+
+            Loader {
+                sourceComponent: _avoidance_enabled ? copterProxAvoid : undefined
             }
 
             Component {
