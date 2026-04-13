@@ -70,7 +70,6 @@ VideoManager::VideoManager(QGCApplication* app, QGCToolbox* toolbox)
 //-----------------------------------------------------------------------------
 VideoManager::~VideoManager()
 {
-    tertiaryVideoChecker.join();
 
     for (int i = 0; i < 3; i++) {
         if (_videoReceiver[i] != nullptr) {

@@ -76,4 +76,16 @@ private:
     Fact _rotationPitch270Fact;
     Fact _minDistanceFact;
     Fact _maxDistanceFact;
+
+    qint64 _rotationNoneTimer;
+    qint64 _rotationYaw45Timer;
+    qint64 _rotationYaw90Timer;
+    qint64 _rotationYaw135Timer;
+    qint64 _rotationYaw180Timer;
+    qint64 _rotationYaw225Timer;
+    qint64 _rotationYaw270Timer;
+    qint64 _rotationYaw315Timer;
+    qint64 _rotationPitch90Timer;
+    qint64 _rotationPitch270Timer;
+
 };

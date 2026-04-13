@@ -65,26 +65,33 @@ void VehicleDistanceSensorFactGroup::handleMessage(Vehicle* /* vehicle */, mavli
     struct orientation2Fact_s {
         MAV_SENSOR_ORIENTATION  orientation;
         Fact*                   fact;
+        qint64                 timer;
     };
 
     orientation2Fact_s rgOrientation2Fact[] =
     {
-        { MAV_SENSOR_ROTATION_NONE,         rotationNone() },
-        { MAV_SENSOR_ROTATION_YAW_45,       rotationYaw45() },
-        { MAV_SENSOR_ROTATION_YAW_90,       rotationYaw90() },
-        { MAV_SENSOR_ROTATION_YAW_135,      rotationYaw135() },
-        { MAV_SENSOR_ROTATION_YAW_180,      rotationYaw180() },
-        { MAV_SENSOR_ROTATION_YAW_225,      rotationYaw225() },
-        { MAV_SENSOR_ROTATION_YAW_270,      rotationYaw270() },
-        { MAV_SENSOR_ROTATION_YAW_315,      rotationYaw315() },
-        { MAV_SENSOR_ROTATION_PITCH_90,     rotationPitch90() },
-        { MAV_SENSOR_ROTATION_PITCH_270,    rotationPitch270() },
+        { MAV_SENSOR_ROTATION_NONE,         rotationNone(),     _rotationNoneTimer },
+        { MAV_SENSOR_ROTATION_YAW_45,       rotationYaw45(),    _rotationYaw45Timer },
+        { MAV_SENSOR_ROTATION_YAW_90,       rotationYaw90(),    _rotationYaw90Timer },
+        { MAV_SENSOR_ROTATION_YAW_135,      rotationYaw135(),   _rotationYaw135Timer },
+        { MAV_SENSOR_ROTATION_YAW_180,      rotationYaw180(),   _rotationYaw180Timer },
+        { MAV_SENSOR_ROTATION_YAW_225,      rotationYaw225(),   _rotationYaw225Timer },
+        { MAV_SENSOR_ROTATION_YAW_270,      rotationYaw270(),   _rotationYaw270Timer },
+        { MAV_SENSOR_ROTATION_YAW_315,      rotationYaw315(),   _rotationYaw315Timer },
+        { MAV_SENSOR_ROTATION_PITCH_90,     rotationPitch90(),  _rotationPitch90Timer },
+        { MAV_SENSOR_ROTATION_PITCH_270,    rotationPitch270(), _rotationPitch270Timer },
     };
 
     for (size_t i=0; i<sizeof(rgOrientation2Fact)/sizeof(rgOrientation2Fact[0]); i++) {
         const orientation2Fact_s& orientation2Fact = rgOrientation2Fact[i];
         if (orientation2Fact.orientation == distanceSensor.orientation) {
+            rgOrientation2Fact[i].timer = QDateTime::currentMSecsSinceEpoch();
             orientation2Fact.fact->setRawValue(distanceSensor.current_distance / 100.0); // cm to meters
+        }
+        else if (rgOrientation2Fact[i].timer + 5000 < QDateTime::currentMSecsSinceEpoch() && rgOrientation2Fact[i].timer != 0)
+        {
+            orientation2Fact.fact->setRawValue(distanceSensor.max_distance / 100.0);
+            rgOrientation2Fact[i].timer = 0;
         }
     }
 
