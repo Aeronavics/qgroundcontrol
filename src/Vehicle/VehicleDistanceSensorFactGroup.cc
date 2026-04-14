@@ -86,7 +86,7 @@ void VehicleDistanceSensorFactGroup::handleMessage(Vehicle* /* vehicle */, mavli
         const orientation2Fact_s& orientation2Fact = rgOrientation2Fact[i];
         if (orientation2Fact.orientation == distanceSensor.orientation) {
             rgOrientation2Fact[i].timer = QDateTime::currentMSecsSinceEpoch();
-            orientation2Fact.fact->setRawValue(distanceSensor.current_distance / 100.0); // cm to meters
+            orientation2Fact.fact->setRawValue((distanceSensor.current_distance - 1450) / 100.0); // cm to meters
         }
         else if (rgOrientation2Fact[i].timer + 5000 < QDateTime::currentMSecsSinceEpoch() && rgOrientation2Fact[i].timer != 0)
         {
