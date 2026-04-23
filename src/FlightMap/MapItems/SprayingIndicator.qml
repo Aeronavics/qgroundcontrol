@@ -26,7 +26,7 @@ MapQuickItem {
        height:     _radius * 2
        radius:     _radius
        color:      qgcPal.colorGreen
-       opacity:    0.4
+       opacity:    0.7
 
        readonly property real _radius: ScreenTools.defaultFontPixelHeight * 0.15
    }

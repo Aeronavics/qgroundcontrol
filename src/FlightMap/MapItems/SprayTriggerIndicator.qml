@@ -28,7 +28,7 @@ MapQuickItem {
        color:      qgcPal.colorGreen
        opacity:    0.4
 
-       readonly property real _radius: ScreenTools.defaultFontPixelHeight * 0.6
+       readonly property real _radius: ScreenTools.defaultFontPixelHeight * 0.45
 
        QGCColoredImage {
            height:             parent.height * 0.75

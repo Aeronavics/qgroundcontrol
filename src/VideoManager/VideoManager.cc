@@ -15,6 +15,10 @@
 #include <QDir>
 #include <QQuickWindow>
 #include <QTcpSocket>
+// #if defined(__android__)
+#include <QAndroidJniObject>
+#include <QAndroidJniEnvironment>
+// #endif
 
 #ifndef QGC_DISABLE_UVC
 #include <QCameraInfo>
@@ -513,8 +517,6 @@ VideoManager::grabImage(const QString& imageFile)
     emit imageFileChanged();
     _videoReceiver[0]->takeScreenshot(_imageFile);
 
-
-
 #else
     Q_UNUSED(imageFile)
 #endif
@@ -835,7 +837,7 @@ VideoManager::_initVideo()
         _videoSink[0] = qgcApp()->toolbox()->corePlugin()->createVideoSink(this, widget);
         if (_videoSink[0] != nullptr) {
             if (_videoStarted[0]) {
-                _videoReceiver[0]->startDecoding(_videoSink[1]);
+                _videoReceiver[0]->startDecoding(_videoSink[0]);
             }
         } else {
             qCDebug(VideoManagerLog) << "createVideoSink() failed";
@@ -1231,4 +1233,110 @@ VideoManager::checkForTertiaryStream(bool* connected)
         }
         std::this_thread::sleep_for(std::chrono::seconds(5));
     }
+}
+
+//----------------------------------------------------------------------------------------
+std::string
+VideoManager::toExifString(double d, bool bLat)
+{
+    const char* NS = d >= 0.0 ? "N" : "S";
+    const char* EW = d >= 0.0 ? "E" : "W";
+    const char* NSEW = bLat ? NS : EW;
+    if (d < 0)
+        d = -d;
+    auto deg = static_cast<int>(d);
+    d -= deg;
+    d *= 60;
+    auto min = static_cast<int>(d);
+    d -= min;
+    d *= 60 * 100;
+    int sec = static_cast<int>(d);
+
+    char result[200];
+    snprintf(result, sizeof(result), "%d/1,%d/1,%d/100", deg, min, sec);
+    return result;
+}
+
+//----------------------------------------------------------------------------------------
+std::string
+VideoManager::toExifAltString(double d)
+{
+    char result[200];
+    d *= 100;
+    snprintf(result, sizeof(result), "%d/100", abs(static_cast<int>(d)));
+    return result;
+}
+
+//----------------------------------------------------------------------------------------
+void
+VideoManager::writeEXIFDataToFile(QString path)
+{
+#if defined(__android__)
+
+    QAndroidJniObject exifObject("android/media/ExifInterface", "(Ljava/lang/String;)V",
+                                 QAndroidJniObject::fromString(path).object<jstring>());
+
+    if (exifObject.isValid()) {
+
+        QDateTime current = QDateTime::currentDateTime();
+        QString datetime = current.toString("yyyy:MM:dd HH:mm:ss");
+
+        exifObject.callMethod<void>("setAttribute",
+                                    "(Ljava/lang/String;Ljava/lang/String;)V",
+                                    QAndroidJniObject::fromString("Make").object<jstring>(),
+                                    QAndroidJniObject::fromString("SPS Automation").object<jstring>());
+
+        exifObject.callMethod<void>("setAttribute",
+                                    "(Ljava/lang/String;Ljava/lang/String;)V",
+                                    QAndroidJniObject::fromString("Model").object<jstring>(),
+                                    QAndroidJniObject::fromString("AC-16").object<jstring>());
+
+        exifObject.callMethod<void>("setAttribute", 
+                                    "(Ljava/lang/String;Ljava/lang/String;)V",
+                                    QAndroidJniObject::fromString("DateTime").object<jstring>(),
+                                    QAndroidJniObject::fromString(datetime).object<jstring>());
+
+        exifObject.callMethod<void>("setAttribute",
+                                    "(Ljava/lang/String;Ljava/lang/String;)V",
+                                    QAndroidJniObject::fromString("GPSLatitude").object<jstring>(),
+                                    QAndroidJniObject::fromString(toExifString(_activeVehicle->latitude(), true).c_str()).object<jstring>());
+
+        exifObject.callMethod<void>("setAttribute",
+                                    "(Ljava/lang/String;Ljava/lang/String;)V",
+                                    QAndroidJniObject::fromString("GPSLongitude").object<jstring>(),
+                                    QAndroidJniObject::fromString(toExifString(_activeVehicle->longitude(), false).c_str()).object<jstring>());
+
+        exifObject.callMethod<void>("setAttribute",
+                                    "(Ljava/lang/String;Ljava/lang/String;)V",
+                                    QAndroidJniObject::fromString("GPSAltitude").object<jstring>(),
+                                    QAndroidJniObject::fromString(toExifAltString(_activeVehicle->altitudeAMSL()->rawValue().toDouble()).c_str()).object<jstring>());
+
+        exifObject.callMethod<void>("setAttribute",
+                                    "(Ljava/lang/String;Ljava/lang/String;)V",
+                                    QAndroidJniObject::fromString("GPSAltitudeRef").object<jstring>(),
+                                    QAndroidJniObject::fromString(_activeVehicle->altitudeAMSL()->rawValue().toDouble() < 0.0 ? "1" : "0").object<jstring>());
+        exifObject.callMethod<void>("setAttribute",
+                                    "(Ljava/lang/String;Ljava/lang/String;)V",
+                                    QAndroidJniObject::fromString("GPSLatitudeRef").object<jstring>(),
+                                    QAndroidJniObject::fromString(_activeVehicle->latitude() > 0 ? "N" : "S").object<jstring>());
+        exifObject.callMethod<void>("setAttribute",
+                                    "(Ljava/lang/String;Ljava/lang/String;)V",
+                                    QAndroidJniObject::fromString("GPSLongitudeRef").object<jstring>(),
+                                    QAndroidJniObject::fromString(_activeVehicle->longitude() > 0 ? "E" : "W").object<jstring>());
+
+        char headingString[200];
+        snprintf(headingString, sizeof(headingString), "%d/100", abs(static_cast<int>(_activeVehicle->heading()->rawValue().toDouble() * 100)));
+
+        exifObject.callMethod<void>("setAttribute",
+                                    "(Ljava/lang/String;Ljava/lang/String;)V",
+                                    QAndroidJniObject::fromString("GPSImgDirection").object<jstring>(),
+                                    QAndroidJniObject::fromString(headingString).object<jstring>());
+        exifObject.callMethod<void>("setAttribute",
+                                    "(Ljava/lang/String;Ljava/lang/String;)V",
+                                    QAndroidJniObject::fromString("GPSImgDirectionRef").object<jstring>(),
+                                    QAndroidJniObject::fromString("T").object<jstring>());
+
+        exifObject.callMethod<void>("saveAttributes", "()V");
+    }
+#endif
 }

@@ -64,6 +64,7 @@ public:
     Q_PROPERTY(bool             tertiaryDecoding        READ    tertiaryDecoding                            NOTIFY tertiaryDecodingChanged)
     Q_PROPERTY(bool             recording               READ    recording                                   NOTIFY recordingChanged)
     Q_PROPERTY(QSize            videoSize               READ    videoSize                                   NOTIFY videoSizeChanged)
+    Q_PROPERTY(bool             primaryStream           READ    primaryStream                               NOTIFY primaryStreamChanged)
     Q_PROPERTY(bool             secondaryStream         READ    secondaryStream                             NOTIFY secondaryStreamChanged)
     Q_PROPERTY(bool             tertiaryStream          READ    tertiaryStream                              NOTIFY tertiaryStreamChanged)
 
@@ -82,6 +83,7 @@ public:
     virtual QString     imageFile           ();
     virtual QString     secondaryImageFile  ();
     virtual QString     tertiaryImageFile   ();
+    virtual bool        primaryStream       () { return _currentStream == 0; }
     virtual bool        secondaryStream     () { return _currentStream == 1; }
     virtual bool        tertiaryStream      () { return _currentStream == 2; }
 
@@ -138,6 +140,8 @@ public:
     Q_INVOKABLE void secondaryGrabImage (const QString& secondaryImageFile = QString());
     Q_INVOKABLE void tertiaryGrabImage  (const QString& tertiaryImageFile = QString());
 
+    Q_INVOKABLE void writeEXIFDataToFile (const QString path);
+
     Q_INVOKABLE void toggleStreams  ();
 
 signals:
@@ -160,6 +164,7 @@ signals:
     void recordingChanged           ();
     void recordingStarted           ();
     void videoSizeChanged           ();
+    void primaryStreamChanged       ();
     void secondaryStreamChanged     ();
     void tertiaryStreamChanged      ();
 
@@ -186,6 +191,8 @@ protected:
     void _startReceiver             (unsigned id);
     void _stopReceiver              (unsigned id);
     void checkForTertiaryStream     (bool* connected);
+    std::string toExifString        (double d, bool bLat);
+    std::string toExifAltString     (double d);
 
 protected:
     QString                 _videoFile;

@@ -389,8 +389,8 @@ SprayLogDownloadController::addLogsToFlightMap()
                         QStringList coords = line.split(",");
 
                         QString sprayStatus = coords[0];
-                        double latitiude = coords[1].toDouble();
-                        double longitude = coords[2].toDouble();
+                        double longitude = coords[1].toDouble();
+                        double latitiude = coords[2].toDouble();
 
                         QGeoCoordinate sprayCoordinate(latitiude, longitude, 0.0);
 
@@ -427,7 +427,6 @@ SprayLogDownloadController::addLogsToSprayMap(int width, int height)
                 if(!_downloadPath.endsWith(QDir::separator())) {
                     _downloadPath += QDir::separator();
                 }
-                qDebug() << _downloadPath;
                 QFile file(_downloadPath + "spray_logs/" + entry->id() + ".txt");
                 if (file.open(QIODevice::ReadOnly)) {
                     QTextStream in(&file);
@@ -453,8 +452,8 @@ SprayLogDownloadController::addLogsToSprayMap(int width, int height)
 
                         QString sprayStatus = coords[0];
 
-                        double latitiude = coords[1].toDouble();
-                        double longitude = coords[2].toDouble();
+                        double longitude = coords[1].toDouble();
+                        double latitiude = coords[2].toDouble();
 
                         QGeoCoordinate sprayCoordinate(latitiude, longitude, 0.0);
 
@@ -533,7 +532,6 @@ SprayLogDownloadController::_calculateZoomAndCenter(int width, int height)
         summed_lon += sprayLocation->coordinate().longitude();
     }
 
-
     double average_lat = summed_lat / (_sprayStartPoints.count() + _sprayTrailPoints.count());
     double average_lon = summed_lon / (_sprayStartPoints.count() + _sprayTrailPoints.count());
     QGeoCoordinate map_center = QGeoCoordinate(average_lat, average_lon, 0.0);
@@ -603,7 +601,6 @@ SprayLogEntry*
 SprayLogModel::get(int index)
 {
     if (index < 0 || index >= _logEntries.count()) {
-        qDebug() << "returning nullptr";
         return nullptr;
     }
     return _logEntries[index];

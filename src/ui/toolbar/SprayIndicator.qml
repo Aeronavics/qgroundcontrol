@@ -32,73 +32,25 @@ Item {
     property var _activeVehicle: QGroundControl.multiVehicleManager.activeVehicle
 
     function getSprayColor() {
-        if (sprayer.mesFlowrate.rawValue === 65535)
+        if (sprayer.mesFlowrate.rawValue > 0 && sprayer.desFlowrate.rawValue > 0)
         {
-            if (sprayer.desFlowrate.rawValue > 0)
-            {
-                return qgcPal.colorGreen
-            }
-            else if (sprayer.sprayRemaining.rawValue < 10)
-            {
-                return qgcPal.colorRed
-            }
-            else if (sprayer.error.rawValue > 0)
-            {
-                if (sprayer.sprayRemaining.rawValue >= 10)
-                {
-                    return qgcPal.colorOrange
-                }
-                else
-                {
-                    return qgcPal.colorRed
-                }
-            }
-            else if (sprayer.sprayRemaining.rawValue < 25)
-            {
-                    return qgcPal.colorOrange
-            }
-            else if (sprayer.sprayRemaining.rawValue >= 25)
-            {
-                    return qgcPal.text
-            }
-            else
-            {
-                return qgcPal.colorRed
-            }
+            return qgcPal.colorGreen
+        }
+        else if (sprayer.mesFlowrate.rawValue === 0 && sprayer.desFlowrate.rawValue > 0)
+        {
+            return qgcPal.colorRed
+        }
+        else if (sprayer.sprayRemaining.rawValue < 10)
+        {
+                return qgcPal.colorOrange
+        }
+        else if (sprayer.sprayRemaining.rawValue >= 10)
+        {
+                return qgcPal.text
         }
         else
         {
-            if (sprayer.mesFlowrate.rawValue > 0 && sprayer.desFlowrate.rawValue > 0)
-            {
-                return qgcPal.colorGreen
-            }
-            else if (sprayer.sprayRemaining.rawValue < 10)
-            {
-                return qgcPal.colorRed
-            }
-            else if (sprayer.error.rawValue > 0)
-            {
-                if (sprayer.sprayRemaining.rawValue >= 10)
-                {
-                    return qgcPal.colorOrange
-                }
-                else
-                {
-                    return qgcPal.colorRed
-                }
-            }
-            else if (sprayer.sprayRemaining.rawValue < 25)
-            {
-                    return qgcPal.colorOrange
-            }
-            else if (sprayer.sprayRemaining.rawValue >= 25)
-            {
-                    return qgcPal.text
-            }
-            else
-            {
-                return qgcPal.colorRed
-            }
+            return qgcPal.colorRed
         }
     }
 

@@ -102,10 +102,11 @@ Item {
                     target: QGroundControl.videoManager
                     function onImageFileChanged() {
                         videoContent.grabToImage(function(result) {
-                            if (!QGroundControl.videoManager.secondaryStream) {
+                            if (QGroundControl.videoManager.primaryStream) {
                                 if (!result.saveToFile(QGroundControl.videoManager.imageFile)) {
                                     console.error('Error capturing video frame');
                                 }
+                                QGroundControl.videoManager.writeEXIFDataToFile(QGroundControl.videoManager.imageFile);
                             }
                         });
                     }
@@ -141,6 +142,7 @@ Item {
                                 if (!result.saveToFile(QGroundControl.videoManager.secondaryImageFile)) {
                                     console.error('Error capturing video frame');
                                 }
+                                QGroundControl.videoManager.writeEXIFDataToFile(QGroundControl.videoManager.secondaryImageFile);
                             }
                         });
                     }
@@ -176,6 +178,7 @@ Item {
                                 if (!result.saveToFile(QGroundControl.videoManager.tertiaryImageFile)) {
                                     console.error('Error capturing video frame');
                                 }
+                                QGroundControl.videoManager.writeEXIFDataToFile(QGroundControl.videoManager.tertiaryImageFile);
                             }
                         });
                     }
