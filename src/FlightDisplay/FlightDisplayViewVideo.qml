@@ -27,13 +27,12 @@ Item {
     property bool useSmallFont: true
 
     property double _ar:                QGroundControl.videoManager.aspectRatio
-    property bool   _showGrid:          QGroundControl.settingsManager.videoSettings.gridLines.rawValue > 0
+    // property bool   _showGrid:          QGroundControl.settingsManager.videoSettings.gridLines.rawValue > 0
     property var    _dynamicCameras:    globals.activeVehicle ? globals.activeVehicle.cameraManager : null
     property bool   _connected:         globals.activeVehicle ? !globals.activeVehicle.communicationLost : false
     property int    _curCameraIndex:    _dynamicCameras ? _dynamicCameras.currentCamera : 0
     property bool   _isCamera:          _dynamicCameras ? _dynamicCameras.cameras.count > 0 : false
     property var    _camera:            _isCamera ? _dynamicCameras.cameras.get(_curCameraIndex) : null
-    property bool   _hasZoom:           _camera && _camera.hasZoom
     property int    _fitMode:           QGroundControl.settingsManager.videoSettings.videoFit.rawValue
 
     function getWidth() {
@@ -43,33 +42,31 @@ Item {
         return videoBackground.getHeight()
     }
 
-    property double _thermalHeightFactor: 0.85 //-- TODO
+    Image {
+        id:             noVideo
+        anchors.fill:   parent
+        source:         "/res/NoVideoBackground.jpg"
+        fillMode:       Image.PreserveAspectCrop
+        visible:        (QGroundControl.videoManager.primaryStream && !(QGroundControl.videoManager.decoding)) || (QGroundControl.videoManager.secondaryStream && !(QGroundControl.videoManager.secondaryDecoding)) || (QGroundControl.videoManager.tertiaryStream && !(QGroundControl.videoManager.tertiaryDecoding))
 
-        Image {
-            id:             noVideo
-            anchors.fill:   parent
-            source:         "/res/NoVideoBackground.jpg"
-            fillMode:       Image.PreserveAspectCrop
-            visible:        !(QGroundControl.videoManager.decoding)
-
-            Rectangle {
-                anchors.centerIn:   parent
-                width:              noVideoLabel.contentWidth + ScreenTools.defaultFontPixelHeight
-                height:             noVideoLabel.contentHeight + ScreenTools.defaultFontPixelHeight
-                radius:             ScreenTools.defaultFontPixelWidth / 2
-                color:              "black"
-                opacity:            0.5
-            }
-
-            QGCLabel {
-                id:                 noVideoLabel
-                text:               QGroundControl.settingsManager.videoSettings.streamEnabled.rawValue ? qsTr("WAITING FOR VIDEO") : qsTr("VIDEO DISABLED")
-                font.family:        ScreenTools.demiboldFontFamily
-                color:              "white"
-                font.pointSize:     useSmallFont ? ScreenTools.smallFontPointSize : ScreenTools.largeFontPointSize
-                anchors.centerIn:   parent
-            }
+        Rectangle {
+            anchors.centerIn:   parent
+            width:              noVideoLabel.contentWidth + ScreenTools.defaultFontPixelHeight
+            height:             noVideoLabel.contentHeight + ScreenTools.defaultFontPixelHeight
+            radius:             ScreenTools.defaultFontPixelWidth / 2
+            color:              "black"
+            opacity:            0.5
         }
+
+        QGCLabel {
+            id:                 noVideoLabel
+            text:               QGroundControl.settingsManager.videoSettings.streamEnabled.rawValue ? qsTr("WAITING FOR VIDEO") : qsTr("VIDEO DISABLED")
+            font.family:        ScreenTools.demiboldFontFamily
+            color:              "white"
+            font.pointSize:     useSmallFont ? ScreenTools.smallFontPointSize : ScreenTools.largeFontPointSize
+            anchors.centerIn:   parent
+        }
+    }
 
     Rectangle {
         id:             videoBackground
@@ -123,8 +120,6 @@ Item {
             anchors.centerIn:   parent
             visible:            QGroundControl.videoManager.decoding
             sourceComponent:    videoBackgroundComponent
-
-            property bool videoDisabled: QGroundControl.settingsManager.videoSettings.videoSource.rawValue === QGroundControl.settingsManager.videoSettings.disabledVideoSource
         }
 
         Component {
@@ -159,8 +154,6 @@ Item {
             anchors.centerIn:   parent
             visible:            QGroundControl.videoManager.secondaryDecoding
             sourceComponent:    secondVideoBackgroundComponent
-
-            property bool videoDisabled: QGroundControl.settingsManager.videoSettings.videoSource.rawValue === QGroundControl.settingsManager.videoSettings.disabledVideoSource
         }
 
         Component {
@@ -198,27 +191,5 @@ Item {
 
             property bool videoDisabled: QGroundControl.settingsManager.videoSettings.videoSource.rawValue === QGroundControl.settingsManager.videoSettings.disabledVideoSource
         }
-
-        // //-- Zoom
-        // PinchArea {
-        //     id:             pinchZoom
-        //     enabled:        _hasZoom
-        //     anchors.fill:   parent
-        //     onPinchStarted: pinchZoom.zoom = 0
-        //     onPinchUpdated: {
-        //         if(_hasZoom) {
-        //             var z = 0
-        //             if(pinch.scale < 1) {
-        //                 z = Math.round(pinch.scale * -10)
-        //             } else {
-        //                 z = Math.round(pinch.scale)
-        //             }
-        //             if(pinchZoom.zoom != z) {
-        //                 _camera.stepZoom(z)
-        //             }
-        //         }
-        //     }
-        //     property int zoom: 0
-        // }
     }
 }

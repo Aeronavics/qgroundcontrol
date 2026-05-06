@@ -15,10 +15,10 @@
 #include <QDir>
 #include <QQuickWindow>
 #include <QTcpSocket>
-// #if defined(__android__)
+#if defined(__android__)
 #include <QAndroidJniObject>
 #include <QAndroidJniEnvironment>
-// #endif
+#endif
 
 #ifndef QGC_DISABLE_UVC
 #include <QCameraInfo>
@@ -69,6 +69,10 @@ VideoManager::VideoManager(QGCApplication* app, QGCToolbox* toolbox)
 #endif
     // Start thread checking for third camera
     tertiaryVideoChecker = std::thread(&VideoManager::checkForTertiaryStream, this, &_tertiaryStreamAvailable);
+    tertiaryVideoChecker.detach();
+
+    connect(&_watchdogTimer, &QTimer::timeout, this, &VideoManager::_watchdog);
+    _watchdogTimer.start(500);
 }
 
 //-----------------------------------------------------------------------------
@@ -90,6 +94,24 @@ VideoManager::~VideoManager()
             _videoSink[i] = nullptr;
         }
 #endif
+    }
+}
+
+//-----------------------------------------------------------------------------
+void
+VideoManager::_watchdog()
+{
+    if (!_decoding)
+    {
+        _restartVideo(0);
+    }
+    if (!_secondaryDecoding)
+    {
+        _restartVideo(1);
+    }
+    if (!_tertiaryDecoding && _tertiaryStreamAvailable)
+    {
+        _restartVideo(2);
     }
 }
 
@@ -320,29 +342,8 @@ VideoManager::setToolbox(QGCToolbox *toolbox)
         _videoSize = ((quint32)size.width() << 16) | (quint32)size.height();
         emit videoSizeChanged();
     });
-
-    // if (_videoReceiver[1] != nullptr) {
-    //     connect(_videoReceiver[1], &VideoReceiver::onStartComplete, this, [this](VideoReceiver::STATUS status) {
-    //         if (status == VideoReceiver::STATUS_OK) {
-    //             _videoStarted[1] = true;
-    //             if (_videoSink[1] != nullptr) {
-    //                 _videoReceiver[1]->startDecoding(_videoSink[1]);
-    //             }
-    //         } else if (status == VideoReceiver::STATUS_INVALID_URL) {
-    //             // Invalid URL - don't restart
-    //         } else if (status == VideoReceiver::STATUS_INVALID_STATE) {
-    //             // Already running
-    //         } else {
-    //             _restartVideo(1);
-    //         }
-    //     });
-
-    //     connect(_videoReceiver[1], &VideoReceiver::onStopComplete, this, [this](VideoReceiver::STATUS) {
-    //         _videoStarted[1] = false;
-    //         _startReceiver(1);
-    //     });
-    // }
 #endif
+
     _updateSettings(0);
     _updateSettings(1);
     _updateSettings(2);
@@ -889,7 +890,9 @@ VideoManager::_updateSettings(unsigned id)
 
     bool settingsChanged = _lowLatencyStreaming[id] != lowLatencyStreaming;
 
-    _lowLatencyStreaming[id] = lowLatencyStreaming;
+    _lowLatencyStreaming[0] = lowLatencyStreaming;
+    _lowLatencyStreaming[1] = lowLatencyStreaming;
+    _lowLatencyStreaming[2] = lowLatencyStreaming;
 
     //-- Auto discovery
 
@@ -1177,10 +1180,8 @@ VideoManager::toggleStreams()
         widget->setVisible(false);
         _currentStream = 1;
     }
-    else if (_currentStream == 1)
+    else if (_currentStream == 1 && _tertiaryStreamAvailable)
     {
-        if (_tertiaryStreamAvailable)
-        {
             QQuickItem* widget = root->findChild<QQuickItem*>("videoContent");
             widget->setVisible(false);
             widget = root->findChild<QQuickItem*>("secondVideoContent");
@@ -1188,19 +1189,8 @@ VideoManager::toggleStreams()
             widget = root->findChild<QQuickItem*>("thirdVideoContent");
             widget->setVisible(true);
             _currentStream = 2;
-        }
-        else
-        {
-            QQuickItem* widget = root->findChild<QQuickItem*>("videoContent");
-            widget->setVisible(true);
-            widget = root->findChild<QQuickItem*>("secondVideoContent");
-            widget->setVisible(false);
-            widget = root->findChild<QQuickItem*>("thirdVideoContent");
-            widget->setVisible(false);
-            _currentStream = 0;
-        }
     }
-    else if (_currentStream == 2)
+    else
     {
         QQuickItem* widget = root->findChild<QQuickItem*>("videoContent");
         widget->setVisible(true);
@@ -1222,7 +1212,7 @@ VideoManager::checkForTertiaryStream(bool* connected)
     {
         QTcpSocket socket;
         socket.connectToHost("192.168.144.55", 80);
-        if (socket.waitForConnected(1000)) { // 1 second timeout
+        if (socket.waitForConnected(500)) { // 1 second timeout
             if (!*connected)
             {
                 _restartVideo(2);
@@ -1239,9 +1229,6 @@ VideoManager::checkForTertiaryStream(bool* connected)
 std::string
 VideoManager::toExifString(double d, bool bLat)
 {
-    const char* NS = d >= 0.0 ? "N" : "S";
-    const char* EW = d >= 0.0 ? "E" : "W";
-    const char* NSEW = bLat ? NS : EW;
     if (d < 0)
         d = -d;
     auto deg = static_cast<int>(d);

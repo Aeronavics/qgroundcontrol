@@ -96,7 +96,7 @@ Item {
             id:                     sprayValuesColumn
             anchors.verticalCenter: parent.verticalCenter
             anchors.leftMargin:     ScreenTools.defaultFontPixelWidth / 2
-            anchors.left:           sprayImage.right
+            // anchors.left:           sprayImage.right
 
             QGCLabel {
                 anchors.horizontalCenter:   flowrateValue.horizontalCenter

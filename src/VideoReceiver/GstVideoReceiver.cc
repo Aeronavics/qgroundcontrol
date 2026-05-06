@@ -52,13 +52,13 @@ GstVideoReceiver::GstVideoReceiver(QObject* parent)
     , _lastVideoFrameTime(0)
     , _resetVideoSink(true)
     , _videoSinkProbeId(0)
-    , _udpReconnect_us(5000000)
+    , _udpReconnect_us(250000)
     , _signalDepth(0)
     , _endOfStream(false)
 {
     _slotHandler.start();
     connect(&_watchdogTimer, &QTimer::timeout, this, &GstVideoReceiver::_watchdog);
-    _watchdogTimer.start(1000);
+    _watchdogTimer.start(500);
 }
 
 GstVideoReceiver::~GstVideoReceiver(void)
@@ -779,7 +779,7 @@ GstVideoReceiver::_makeSource(const QString& uri)
             }
         } else if (isRtsp) {
             if ((source = gst_element_factory_make("rtspsrc", "source")) != nullptr) {
-                g_object_set(static_cast<gpointer>(source), "location", qPrintable(uri), "latency", 100, "udp-reconnect", 1, "timeout", _udpReconnect_us, "is-live", 1, NULL);
+                g_object_set(static_cast<gpointer>(source), "location", qPrintable(uri), "latency", 100, "timeout", _udpReconnect_us, "is-live", 1, nullptr);
             }
         } else if(isUdp264 || isUdp265 || isUdpMPEGTS || isTaisync) {
             if ((source = gst_element_factory_make("udpsrc", "source")) != nullptr) {

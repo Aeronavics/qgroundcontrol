@@ -193,6 +193,7 @@ protected:
     void checkForTertiaryStream     (bool* connected);
     std::string toExifString        (double d, bool bLat);
     std::string toExifAltString     (double d);
+    void _watchdog                  ();
 
 protected:
     QString                 _videoFile;
@@ -226,6 +227,7 @@ protected:
     Vehicle*                _activeVehicle          = nullptr;
     std::thread             tertiaryVideoChecker;
     std::mutex              tertiaryCheckerMutex;
+    QTimer                  _watchdogTimer;
 };
 
 #endif

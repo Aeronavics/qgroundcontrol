@@ -2,16 +2,21 @@
 #include "Vehicle.h"
 #include <bitset>
 
-const char* VehicleSprayFactGroup::_mesFlowrateFactName =       "mesFlowrate";
-const char* VehicleSprayFactGroup::_desFlowrateFactName =       "desFlowrate";
-const char* VehicleSprayFactGroup::_setFlowrateFactName =       "setFlowrate";
+#include "QGCApplication.h"
+#include "QGCCorePlugin.h"
+#include "VideoManager.h"
+
+
+const char* VehicleSprayFactGroup::_mesFlowrateFactName =           "mesFlowrate";
+const char* VehicleSprayFactGroup::_desFlowrateFactName =           "desFlowrate";
+const char* VehicleSprayFactGroup::_setFlowrateFactName =           "setFlowrate";
 const char* VehicleSprayFactGroup::_totalSprayedVolumeFactName =    "totalVolume";
 const char* VehicleSprayFactGroup::_armedSprayedVolumeFactName =    "armedVolume";
-const char* VehicleSprayFactGroup::_lastTreeVolumeFactName =    "lastTreeVolume";
-const char* VehicleSprayFactGroup::_sprayRemainingFactName =    "sprayRemaining";
-const char* VehicleSprayFactGroup::_mesPressureFactName =       "mesPressure";
-const char* VehicleSprayFactGroup::_errorFactName =             "error";
-const char* VehicleSprayFactGroup::_sprayerSeenFactName =             "sprayerEnabled";
+const char* VehicleSprayFactGroup::_lastTreeVolumeFactName =        "lastTreeVolume";
+const char* VehicleSprayFactGroup::_sprayRemainingFactName =        "sprayRemaining";
+const char* VehicleSprayFactGroup::_mesPressureFactName =           "mesPressure";
+const char* VehicleSprayFactGroup::_errorFactName =                 "error";
+const char* VehicleSprayFactGroup::_sprayerSeenFactName =           "sprayerEnabled";
 
 VehicleSprayFactGroup::VehicleSprayFactGroup(QObject* parent)
     : FactGroup(1000, ":/json/Vehicle/SprayFact.json", parent)
@@ -65,6 +70,22 @@ void VehicleSprayFactGroup::_handleSprayStatus(mavlink_message_t& message)
 {
     mavlink_anv_spray_status_t spray;
     mavlink_msg_anv_spray_status_decode(&message, &spray);
+
+    if (desFlowrate()->rawValue().toUInt() == 0 && spray.desired_flowrate > 0)
+    {
+        if (qgcApp()->toolbox()->videoManager()->primaryStream() && qgcApp()->toolbox()->videoManager()->decoding())
+        {
+            qgcApp()->toolbox()->videoManager()->grabImage();
+        }
+        else if (qgcApp()->toolbox()->videoManager()->secondaryStream() && qgcApp()->toolbox()->videoManager()->secondaryDecoding())
+        {
+            qgcApp()->toolbox()->videoManager()->secondaryGrabImage();
+        }
+        else if (qgcApp()->toolbox()->videoManager()->tertiaryStream() && qgcApp()->toolbox()->videoManager()->tertiaryDecoding())
+        {
+            qgcApp()->toolbox()->videoManager()->tertiaryGrabImage();
+        }
+    }
 
     mesFlowrate()->setRawValue          (spray.measured_flowrate);
     desFlowrate()->setRawValue          (spray.desired_flowrate);
