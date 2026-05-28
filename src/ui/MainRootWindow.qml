@@ -143,8 +143,9 @@ ApplicationWindow {
     }
 
     function showPlanView() {
-        viewSwitch(toolbar.planViewToolbar)
-        planView.visible = true
+        showTool(qsTr("Plan"), "PlanViewTool.qml", "/qmlimages/Plan.svg")
+        // viewSwitch(toolbar.planViewToolbar)
+        // planView.visible = true
     }
 
     function showTool(toolTitle, toolSource, toolIcon) {
@@ -164,7 +165,7 @@ ApplicationWindow {
     }
 
     function showSettingsTool() {
-        showTool(qsTr("Application Settings"), "AppSettings.qml", "/res/QGCLogoWhite")
+        showTool(qsTr("Application Settings"), "AppSettings.qml", "/res/SPSALogoWhite")
     }
 
     //-------------------------------------------------------------------------
@@ -298,6 +299,36 @@ ApplicationWindow {
                     spacing:        ScreenTools.defaultFontPixelWidth
 
                     SubMenuButton {
+                        id:                 planButton
+                        height:             toolSelectDialog._toolButtonHeight
+                        Layout.fillWidth:   true
+                        text:               qsTr("Plan")
+                        imageColor:         qgcPal.text
+                        imageResource:      "/qmlimages/Plan.svg"
+                        onClicked: {
+                            if (!mainWindow.preventViewSwitch()) {
+                                toolSelectDialog.close()
+                                mainWindow.showPlanView()
+                            }
+                        }
+                    }
+
+                    SubMenuButton {
+                        id:                 checklistButton
+                        height:             toolSelectDialog._toolButtonHeight
+                        Layout.fillWidth:   true
+                        text:               qsTr("Vehicle Checklist")
+                        imageColor:         qgcPal.text
+                        imageResource:      "/qmlimages/check.svg"
+                        onClicked: {
+                            if (!mainWindow.preventViewSwitch()) {
+                                toolSelectDialog.close()
+                                preFlightChecklistPopup.createObject(mainWindow).open()
+                            }
+                        }
+                    }
+
+                    SubMenuButton {
                         id:                 setupButton
                         height:             toolSelectDialog._toolButtonHeight
                         Layout.fillWidth:   true
@@ -333,7 +364,7 @@ ApplicationWindow {
                         height:             toolSelectDialog._toolButtonHeight
                         Layout.fillWidth:   true
                         text:               qsTr("Application Settings")
-                        imageResource:      "/res/QGCLogoFull"
+                        imageResource:      "/res/SPSASquare"
                         imageColor:         "transparent"
                         visible:            !QGroundControl.corePlugin.options.combineSettingsAndSetup
                         onClicked: {
@@ -426,6 +457,12 @@ ApplicationWindow {
                     }
                 }
             }
+        }
+    }
+
+    Component {
+        id: preFlightChecklistPopup
+        FlyViewPreFlightChecklistPopup {
         }
     }
 
@@ -539,17 +576,26 @@ ApplicationWindow {
     //-------------------------------------------------------------------------
     //-- Critical Vehicle Message Popup
 
+    Timer {
+        id: criticalVehicleMessagePopupTimer
+        interval: 5000
+        repeat: false
+        running: false
+        onTriggered: criticalVehicleMessagePopup.close()
+    }
+
     function showCriticalVehicleMessage(message) {
         // indicatorPopup.close()
         if (!indicatorPopup.visible) {
             if (criticalVehicleMessagePopup.visible || QGroundControl.videoManager.fullScreen) {
                 // We received additional wanring message while an older warning message was still displayed.
                 // When the user close the older one drop the message indicator tool so they can see the rest of them.
-                criticalVehicleMessagePopup.dropMessageIndicatorOnClose = true
+                criticalVehicleMessagePopup.dropMessageIndicatorOnClose = true;
             } else {
-                criticalVehicleMessagePopup.criticalVehicleMessage      = message
-                criticalVehicleMessagePopup.dropMessageIndicatorOnClose = false
-                criticalVehicleMessagePopup.open()
+                criticalVehicleMessagePopup.criticalVehicleMessage      = message;
+                criticalVehicleMessagePopup.dropMessageIndicatorOnClose = false;
+                criticalVehicleMessagePopup.open();
+                criticalVehicleMessagePopupTimer.start();
             }
         }
     }
