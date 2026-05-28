@@ -36,12 +36,12 @@ Rectangle {
         id: geoController
     }
 
-    DFLogDownloadController {
-        id: dflogController
-    }
-
     SprayLogDownloadController {
         id: spraylogController
+    }
+
+    DFLogDownloadController {
+        id: dflogController
     }
 
     QGCFlickable {
@@ -126,7 +126,7 @@ Rectangle {
         anchors.right:          parent.right
         anchors.top:            parent.top
         anchors.bottom:         parent.bottom
-        source:                 "DFLogDownloadPage.qml"
+        source:                 "SprayLogDownloadPage.qml"
 
         property string title
 
@@ -135,25 +135,4 @@ Rectangle {
             onPopout:   mainWindow.createrWindowedAnalyzePage(panelLoader.title, panelLoader.source)
         }
     }
-
-    // Loader {
-    //         id:                     sprayPanelLoader
-    //         anchors.topMargin:      _verticalMargin
-    //         anchors.bottomMargin:   _verticalMargin
-    //         anchors.leftMargin:     _horizontalMargin
-    //         anchors.rightMargin:    _horizontalMargin
-    //         anchors.left:           divider.right
-    //         anchors.right:          parent.right
-    //         anchors.top:            parent.top
-    //         anchors.bottom:         parent.bottom
-    //         source:                 "SprayLogDownloadPage.qml"
-
-    //         property string title
-
-    //         Connections {
-    //             target:     sprayPanelLoader.item
-    //             onPopout:   mainWindow.createrWindowedAnalyzePage(sprayPanelLoader.title, sprayPanelLoader.source)
-    //         }
-    //     }
-
 }

@@ -191,10 +191,10 @@ QVariantList &QGCCorePlugin::settingsPages()
 QVariantList& QGCCorePlugin::analyzePages()
 {
     _p->analyzeList.erase(_p->analyzeList.begin(), _p->analyzeList.end());
-    _p->analyzeList.append(QVariant::fromValue(new QmlComponentInfo(tr("Flight Log"),     QUrl::fromUserInput("qrc:/qml/DFLogDownloadPage.qml"),        QUrl::fromUserInput("qrc:/qmlimages/LogDownloadIcon"))));
     _p->analyzeList.append(QVariant::fromValue(new QmlComponentInfo(tr("Spray Logs"),     QUrl::fromUserInput("qrc:/qml/SprayLogDownloadPage.qml"),     QUrl::fromUserInput("qrc:/qmlimages/SprayIcon"))));
     if (_showAdvancedUI)
     {
+        _p->analyzeList.append(QVariant::fromValue(new QmlComponentInfo(tr("Flight Log"),     QUrl::fromUserInput("qrc:/qml/DFLogDownloadPage.qml"),        QUrl::fromUserInput("qrc:/qmlimages/LogDownloadIcon"))));
 #if !defined(__mobile__)
         _p->analyzeList.append(QVariant::fromValue(new QmlComponentInfo(tr("GeoTag Images"),    QUrl::fromUserInput("qrc:/qml/GeoTagPage.qml"),             QUrl::fromUserInput("qrc:/qmlimages/GeoTagIcon"))));
 #endif

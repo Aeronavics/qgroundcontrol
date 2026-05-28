@@ -145,6 +145,8 @@ public:
     Q_PROPERTY(double       mapZoomLevel    READ mapZoomLevel       WRITE setMapZoomLevel       NOTIFY mapZoomLevelChanged)
     Q_PROPERTY(QmlObjectListModel*  sprayStartPoints                     READ sprayStartPoints            CONSTANT)
     Q_PROPERTY(QmlObjectListModel*  sprayTrailPoints                     READ sprayTrialPoints            CONSTANT)
+    Q_PROPERTY(bool loading                 READ loading            NOTIFY loadingChanged)
+    Q_PROPERTY(bool loadingComplete         READ loadingComplete    NOTIFY loadingCompleteChanged)
 
 
     SprayLogModel*      model               ()       { return &_logEntriesModel; }
@@ -155,8 +157,10 @@ public:
     void                download            (SprayLogEntry* entry);
     void                setMapCenter        (QGeoCoordinate& coordinate);
     void                setMapZoomLevel     (double zoom);
-    QmlObjectListModel* sprayStartPoints  () { return &_sprayStartPoints; }
-    QmlObjectListModel* sprayTrialPoints  () { return &_sprayTrailPoints; }
+    QmlObjectListModel* sprayStartPoints    () { return &_sprayStartPoints; }
+    QmlObjectListModel* sprayTrialPoints    () { return &_sprayTrailPoints; }
+    bool                loading             () { return _loading; }
+    bool                loadingComplete     () { return _loaded; }
 
 
     static QGeoCoordinate   mapCenter       () {return _coord;}
@@ -179,6 +183,8 @@ signals:
     void selectionChanged       ();
     void mapCenterChanged       (QGeoCoordinate mapCenter);
     void mapZoomLevelChanged    (double mapZoomLevel);
+    void loadingChanged         ();
+    void loadingCompleteChanged ();
 
 private slots:
     void error              (QNetworkReply::NetworkError);
@@ -201,6 +207,8 @@ private:
     void _calculateZoomAndCenter (int width, int height);
     void _calculateZoomLevel(int width, int height, QGeoCoordinate min_coords, QGeoCoordinate max_coords);
     void _calculateMapCenter();
+    void _setLoading        (bool loading);
+    void _setLoadingComplete(bool loaded);
 
     void _delete            (SprayLogEntry* entry);
 
@@ -219,6 +227,8 @@ private:
     bool                _downloadInProgress = false;
     QNetworkReply*      _reply;
     bool                _awaiting_response = false;
+    bool                _loading;
+    bool                _loaded;
 
     static QGeoCoordinate   _coord;
     static double           _zoom;

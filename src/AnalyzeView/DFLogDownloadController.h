@@ -141,6 +141,8 @@ public:
     Q_PROPERTY(QGCDFLogModel* model           READ model              NOTIFY modelChanged)
     Q_PROPERTY(bool         requestingList  READ requestingList     NOTIFY requestingListChanged)
     Q_PROPERTY(bool         downloadingLogs READ downloadingLogs    NOTIFY downloadingLogsChanged)
+    Q_PROPERTY(bool loading                 READ loading            NOTIFY loadingChanged)
+    Q_PROPERTY(bool loadingComplete         READ loadingComplete    NOTIFY loadingCompleteChanged)
 
     QGCDFLogModel*      model               ()       { return &_logEntriesModel; }
     bool                requestingList      () const { return _requestingLogEntries; }
@@ -148,6 +150,8 @@ public:
     void                downloadToDirectory (const QString& dir);
     void                checkForDownloads   ();
     void                download            (QGCDFLogEntry* entry);
+    bool                loading             () { return _loading; }
+    bool                loadingComplete     () { return _loaded; }
 
     Q_INVOKABLE void    refresh             ();
     Q_INVOKABLE void    erase               ();
@@ -161,6 +165,8 @@ signals:
     void downloadingLogsChanged ();
     void modelChanged           ();
     void selectionChanged       ();
+    void loadingChanged         ();
+    void loadingCompleteChanged ();
 
 private slots:
     void error              (QNetworkReply::NetworkError);
@@ -180,6 +186,8 @@ private:
     void _requestLogData    (uint16_t id, uint32_t offset, uint32_t count, int retryCount = 0);
     bool _prepareLogDownload();
     void _setDownloading    (bool active);
+    void _setLoading        (bool loading);
+    void _setLoadingComplete(bool loaded);
 
     void _delete            (QGCDFLogEntry* entry);
 
@@ -198,6 +206,8 @@ private:
     bool                _downloadInProgress = false;
     QNetworkReply*      _reply;
     bool                _awaiting_response = false;
+    bool                _loading;
+    bool                _loaded;
 
 
 };

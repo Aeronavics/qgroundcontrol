@@ -27,6 +27,8 @@
 #include <QNetworkAccessManager>
 #include <QNetworkRequest>
 #include <QNetworkReply>
+#include <QDir>
+#include <QStringList>
 
 #define kTimeOutMilliseconds 500
 #define kGUIRateMilliseconds 17
@@ -84,6 +86,8 @@ SprayLogDownloadController::SprayLogDownloadController(void)
     , _downloadingLogs(false)
     , _retries(0)
     , _apmOneBased(0)
+    , _loading(false)
+    , _loaded(false)
 {
     connect(this, &SprayLogDownloadController::mapCenterChanged, this, [](QGeoCoordinate){});
     connect(this, &SprayLogDownloadController::mapZoomLevelChanged, this, [](double){});
@@ -94,6 +98,8 @@ SprayLogDownloadController::SprayLogDownloadController(void)
 void
 SprayLogDownloadController::refresh(void)
 {
+    _setLoading(true);
+    _setLoadingComplete(false);
     QNetworkAccessManager *manager = new QNetworkAccessManager(this);
     QNetworkRequest request(QUrl("http://192.168.144.1/spray_log"));
     manager->get(request);
@@ -113,14 +119,59 @@ SprayLogDownloadController::refresh(void)
                 }
             }
             _logEntriesModel.sort_by_id();
+            _setLoadingComplete(true);
+            _setLoading(false);
             qDebug() << "Request finished successfully";
         } else {
             qDebug() << "Error:" << reply->errorString();
             qDebug() << "Error:" << reply->error();
+
+            _logEntriesModel.clear();
+
+            // Check Downloaded
+            QString dowload_path = qgcApp()->toolbox()->settingsManager()->appSettings()->logSavePath();
+            if(!dowload_path.endsWith(QDir::separator())) {
+                dowload_path += QDir::separator();
+            }
+            dowload_path += "spray_logs";
+
+            QDir directory(dowload_path);
+            QStringList files = directory.entryList(QDir::Files | QDir::NoDotAndDotDot);
+
+            foreach(QString filename, files) {
+                qDebug() << filename;
+                QFileInfo file_info(dowload_path + QDir::separator() + filename);
+
+                SprayLogEntry* logEntry = new SprayLogEntry(QString::number(file_info.baseName().toInt()), file_info.lastModified(), file_info.size());
+
+                _logEntriesModel.append(logEntry);
+            }
+            _logEntriesModel.sort_by_id();
+            _setLoadingComplete(true);
+            _setLoading(false);
         }
         reply->deleteLater(); // Ensure the reply object is deleted
     });
 }
+
+
+//----------------------------------------------------------------------------------------
+void
+SprayLogDownloadController::_setLoading(bool loading)
+{
+    _loading = loading;
+    emit loadingChanged();
+}
+
+
+//----------------------------------------------------------------------------------------
+void
+SprayLogDownloadController::_setLoadingComplete(bool loaded)
+{
+    _loaded = loaded;
+    emit loadingCompleteChanged();
+}
+
 
 //----------------------------------------------------------------------------------------
 void
@@ -204,7 +255,10 @@ SprayLogDownloadController::error(QNetworkReply::NetworkError err)
 {
     // Manage error here.
     SprayLogEntry* entry = _getDownloading();
+    qDebug() << err;
     entry->setStatus("Error");
+    _downloadInProgress = false;
+    entry->setDownloading(false);
     // _reply->deleteLater();
 }
 
@@ -251,13 +305,13 @@ SprayLogDownloadController::downloadFinished()
         QDataStream out(&file);
         out << b;
         entry->setStatus("Downloaded");
-        _downloadInProgress = false;
-        entry->setDownloading(false);
     } else {
         qDebug() << "Error:" << _reply->errorString();
         qDebug() << "Error:" << _reply->error();
         entry->setStatus("Error");
     }
+    _downloadInProgress = false;
+    entry->setDownloading(false);
     _reply->deleteLater();
 
     checkForDownloads();

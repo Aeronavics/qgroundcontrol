@@ -85,6 +85,8 @@ DFLogDownloadController::DFLogDownloadController(void)
 void
 DFLogDownloadController::refresh(void)
 {
+    _setLoading(true);
+    _setLoadingComplete(false);
     QNetworkAccessManager *manager = new QNetworkAccessManager(this);
     QNetworkRequest request(QUrl("http://192.168.144.1/flight_log"));
     manager->get(request);
@@ -104,14 +106,61 @@ DFLogDownloadController::refresh(void)
                 }
             }
             _logEntriesModel.sort_by_id();
+            _setLoading(false);
+            _setLoadingComplete(true);
             qDebug() << "Request finished successfully";
         } else {
             qDebug() << "Error:" << reply->errorString();
             qDebug() << "Error:" << reply->error();
+
+            _logEntriesModel.clear();
+
+            // Check Downloaded
+            QString dowload_path = qgcApp()->toolbox()->settingsManager()->appSettings()->logSavePath();
+            if(!dowload_path.endsWith(QDir::separator())) {
+                dowload_path += QDir::separator();
+            }
+            dowload_path += "flight_logs";
+
+            QDir directory(dowload_path);
+            QStringList files = directory.entryList(QDir::Files | QDir::NoDotAndDotDot);
+
+            foreach(QString filename, files) {
+                qDebug() << filename;
+                QFileInfo file_info(dowload_path + QDir::separator() + filename);
+
+                QGCDFLogEntry* logEntry = new QGCDFLogEntry(QString::number(file_info.baseName().toInt()), file_info.lastModified(), file_info.size());
+
+                _logEntriesModel.append(logEntry);
+            }
+            _logEntriesModel.sort_by_id();
+
+
+            _setLoading(false);
+            _setLoadingComplete(true);
         }
         reply->deleteLater(); // Ensure the reply object is deleted
     });
 }
+
+
+//----------------------------------------------------------------------------------------
+void
+DFLogDownloadController::_setLoading(bool loading)
+{
+    _loading = loading;
+    emit loadingChanged();
+}
+
+
+//----------------------------------------------------------------------------------------
+void
+DFLogDownloadController::_setLoadingComplete(bool loaded)
+{
+    _loaded = loaded;
+    emit loadingCompleteChanged();
+}
+
 
 //----------------------------------------------------------------------------------------
 void
@@ -196,6 +245,8 @@ DFLogDownloadController::error(QNetworkReply::NetworkError err)
     // Manage error here.
     QGCDFLogEntry* entry = _getDownloading();
     entry->setStatus("Error");
+    entry->setDownloading(false);
+    _downloadInProgress = false;
     // _reply->deleteLater();
 }
 
@@ -238,13 +289,14 @@ DFLogDownloadController::downloadFinished()
         QDataStream out(&file);
         out << b;
         entry->setStatus("Downloaded");
-        _downloadInProgress = false;
         entry->setDownloading(false);
     } else {
         qDebug() << "Error:" << _reply->errorString();
         qDebug() << "Error:" << _reply->error();
         entry->setStatus("Error");
     }
+    entry->setDownloading(false);
+    _downloadInProgress = false;
     _reply->deleteLater();
 
     checkForDownloads();
