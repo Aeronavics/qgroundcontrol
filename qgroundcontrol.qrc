@@ -80,6 +80,7 @@
         <file alias="PlanToolBar.qml">src/PlanView/PlanToolBar.qml</file>
         <file alias="PlanToolBarIndicators.qml">src/PlanView/PlanToolBarIndicators.qml</file>
         <file alias="PlanView.qml">src/PlanView/PlanView.qml</file>
+        <file alias="PlanViewTool.qml">src/PlanView/PlanViewTool.qml</file>
         <file alias="PreFlightCheckList.qml">src/FlightDisplay/PreFlightCheckList.qml</file>
         <file alias="PX4FlowSensor.qml">src/VehicleSetup/PX4FlowSensor.qml</file>
         <file alias="QGCInstrumentWidget.qml">src/FlightMap/Widgets/QGCInstrumentWidget.qml</file>
@@ -299,6 +300,7 @@
         <file alias="DFLogDownloadPage.qml">src/AnalyzeView/DFLogDownloadPage.qml</file>
         <file alias="SprayLogDownloadPage.qml">src/AnalyzeView/SprayLogDownloadPage.qml</file>
         <file alias="QGroundControl/FlightMap/SprayingIndicator.qml">src/FlightMap/MapItems/SprayingIndicator.qml</file>
+        <file>src/PlanView/PlanViewTool.qml</file>
     </qresource>
     <qresource prefix="/FirstRunPromptDialogs">
         <file alias="UnitsFirstRunPrompt.qml">src/FirstRunPromptDialogs/UnitsFirstRunPrompt.qml</file>

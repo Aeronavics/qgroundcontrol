@@ -19,14 +19,14 @@ PreFlightCheckButton {
     manualText:                     qsTr("Battery connector firmly plugged?")
     telemetryFailure:               _batLow
     telemetryTextFailure:           allowTelemetryFailureOverride ?
-                                        qsTr("Warning - Battery charge below %1%.").arg(failurePercent) :
-                                        qsTr("Battery charge below %1%. Please recharge.").arg(failurePercent)
-    allowTelemetryFailureOverride:  allowFailurePercentOverride
+                                        qsTr("Warning - Battery charge below %1V.").arg(failureVoltage) :
+                                        qsTr("Battery charge below %1v. Please recharge.").arg(failureVoltage)
+    allowTelemetryFailureOverride:  allowFailureVoltageOverride
 
-    property int    failurePercent:                 40
-    property bool   allowFailurePercentOverride:    false
+    property int    failureVoltage:                 56
+    property bool   allowFailureVoltageOverride:    false
     property var    _batteryGroup:                  globals.activeVehicle && globals.activeVehicle.batteries.count ? globals.activeVehicle.batteries.get(0) : undefined
-    property var    _batteryValue:                  _batteryGroup ? _batteryGroup.percentRemaining.value : 0
-    property var    _batPercentRemaining:           isNaN(_batteryValue) ? 0 : _batteryValue
-    property bool   _batLow:                        _batPercentRemaining < failurePercent
+    property var    _batteryValue:                  _batteryGroup ? _batteryGroup.voltage.value : 0
+    property var    _batVoltageRemaining:           isNaN(_batteryValue) ? 0 : _batteryValue
+    property bool   _batLow:                        _batVoltageRemaining < failureVoltage
 }
