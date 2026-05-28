@@ -154,7 +154,7 @@ Item {
                             QGCLabel { text: qsTr("Spray Remaining"); }
                             QGCLabel { text: qsTr("Total Vol Sprayed") }
                             QGCLabel { text: qsTr("Armed Vol Sprayed") }
-                            QGCLabel { text: qsTr("Last Tree Vol") }
+                            QGCLabel { text: qsTr("Last Spot Vol") }
                             QGCLabel { text: qsTr("Measured Flowrate") }
                             QGCLabel { text: qsTr("Desired Flowrate"); }
                             QGCLabel { text: qsTr("Set Flowrate"); }
