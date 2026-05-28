@@ -61,7 +61,7 @@ FlightMap {
         _saveZoomLevelSetting = false
         if (pipMode) {
             if (QGroundControl.flightMapZoom > 3) {
-                zoomLevel = QGroundControl.flightMapZoom - 3
+                zoomLevel = QGroundControl.flightMapZoom - 1
             }
         } else {
             zoomLevel = QGroundControl.flightMapZoom
@@ -567,7 +567,7 @@ FlightMap {
     MouseArea {
         anchors.fill: parent
         
-        onClicked: {
+        onPressAndHold: {
             if (!globals.guidedControllerFlyView.guidedUIVisible && 
                 (globals.guidedControllerFlyView.showGotoLocation || globals.guidedControllerFlyView.showOrbit || globals.guidedControllerFlyView.showROI || globals.guidedControllerFlyView.showSetHome || globals.guidedControllerFlyView.showSetEstimatorOrigin)) {
                 orbitMapCircle.hide()

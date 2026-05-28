@@ -115,10 +115,26 @@ Item {
 
     MouseArea {
         id:             pipMouseArea
-        anchors.fill:   parent
+        anchors.top:    parent.top
+        anchors.left:   parent.left
+        height:         ScreenTools.minTouchPixels
+        width:          height
         enabled:        _isExpanded
         hoverEnabled:   true
         onClicked:      _swapPip()
+    }
+
+    // Resize icon
+    Image {
+        source:         "/qmlimages/PiP.svg"
+        fillMode:       Image.PreserveAspectFit
+        mipmap: true
+        anchors.left:   parent.left
+        anchors.top:    parent.top
+        visible:        _isExpanded && (ScreenTools.isMobile || pipMouseArea.containsMouse)
+        height:         ScreenTools.defaultFontPixelHeight * 2.5
+        width:          ScreenTools.defaultFontPixelHeight * 2.5
+        sourceSize.height:  height
     }
 
     // MouseArea to drag in order to resize the PiP area
@@ -189,24 +205,24 @@ Item {
         }
     }
 
-    // Pip to Window
-    Image {
-        id:             popupPIP
-        source:         "/qmlimages/PiP.svg"
-        mipmap:         true
-        fillMode:       Image.PreserveAspectFit
-        anchors.left:   parent.left
-        anchors.top:    parent.top
-        visible:        _isExpanded && !ScreenTools.isMobile && pipMouseArea.containsMouse
-        height:         ScreenTools.defaultFontPixelHeight * 2.5
-        width:          ScreenTools.defaultFontPixelHeight * 2.5
-        sourceSize.height:  height
+    // // Pip to Window
+    // Image {
+    //     id:             popupPIP
+    //     source:         "/qmlimages/PiP.svg"
+    //     mipmap:         true
+    //     fillMode:       Image.PreserveAspectFit
+    //     anchors.left:   parent.left
+    //     anchors.top:    parent.top
+    //     visible:        _isExpanded && !ScreenTools.isMobile && pipMouseArea.containsMouse
+    //     height:         ScreenTools.defaultFontPixelHeight * 2.5
+    //     width:          ScreenTools.defaultFontPixelHeight * 2.5
+    //     sourceSize.height:  height
 
-        MouseArea {
-            anchors.fill:   parent
-            onClicked:      _pipOrWindowItem.pipState.state = _pipOrWindowItem.pipState.windowState
-        }
-    }
+    //     MouseArea {
+    //         anchors.fill:   parent
+    //         onClicked:      _pipOrWindowItem.pipState.state = _pipOrWindowItem.pipState.windowState
+    //     }
+    // }
 
     Image {
         id:             hidePIP
