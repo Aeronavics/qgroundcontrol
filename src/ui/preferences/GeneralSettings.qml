@@ -98,23 +98,23 @@ Rectangle {
                             anchors.horizontalCenter:   parent.horizontalCenter
                             spacing:                    _margins
 
-                            FactCheckBox {
-                                id:             useCheckList
-                                text:           qsTr("Use Preflight Checklist")
-                                fact:           _useChecklist
-                                visible:        _useChecklist.visible && QGroundControl.corePlugin.options.preFlightChecklistUrl.toString().length
+                            // FactCheckBox {
+                            //     id:             useCheckList
+                            //     text:           qsTr("Use Preflight Checklist")
+                            //     fact:           _useChecklist
+                            //     visible:        _useChecklist.visible && QGroundControl.corePlugin.options.preFlightChecklistUrl.toString().length
 
-                                property Fact _useChecklist: QGroundControl.settingsManager.appSettings.useChecklist
-                            }
+                            //     property Fact _useChecklist: QGroundControl.settingsManager.appSettings.useChecklist
+                            // }
 
-                            FactCheckBox {
-                                text:           qsTr("Enforce Preflight Checklist")
-                                fact:           _enforceChecklist
-                                enabled:        QGroundControl.settingsManager.appSettings.useChecklist.value
-                                visible:        useCheckList.visible && _enforceChecklist.visible && QGroundControl.corePlugin.options.preFlightChecklistUrl.toString().length
+                            // FactCheckBox {
+                            //     text:           qsTr("Enforce Preflight Checklist")
+                            //     fact:           _enforceChecklist
+                            //     enabled:        QGroundControl.settingsManager.appSettings.useChecklist.value
+                            //     visible:        useCheckList.visible && _enforceChecklist.visible && QGroundControl.corePlugin.options.preFlightChecklistUrl.toString().length
 
-                                property Fact _enforceChecklist: QGroundControl.settingsManager.appSettings.enforceChecklist
-                            }
+                            //     property Fact _enforceChecklist: QGroundControl.settingsManager.appSettings.enforceChecklist
+                            // }
 
                             FactCheckBox {
                                 text:       qsTr("Keep Map Centered On Vehicle")
@@ -124,38 +124,38 @@ Rectangle {
                                 property Fact _keepMapCenteredOnVehicle: QGroundControl.settingsManager.flyViewSettings.keepMapCenteredOnVehicle
                             }
 
-                            FactCheckBox {
-                                text:       qsTr("Show Telemetry Log Replay Status Bar")
-                                fact:       _showLogReplayStatusBar
-                                visible:    _showLogReplayStatusBar.visible
+                            // FactCheckBox {
+                            //     text:       qsTr("Show Telemetry Log Replay Status Bar")
+                            //     fact:       _showLogReplayStatusBar
+                            //     visible:    _showLogReplayStatusBar.visible
 
-                                property Fact _showLogReplayStatusBar: QGroundControl.settingsManager.flyViewSettings.showLogReplayStatusBar
-                            }
+                            //     property Fact _showLogReplayStatusBar: QGroundControl.settingsManager.flyViewSettings.showLogReplayStatusBar
+                            // }
 
-                            RowLayout {
-                                spacing: ScreenTools.defaultFontPixelWidth
+                            // RowLayout {
+                            //     spacing: ScreenTools.defaultFontPixelWidth
 
-                                FactCheckBox {
-                                    text:       qsTr("Virtual Joystick")
-                                    visible:    _virtualJoystick.visible
-                                    fact:       _virtualJoystick
-                                }
+                            //     FactCheckBox {
+                            //         text:       qsTr("Virtual Joystick")
+                            //         visible:    _virtualJoystick.visible
+                            //         fact:       _virtualJoystick
+                            //     }
 
-                                FactCheckBox {
-                                    text:       qsTr("Auto-Center Throttle")
-                                    visible:    _virtualJoystickAutoCenterThrottle.visible
-                                    enabled:    _virtualJoystick.rawValue
-                                    fact:       _virtualJoystickAutoCenterThrottle
-                                }
-                            }
+                            //     FactCheckBox {
+                            //         text:       qsTr("Auto-Center Throttle")
+                            //         visible:    _virtualJoystickAutoCenterThrottle.visible
+                            //         enabled:    _virtualJoystick.rawValue
+                            //         fact:       _virtualJoystickAutoCenterThrottle
+                            //     }
+                            // }
 
-                            FactCheckBox {
-                                text:       qsTr("Use Vertical Instrument Panel")
-                                visible:    _alternateInstrumentPanel.visible
-                                fact:       _alternateInstrumentPanel
+                            // FactCheckBox {
+                            //     text:       qsTr("Use Vertical Instrument Panel")
+                            //     visible:    _alternateInstrumentPanel.visible
+                            //     fact:       _alternateInstrumentPanel
 
-                                property Fact _alternateInstrumentPanel: QGroundControl.settingsManager.flyViewSettings.alternateInstrumentPanel
-                            }
+                            //     property Fact _alternateInstrumentPanel: QGroundControl.settingsManager.flyViewSettings.alternateInstrumentPanel
+                            // }
 
                             FactCheckBox {
                                 text:       qsTr("Show additional heading indicators on Compass")
@@ -173,13 +173,13 @@ Rectangle {
                                 property Fact _lockNoseUpCompass: QGroundControl.settingsManager.flyViewSettings.lockNoseUpCompass
                             }
 
-                            FactCheckBox {
-                                text:       qsTr("Show simple camera controls (DIGICAM_CONTROL)")
-                                visible:    _showDumbCameraControl.visible
-                                fact:       _showDumbCameraControl
+                            // FactCheckBox {
+                            //     text:       qsTr("Show simple camera controls (DIGICAM_CONTROL)")
+                            //     visible:    _showDumbCameraControl.visible
+                            //     fact:       _showDumbCameraControl
 
-                                property Fact _showDumbCameraControl: QGroundControl.settingsManager.flyViewSettings.showSimpleCameraControl
-                            }
+                            //     property Fact _showDumbCameraControl: QGroundControl.settingsManager.flyViewSettings.showSimpleCameraControl
+                            // }
 
                             FactCheckBox {
                                 text:       qsTr("Update home position based on device location. This will affect return to home")
@@ -188,236 +188,236 @@ Rectangle {
                                 property Fact _updateHomePosition: QGroundControl.settingsManager.flyViewSettings.updateHomePosition
                             }
 
-                            FactCheckBox {
-                                text:       qsTr("Enable Custom Actions")
-                                visible:    _enableCustomActions.visible
-                                fact:       _enableCustomActions
+                            // FactCheckBox {
+                            //     text:       qsTr("Enable Custom Actions")
+                            //     visible:    _enableCustomActions.visible
+                            //     fact:       _enableCustomActions
 
-                                property Fact _enableCustomActions: QGroundControl.settingsManager.flyViewSettings.enableCustomActions
-                            }
+                            //     property Fact _enableCustomActions: QGroundControl.settingsManager.flyViewSettings.enableCustomActions
+                            // }
 
                             //-----------------------------------------------------------------
                             //-- CustomAction definition path
-                            GridLayout {
-                                id: customActions
+                            // GridLayout {
+                            //     id: customActions
 
-                                columns:  2
-                                visible:  QGroundControl.settingsManager.flyViewSettings.enableCustomActions.rawValue
+                            //     columns:  2
+                            //     visible:  QGroundControl.settingsManager.flyViewSettings.enableCustomActions.rawValue
 
-                                onVisibleChanged: {
-                                    if (jsonFile.rawValue === "" && ScreenTools.isMobile) {
-                                        jsonFile.rawValue = _defaultFile
-                                    }
-                                }
+                            //     onVisibleChanged: {
+                            //         if (jsonFile.rawValue === "" && ScreenTools.isMobile) {
+                            //             jsonFile.rawValue = _defaultFile
+                            //         }
+                            //     }
 
-                                property Fact   jsonFile:     QGroundControl.settingsManager.flyViewSettings.customActionDefinitions
-                                property string _defaultDir:  QGroundControl.settingsManager.appSettings.customActionsSavePath
-                                property string _defaultFile: _defaultDir + "/CustomActions.json"
+                            //     property Fact   jsonFile:     QGroundControl.settingsManager.flyViewSettings.customActionDefinitions
+                            //     property string _defaultDir:  QGroundControl.settingsManager.appSettings.customActionsSavePath
+                            //     property string _defaultFile: _defaultDir + "/CustomActions.json"
 
-                                QGCLabel {
-                                    text: qsTr("Custom Action Definitions")
+                            //     QGCLabel {
+                            //         text: qsTr("Custom Action Definitions")
 
-                                    Layout.columnSpan:  2
-                                    Layout.alignment:   Qt.AlignHCenter
-                                }
+                            //         Layout.columnSpan:  2
+                            //         Layout.alignment:   Qt.AlignHCenter
+                            //     }
 
-                                QGCTextField {
-                                    Layout.fillWidth:   true
-                                    readOnly:           true
-                                    text:               customActions.jsonFile.rawValue === "" ? qsTr("<not set>") : customActions.jsonFile.rawValue
-                                }
-                                QGCButton {
-                                    visible:    !ScreenTools.isMobile
-                                    text:       qsTr("Browse")
-                                    onClicked:  customActionPathBrowseDialog.openForLoad()
-                                    QGCFileDialog {
-                                        id:             customActionPathBrowseDialog
-                                        title:          qsTr("Choose the Custom Action Definitions file")
-                                        folder:         customActions.jsonFile.rawValue
-                                        selectExisting: true
-                                        selectFolder:   false
-                                        onAcceptedForLoad: customActions.jsonFile.rawValue = file
-                                        nameFilters: ["JSON files (*.json)"]
-                                    }
-                                }
-                                // The file loader on Android doesn't work, so we hard code the path to the
-                                // JSON file. However, we need a button to force a refresh if the JSON file
-                                // is changed.
-                                QGCButton {
-                                    visible:    ScreenTools.isMobile
-                                    text:       qsTr("Reload")
-                                    onClicked:  {
-                                        customActions.jsonFile.valueChanged(customActions.jsonFile.rawValue)
-                                    }
-                                }
-                            }
+                            //     QGCTextField {
+                            //         Layout.fillWidth:   true
+                            //         readOnly:           true
+                            //         text:               customActions.jsonFile.rawValue === "" ? qsTr("<not set>") : customActions.jsonFile.rawValue
+                            //     }
+                            //     QGCButton {
+                            //         visible:    !ScreenTools.isMobile
+                            //         text:       qsTr("Browse")
+                            //         onClicked:  customActionPathBrowseDialog.openForLoad()
+                            //         QGCFileDialog {
+                            //             id:             customActionPathBrowseDialog
+                            //             title:          qsTr("Choose the Custom Action Definitions file")
+                            //             folder:         customActions.jsonFile.rawValue
+                            //             selectExisting: true
+                            //             selectFolder:   false
+                            //             onAcceptedForLoad: customActions.jsonFile.rawValue = file
+                            //             nameFilters: ["JSON files (*.json)"]
+                            //         }
+                            //     }
+                            //     // The file loader on Android doesn't work, so we hard code the path to the
+                            //     // JSON file. However, we need a button to force a refresh if the JSON file
+                            //     // is changed.
+                            //     QGCButton {
+                            //         visible:    ScreenTools.isMobile
+                            //         text:       qsTr("Reload")
+                            //         onClicked:  {
+                            //             customActions.jsonFile.valueChanged(customActions.jsonFile.rawValue)
+                            //         }
+                            //     }
+                            // }
 
-                            GridLayout {
-                                columns: 2
+                            // GridLayout {
+                            //     columns: 2
 
-                                QGCLabel {
-                                    text:               qsTr("Guided Command Settings")
-                                    Layout.columnSpan:  2
-                                    Layout.alignment:   Qt.AlignHCenter
-                                }
+                            //     QGCLabel {
+                            //         text:               qsTr("Guided Command Settings")
+                            //         Layout.columnSpan:  2
+                            //         Layout.alignment:   Qt.AlignHCenter
+                            //     }
 
-                                QGCLabel {
-                                    text:       qsTr("Minimum Altitude")
-                                    visible:    guidedMinAltField.visible
-                                }
-                                FactTextField {
-                                    id:                     guidedMinAltField
-                                    Layout.preferredWidth:  _valueFieldWidth
-                                    visible:                fact.visible
-                                    fact:                   _flyViewSettings.guidedMinimumAltitude
-                                }
+                            //     QGCLabel {
+                            //         text:       qsTr("Minimum Altitude")
+                            //         visible:    guidedMinAltField.visible
+                            //     }
+                            //     FactTextField {
+                            //         id:                     guidedMinAltField
+                            //         Layout.preferredWidth:  _valueFieldWidth
+                            //         visible:                fact.visible
+                            //         fact:                   _flyViewSettings.guidedMinimumAltitude
+                            //     }
 
-                                QGCLabel {
-                                    text:       qsTr("Maximum Altitude")
-                                    visible:    guidedMaxAltField.visible
-                                }
-                                FactTextField {
-                                    id:                     guidedMaxAltField
-                                    Layout.preferredWidth:  _valueFieldWidth
-                                    visible:                fact.visible
-                                    fact:                   _flyViewSettings.guidedMaximumAltitude
-                                }
+                            //     QGCLabel {
+                            //         text:       qsTr("Maximum Altitude")
+                            //         visible:    guidedMaxAltField.visible
+                            //     }
+                            //     FactTextField {
+                            //         id:                     guidedMaxAltField
+                            //         Layout.preferredWidth:  _valueFieldWidth
+                            //         visible:                fact.visible
+                            //         fact:                   _flyViewSettings.guidedMaximumAltitude
+                            //     }
 
-                                QGCLabel {
-                                    text:       qsTr("Go To Location Max Distance")
-                                    visible:    maxGotoDistanceField.visible
-                                }
-                                FactTextField {
-                                    id:                     maxGotoDistanceField
-                                    Layout.preferredWidth:  _valueFieldWidth
-                                    visible:                fact.visible
-                                    fact:                  _flyViewSettings.maxGoToLocationDistance
-                                }
-                            }
+                            //     QGCLabel {
+                            //         text:       qsTr("Go To Location Max Distance")
+                            //         visible:    maxGotoDistanceField.visible
+                            //     }
+                            //     FactTextField {
+                            //         id:                     maxGotoDistanceField
+                            //         Layout.preferredWidth:  _valueFieldWidth
+                            //         visible:                fact.visible
+                            //         fact:                  _flyViewSettings.maxGoToLocationDistance
+                            //     }
+                            // }
 
-                            GridLayout {
-                                id:         videoGrid
-                                columns:    2
-                                visible:    _videoSettings.visible
+                            // GridLayout {
+                            //     id:         videoGrid
+                            //     columns:    2
+                            //     visible:    _videoSettings.visible
 
-                                QGCLabel {
-                                    text:               qsTr("Video Settings")
-                                    Layout.columnSpan:  2
-                                    Layout.alignment:   Qt.AlignHCenter
-                                }
+                            //     QGCLabel {
+                            //         text:               qsTr("Video Settings")
+                            //         Layout.columnSpan:  2
+                            //         Layout.alignment:   Qt.AlignHCenter
+                            //     }
 
-                                QGCLabel {
-                                    id:         videoSourceLabel
-                                    text:       qsTr("Source")
-                                    visible:    !_videoAutoStreamConfig && _videoSettings.videoSource.visible
-                                }
-                                FactComboBox {
-                                    id:                     videoSource
-                                    Layout.preferredWidth:  _comboFieldWidth
-                                    indexModel:             false
-                                    fact:                   _videoSettings.videoSource
-                                    visible:                videoSourceLabel.visible
-                                }
+                            //     QGCLabel {
+                            //         id:         videoSourceLabel
+                            //         text:       qsTr("Source")
+                            //         visible:    !_videoAutoStreamConfig && _videoSettings.videoSource.visible
+                            //     }
+                            //     FactComboBox {
+                            //         id:                     videoSource
+                            //         Layout.preferredWidth:  _comboFieldWidth
+                            //         indexModel:             false
+                            //         fact:                   _videoSettings.videoSource
+                            //         visible:                videoSourceLabel.visible
+                            //     }
 
-                                QGCLabel {
-                                    id:         udpPortLabel
-                                    text:       qsTr("UDP Port")
-                                    visible:    !_videoAutoStreamConfig && (_isUDP264 || _isUDP265 || _isMPEGTS) && _videoSettings.udpPort.visible
-                                }
-                                FactTextField {
-                                    Layout.preferredWidth:  _comboFieldWidth
-                                    fact:                   _videoSettings.udpPort
-                                    visible:                udpPortLabel.visible
-                                }
+                            //     QGCLabel {
+                            //         id:         udpPortLabel
+                            //         text:       qsTr("UDP Port")
+                            //         visible:    !_videoAutoStreamConfig && (_isUDP264 || _isUDP265 || _isMPEGTS) && _videoSettings.udpPort.visible
+                            //     }
+                            //     FactTextField {
+                            //         Layout.preferredWidth:  _comboFieldWidth
+                            //         fact:                   _videoSettings.udpPort
+                            //         visible:                udpPortLabel.visible
+                            //     }
 
-                                QGCLabel {
-                                    id:         rtspUrlLabel
-                                    text:       qsTr("RTSP URL")
-                                    visible:    !_videoAutoStreamConfig && _isRTSP && _videoSettings.rtspUrl.visible
-                                }
-                                FactTextField {
-                                    Layout.preferredWidth:  _comboFieldWidth
-                                    fact:                   _videoSettings.rtspUrl
-                                    visible:                rtspUrlLabel.visible
-                                }
+                            //     QGCLabel {
+                            //         id:         rtspUrlLabel
+                            //         text:       qsTr("RTSP URL")
+                            //         visible:    !_videoAutoStreamConfig && _isRTSP && _videoSettings.rtspUrl.visible
+                            //     }
+                            //     FactTextField {
+                            //         Layout.preferredWidth:  _comboFieldWidth
+                            //         fact:                   _videoSettings.rtspUrl
+                            //         visible:                rtspUrlLabel.visible
+                            //     }
 
-                                QGCLabel {
-                                    id:         tcpUrlLabel
-                                    text:       qsTr("TCP URL")
-                                    visible:    !_videoAutoStreamConfig && _isTCP && _videoSettings.tcpUrl.visible
-                                }
-                                FactTextField {
-                                    Layout.preferredWidth:  _comboFieldWidth
-                                    fact:                   _videoSettings.tcpUrl
-                                    visible:                tcpUrlLabel.visible
-                                }
+                            //     QGCLabel {
+                            //         id:         tcpUrlLabel
+                            //         text:       qsTr("TCP URL")
+                            //         visible:    !_videoAutoStreamConfig && _isTCP && _videoSettings.tcpUrl.visible
+                            //     }
+                            //     FactTextField {
+                            //         Layout.preferredWidth:  _comboFieldWidth
+                            //         fact:                   _videoSettings.tcpUrl
+                            //         visible:                tcpUrlLabel.visible
+                            //     }
 
-                                QGCLabel {
-                                    text:                   qsTr("Aspect Ratio")
-                                    visible:                !_videoAutoStreamConfig && _isGst && _videoSettings.aspectRatio.visible
-                                }
-                                FactTextField {
-                                    Layout.preferredWidth:  _comboFieldWidth
-                                    fact:                   _videoSettings.aspectRatio
-                                    visible:                !_videoAutoStreamConfig && _isGst && _videoSettings.aspectRatio.visible
-                                }
+                            //     QGCLabel {
+                            //         text:                   qsTr("Aspect Ratio")
+                            //         visible:                !_videoAutoStreamConfig && _isGst && _videoSettings.aspectRatio.visible
+                            //     }
+                            //     FactTextField {
+                            //         Layout.preferredWidth:  _comboFieldWidth
+                            //         fact:                   _videoSettings.aspectRatio
+                            //         visible:                !_videoAutoStreamConfig && _isGst && _videoSettings.aspectRatio.visible
+                            //     }
 
-                                QGCLabel {
-                                    id:         videoFileFormatLabel
-                                    text:       qsTr("Record File Format")
-                                    visible:    _showSaveVideoSettings && _videoSettings.recordingFormat.visible
-                                }
-                                FactComboBox {
-                                    Layout.preferredWidth:  _comboFieldWidth
-                                    fact:                   _videoSettings.recordingFormat
-                                    visible:                videoFileFormatLabel.visible
-                                }
+                            //     QGCLabel {
+                            //         id:         videoFileFormatLabel
+                            //         text:       qsTr("Record File Format")
+                            //         visible:    _showSaveVideoSettings && _videoSettings.recordingFormat.visible
+                            //     }
+                            //     FactComboBox {
+                            //         Layout.preferredWidth:  _comboFieldWidth
+                            //         fact:                   _videoSettings.recordingFormat
+                            //         visible:                videoFileFormatLabel.visible
+                            //     }
 
-                                QGCLabel {
-                                    id:         maxSavedVideoStorageLabel
-                                    text:       qsTr("Max Storage Usage")
-                                    visible:    _showSaveVideoSettings && _videoSettings.maxVideoSize.visible && _videoSettings.enableStorageLimit.value
-                                }
-                                FactTextField {
-                                    Layout.preferredWidth:  _comboFieldWidth
-                                    fact:                   _videoSettings.maxVideoSize
-                                    visible:                _showSaveVideoSettings && _videoSettings.enableStorageLimit.value && maxSavedVideoStorageLabel.visible
-                                }
+                            //     QGCLabel {
+                            //         id:         maxSavedVideoStorageLabel
+                            //         text:       qsTr("Max Storage Usage")
+                            //         visible:    _showSaveVideoSettings && _videoSettings.maxVideoSize.visible && _videoSettings.enableStorageLimit.value
+                            //     }
+                            //     FactTextField {
+                            //         Layout.preferredWidth:  _comboFieldWidth
+                            //         fact:                   _videoSettings.maxVideoSize
+                            //         visible:                _showSaveVideoSettings && _videoSettings.enableStorageLimit.value && maxSavedVideoStorageLabel.visible
+                            //     }
 
-                                QGCLabel {
-                                    id:         videoDecodeLabel
-                                    text:       qsTr("Video decode priority")
-                                    visible:    forceVideoDecoderComboBox.visible
-                                }
-                                FactComboBox {
-                                    id:                     forceVideoDecoderComboBox
-                                    Layout.preferredWidth:  _comboFieldWidth
-                                    fact:                   _videoSettings.forceVideoDecoder
-                                    visible:                fact.visible
-                                    indexModel:             false
-                                }
+                            //     QGCLabel {
+                            //         id:         videoDecodeLabel
+                            //         text:       qsTr("Video decode priority")
+                            //         visible:    forceVideoDecoderComboBox.visible
+                            //     }
+                            //     FactComboBox {
+                            //         id:                     forceVideoDecoderComboBox
+                            //         Layout.preferredWidth:  _comboFieldWidth
+                            //         fact:                   _videoSettings.forceVideoDecoder
+                            //         visible:                fact.visible
+                            //         indexModel:             false
+                            //     }
 
-                                Item { width: 1; height: 1}
-                                FactCheckBox {
-                                    text:       qsTr("Disable When Disarmed")
-                                    fact:       _videoSettings.disableWhenDisarmed
-                                    visible:    !_videoAutoStreamConfig && _isGst && fact.visible
-                                }
+                            //     Item { width: 1; height: 1}
+                            //     FactCheckBox {
+                            //         text:       qsTr("Disable When Disarmed")
+                            //         fact:       _videoSettings.disableWhenDisarmed
+                            //         visible:    !_videoAutoStreamConfig && _isGst && fact.visible
+                            //     }
 
-                                Item { width: 1; height: 1}
-                                FactCheckBox {
-                                    text:       qsTr("Low Latency Mode")
-                                    fact:       _videoSettings.lowLatencyMode
-                                    visible:    !_videoAutoStreamConfig && _isGst && fact.visible
-                                }
+                            //     Item { width: 1; height: 1}
+                            //     FactCheckBox {
+                            //         text:       qsTr("Low Latency Mode")
+                            //         fact:       _videoSettings.lowLatencyMode
+                            //         visible:    !_videoAutoStreamConfig && _isGst && fact.visible
+                            //     }
 
-                                Item { width: 1; height: 1}
-                                FactCheckBox {
-                                    text:       qsTr("Auto-Delete Saved Recordings")
-                                    fact:       _videoSettings.enableStorageLimit
-                                    visible:    _showSaveVideoSettings && fact.visible
-                                }
-                            }
+                            //     Item { width: 1; height: 1}
+                            //     FactCheckBox {
+                            //         text:       qsTr("Auto-Delete Saved Recordings")
+                            //         fact:       _videoSettings.enableStorageLimit
+                            //         visible:    _showSaveVideoSettings && fact.visible
+                            //     }
+                            // }
                         }
                     }
 
@@ -452,11 +452,11 @@ Rectangle {
                                     fact:                   QGroundControl.settingsManager.appSettings.defaultMissionItemAltitude
                                 }
 
-                                QGCLabel { text: qsTr("VTOL TransitionDistance") }
-                                FactTextField {
-                                    Layout.preferredWidth:  _valueFieldWidth
-                                    fact:                   QGroundControl.settingsManager.planViewSettings.vtolTransitionDistance
-                                }
+                                // QGCLabel { text: qsTr("VTOL TransitionDistance") }
+                                // FactTextField {
+                                //     Layout.preferredWidth:  _valueFieldWidth
+                                //     fact:                   QGroundControl.settingsManager.planViewSettings.vtolTransitionDistance
+                                // }
                             }
 
                             FactCheckBox {
@@ -763,167 +763,167 @@ Rectangle {
                         }
                     }
 
-                    Item { width: 1; height: _margins; visible: telemetryLogSectionLabel.visible }
-                    QGCLabel {
-                        id:         telemetryLogSectionLabel
-                        text:       qsTr("Telemetry Logs from Vehicle")
-                        visible:    telemetryRect.visible
-                    }
-                    Rectangle {
-                        id:                     telemetryRect
-                        Layout.preferredHeight: loggingCol.height + (_margins * 2)
-                        Layout.preferredWidth:  loggingCol.width + (_margins * 2)
-                        color:                  qgcPal.windowShade
-                        Layout.fillWidth:       true
-                        visible:                promptSaveLog._telemetrySave.visible || logIfNotArmed._telemetrySaveNotArmed.visible || promptSaveCsv._saveCsvTelemetry.visible
-                        ColumnLayout {
-                            id:                         loggingCol
-                            anchors.margins:            _margins
-                            anchors.top:                parent.top
-                            anchors.horizontalCenter:   parent.horizontalCenter
-                            spacing:                    _margins
-                            FactCheckBox {
-                                id:         promptSaveLog
-                                text:       qsTr("Save log after each flight")
-                                fact:       _telemetrySave
-                                visible:    _telemetrySave.visible
-                                enabled:    !_disableAllDataPersistence
-                                property Fact _telemetrySave: QGroundControl.settingsManager.appSettings.telemetrySave
-                            }
-                            FactCheckBox {
-                                id:         logIfNotArmed
-                                text:       qsTr("Save logs even if vehicle was not armed")
-                                fact:       _telemetrySaveNotArmed
-                                visible:    _telemetrySaveNotArmed.visible
-                                enabled:    promptSaveLog.checked && !_disableAllDataPersistence
-                                property Fact _telemetrySaveNotArmed: QGroundControl.settingsManager.appSettings.telemetrySaveNotArmed
-                            }
-                            FactCheckBox {
-                                id:         promptSaveCsv
-                                text:       qsTr("Save CSV log of telemetry data")
-                                fact:       _saveCsvTelemetry
-                                visible:    _saveCsvTelemetry.visible
-                                enabled:    !_disableAllDataPersistence
-                                property Fact _saveCsvTelemetry: QGroundControl.settingsManager.appSettings.saveCsvTelemetry
-                            }
-                        }
-                    }
+                    // Item { width: 1; height: _margins; visible: telemetryLogSectionLabel.visible }
+                    // QGCLabel {
+                    //     id:         telemetryLogSectionLabel
+                    //     text:       qsTr("Telemetry Logs from Vehicle")
+                    //     visible:    telemetryRect.visible
+                    // }
+                    // Rectangle {
+                    //     id:                     telemetryRect
+                    //     Layout.preferredHeight: loggingCol.height + (_margins * 2)
+                    //     Layout.preferredWidth:  loggingCol.width + (_margins * 2)
+                    //     color:                  qgcPal.windowShade
+                    //     Layout.fillWidth:       true
+                    //     visible:                promptSaveLog._telemetrySave.visible || logIfNotArmed._telemetrySaveNotArmed.visible || promptSaveCsv._saveCsvTelemetry.visible
+                    //     ColumnLayout {
+                    //         id:                         loggingCol
+                    //         anchors.margins:            _margins
+                    //         anchors.top:                parent.top
+                    //         anchors.horizontalCenter:   parent.horizontalCenter
+                    //         spacing:                    _margins
+                    //         FactCheckBox {
+                    //             id:         promptSaveLog
+                    //             text:       qsTr("Save log after each flight")
+                    //             fact:       _telemetrySave
+                    //             visible:    _telemetrySave.visible
+                    //             enabled:    !_disableAllDataPersistence
+                    //             property Fact _telemetrySave: QGroundControl.settingsManager.appSettings.telemetrySave
+                    //         }
+                    //         FactCheckBox {
+                    //             id:         logIfNotArmed
+                    //             text:       qsTr("Save logs even if vehicle was not armed")
+                    //             fact:       _telemetrySaveNotArmed
+                    //             visible:    _telemetrySaveNotArmed.visible
+                    //             enabled:    promptSaveLog.checked && !_disableAllDataPersistence
+                    //             property Fact _telemetrySaveNotArmed: QGroundControl.settingsManager.appSettings.telemetrySaveNotArmed
+                    //         }
+                    //         FactCheckBox {
+                    //             id:         promptSaveCsv
+                    //             text:       qsTr("Save CSV log of telemetry data")
+                    //             fact:       _saveCsvTelemetry
+                    //             visible:    _saveCsvTelemetry.visible
+                    //             enabled:    !_disableAllDataPersistence
+                    //             property Fact _saveCsvTelemetry: QGroundControl.settingsManager.appSettings.saveCsvTelemetry
+                    //         }
+                    //     }
+                    // }
 
-                    Item { width: 1; height: _margins; visible: autoConnectSectionLabel.visible }
-                    QGCLabel {
-                        id:         autoConnectSectionLabel
-                        text:       qsTr("AutoConnect to the following devices")
-                        visible:    QGroundControl.settingsManager.autoConnectSettings.visible
-                    }
-                    Rectangle {
-                        Layout.preferredWidth:  autoConnectCol.width + (_margins * 2)
-                        Layout.preferredHeight: autoConnectCol.height + (_margins * 2)
-                        color:                  qgcPal.windowShade
-                        visible:                autoConnectSectionLabel.visible
-                        Layout.fillWidth:       true
+                    // Item { width: 1; height: _margins; visible: autoConnectSectionLabel.visible }
+                    // QGCLabel {
+                    //     id:         autoConnectSectionLabel
+                    //     text:       qsTr("AutoConnect to the following devices")
+                    //     visible:    QGroundControl.settingsManager.autoConnectSettings.visible
+                    // }
+                    // Rectangle {
+                    //     Layout.preferredWidth:  autoConnectCol.width + (_margins * 2)
+                    //     Layout.preferredHeight: autoConnectCol.height + (_margins * 2)
+                    //     color:                  qgcPal.windowShade
+                    //     visible:                autoConnectSectionLabel.visible
+                    //     Layout.fillWidth:       true
 
-                        ColumnLayout {
-                            id:                 autoConnectCol
-                            anchors.margins:    _margins
-                            anchors.left:       parent.left
-                            anchors.top:        parent.top
-                            spacing:            _margins
+                    //     ColumnLayout {
+                    //         id:                 autoConnectCol
+                    //         anchors.margins:    _margins
+                    //         anchors.left:       parent.left
+                    //         anchors.top:        parent.top
+                    //         spacing:            _margins
 
-                            RowLayout {
-                                spacing: _margins
+                    //         RowLayout {
+                    //             spacing: _margins
 
-                                Repeater {
-                                    id:     autoConnectRepeater
-                                    model:  [ QGroundControl.settingsManager.autoConnectSettings.autoConnectPixhawk,
-                                        QGroundControl.settingsManager.autoConnectSettings.autoConnectSiKRadio,
-                                        QGroundControl.settingsManager.autoConnectSettings.autoConnectPX4Flow,
-                                        QGroundControl.settingsManager.autoConnectSettings.autoConnectLibrePilot,
-                                        QGroundControl.settingsManager.autoConnectSettings.autoConnectUDP,
-                                        QGroundControl.settingsManager.autoConnectSettings.autoConnectRTKGPS,
-                                        QGroundControl.settingsManager.autoConnectSettings.autoConnectZeroConf,
-                                    ]
+                    //             Repeater {
+                    //                 id:     autoConnectRepeater
+                    //                 model:  [ QGroundControl.settingsManager.autoConnectSettings.autoConnectPixhawk,
+                    //                     QGroundControl.settingsManager.autoConnectSettings.autoConnectSiKRadio,
+                    //                     QGroundControl.settingsManager.autoConnectSettings.autoConnectPX4Flow,
+                    //                     QGroundControl.settingsManager.autoConnectSettings.autoConnectLibrePilot,
+                    //                     QGroundControl.settingsManager.autoConnectSettings.autoConnectUDP,
+                    //                     QGroundControl.settingsManager.autoConnectSettings.autoConnectRTKGPS,
+                    //                     QGroundControl.settingsManager.autoConnectSettings.autoConnectZeroConf,
+                    //                 ]
 
-                                    property var names: [ qsTr("Pixhawk"), qsTr("SiK Radio"), qsTr("PX4 Flow"), qsTr("LibrePilot"), qsTr("UDP"), qsTr("RTK GPS"), qsTr("Zero-Conf") ]
+                    //                 property var names: [ qsTr("Pixhawk"), qsTr("SiK Radio"), qsTr("PX4 Flow"), qsTr("LibrePilot"), qsTr("UDP"), qsTr("RTK GPS"), qsTr("Zero-Conf") ]
 
-                                    FactCheckBox {
-                                        text:       autoConnectRepeater.names[index]
-                                        fact:       modelData
-                                        visible:    modelData.visible
-                                    }
-                                }
-                            }
+                    //                 FactCheckBox {
+                    //                     text:       autoConnectRepeater.names[index]
+                    //                     fact:       modelData
+                    //                     visible:    modelData.visible
+                    //                 }
+                    //             }
+                    //         }
 
-                            GridLayout {
-                                Layout.fillWidth:   false
-                                Layout.alignment:   Qt.AlignHCenter
-                                columns:            2
-                                visible:            !ScreenTools.isMobile
-                                                    && QGroundControl.settingsManager.autoConnectSettings.autoConnectNmeaPort.visible
-                                                    && QGroundControl.settingsManager.autoConnectSettings.autoConnectNmeaBaud.visible
+                    //         GridLayout {
+                    //             Layout.fillWidth:   false
+                    //             Layout.alignment:   Qt.AlignHCenter
+                    //             columns:            2
+                    //             visible:            !ScreenTools.isMobile
+                    //                                 && QGroundControl.settingsManager.autoConnectSettings.autoConnectNmeaPort.visible
+                    //                                 && QGroundControl.settingsManager.autoConnectSettings.autoConnectNmeaBaud.visible
 
-                                QGCLabel {
-                                    text: qsTr("NMEA GPS Device")
-                                }
-                                QGCComboBox {
-                                    id:                     nmeaPortCombo
-                                    Layout.preferredWidth:  _comboFieldWidth
+                    //             QGCLabel {
+                    //                 text: qsTr("NMEA GPS Device")
+                    //             }
+                    //             QGCComboBox {
+                    //                 id:                     nmeaPortCombo
+                    //                 Layout.preferredWidth:  _comboFieldWidth
 
-                                    model:  ListModel {
-                                    }
+                    //                 model:  ListModel {
+                    //                 }
 
-                                    onActivated: {
-                                        if (index != -1) {
-                                            QGroundControl.settingsManager.autoConnectSettings.autoConnectNmeaPort.value = textAt(index);
-                                        }
-                                    }
-                                    Component.onCompleted: {
-                                        model.append({text: gpsDisabled})
-                                        model.append({text: gpsUdpPort})
+                    //                 onActivated: {
+                    //                     if (index != -1) {
+                    //                         QGroundControl.settingsManager.autoConnectSettings.autoConnectNmeaPort.value = textAt(index);
+                    //                     }
+                    //                 }
+                    //                 Component.onCompleted: {
+                    //                     model.append({text: gpsDisabled})
+                    //                     model.append({text: gpsUdpPort})
 
-                                        for (var i in QGroundControl.linkManager.serialPorts) {
-                                            nmeaPortCombo.model.append({text:QGroundControl.linkManager.serialPorts[i]})
-                                        }
-                                        var index = nmeaPortCombo.find(QGroundControl.settingsManager.autoConnectSettings.autoConnectNmeaPort.valueString);
-                                        nmeaPortCombo.currentIndex = index;
-                                        if (QGroundControl.linkManager.serialPorts.length === 0) {
-                                            nmeaPortCombo.model.append({text: "Serial <none available>"})
-                                        }
-                                    }
-                                }
+                    //                     for (var i in QGroundControl.linkManager.serialPorts) {
+                    //                         nmeaPortCombo.model.append({text:QGroundControl.linkManager.serialPorts[i]})
+                    //                     }
+                    //                     var index = nmeaPortCombo.find(QGroundControl.settingsManager.autoConnectSettings.autoConnectNmeaPort.valueString);
+                    //                     nmeaPortCombo.currentIndex = index;
+                    //                     if (QGroundControl.linkManager.serialPorts.length === 0) {
+                    //                         nmeaPortCombo.model.append({text: "Serial <none available>"})
+                    //                     }
+                    //                 }
+                    //             }
 
-                                QGCLabel {
-                                    visible:          nmeaPortCombo.currentText !== gpsUdpPort && nmeaPortCombo.currentText !== gpsDisabled
-                                    text:             qsTr("NMEA GPS Baudrate")
-                                }
-                                QGCComboBox {
-                                    visible:                nmeaPortCombo.currentText !== gpsUdpPort && nmeaPortCombo.currentText !== gpsDisabled
-                                    id:                     nmeaBaudCombo
-                                    Layout.preferredWidth:  _comboFieldWidth
-                                    model:                  [1200, 2400, 4800, 9600, 19200, 38400, 57600, 115200, 230400, 460800, 921600]
+                    //             QGCLabel {
+                    //                 visible:          nmeaPortCombo.currentText !== gpsUdpPort && nmeaPortCombo.currentText !== gpsDisabled
+                    //                 text:             qsTr("NMEA GPS Baudrate")
+                    //             }
+                    //             QGCComboBox {
+                    //                 visible:                nmeaPortCombo.currentText !== gpsUdpPort && nmeaPortCombo.currentText !== gpsDisabled
+                    //                 id:                     nmeaBaudCombo
+                    //                 Layout.preferredWidth:  _comboFieldWidth
+                    //                 model:                  [1200, 2400, 4800, 9600, 19200, 38400, 57600, 115200, 230400, 460800, 921600]
 
-                                    onActivated: {
-                                        if (index != -1) {
-                                            QGroundControl.settingsManager.autoConnectSettings.autoConnectNmeaBaud.value = textAt(index);
-                                        }
-                                    }
-                                    Component.onCompleted: {
-                                        var index = nmeaBaudCombo.find(QGroundControl.settingsManager.autoConnectSettings.autoConnectNmeaBaud.valueString);
-                                        nmeaBaudCombo.currentIndex = index;
-                                    }
-                                }
+                    //                 onActivated: {
+                    //                     if (index != -1) {
+                    //                         QGroundControl.settingsManager.autoConnectSettings.autoConnectNmeaBaud.value = textAt(index);
+                    //                     }
+                    //                 }
+                    //                 Component.onCompleted: {
+                    //                     var index = nmeaBaudCombo.find(QGroundControl.settingsManager.autoConnectSettings.autoConnectNmeaBaud.valueString);
+                    //                     nmeaBaudCombo.currentIndex = index;
+                    //                 }
+                    //             }
 
-                                QGCLabel {
-                                    text:       qsTr("NMEA stream UDP port")
-                                    visible:    nmeaPortCombo.currentText === gpsUdpPort
-                                }
-                                FactTextField {
-                                    visible:                nmeaPortCombo.currentText === gpsUdpPort
-                                    Layout.preferredWidth:  _valueFieldWidth
-                                    fact:                   QGroundControl.settingsManager.autoConnectSettings.nmeaUdpPort
-                                }
-                            }
-                        }
-                    }
+                    //             QGCLabel {
+                    //                 text:       qsTr("NMEA stream UDP port")
+                    //                 visible:    nmeaPortCombo.currentText === gpsUdpPort
+                    //             }
+                    //             FactTextField {
+                    //                 visible:                nmeaPortCombo.currentText === gpsUdpPort
+                    //                 Layout.preferredWidth:  _valueFieldWidth
+                    //                 fact:                   QGroundControl.settingsManager.autoConnectSettings.nmeaUdpPort
+                    //             }
+                    //         }
+                    //     }
+                    // }
 
                     Item { width: 1; height: _margins; visible: rtkSectionLabel.visible }
                     QGCLabel {
@@ -1059,144 +1059,144 @@ Rectangle {
                         }
                     }
 
-                    Item { width: 1; height: _margins; visible: adsbSectionLabel.visible }
-                    QGCLabel {
-                        id:         adsbSectionLabel
-                        text:       qsTr("ADSB Server")
-                        visible:    QGroundControl.settingsManager.adsbVehicleManagerSettings.visible
-                    }
-                    Rectangle {
-                        Layout.preferredHeight: adsbGrid.y + adsbGrid.height + _margins
-                        Layout.preferredWidth:  adsbGrid.width + (_margins * 2)
-                        color:                  qgcPal.windowShade
-                        visible:                adsbSectionLabel.visible
-                        Layout.fillWidth:       true
+                    // Item { width: 1; height: _margins; visible: adsbSectionLabel.visible }
+                    // QGCLabel {
+                    //     id:         adsbSectionLabel
+                    //     text:       qsTr("ADSB Server")
+                    //     visible:    QGroundControl.settingsManager.adsbVehicleManagerSettings.visible
+                    // }
+                    // Rectangle {
+                    //     Layout.preferredHeight: adsbGrid.y + adsbGrid.height + _margins
+                    //     Layout.preferredWidth:  adsbGrid.width + (_margins * 2)
+                    //     color:                  qgcPal.windowShade
+                    //     visible:                adsbSectionLabel.visible
+                    //     Layout.fillWidth:       true
 
-                        QGCLabel {
-                            id:                 warningLabel
-                            anchors.margins:    _margins
-                            anchors.top:        parent.top
-                            anchors.left:       parent.left
-                            anchors.right:      parent.right
-                            font.pointSize:     ScreenTools.smallFontPointSize
-                            wrapMode:           Text.WordWrap
-                            text:               qsTr("Note: These setting are not meant for use with an ADSB transponder which is situated on the vehicle.")
-                        }
+                    //     QGCLabel {
+                    //         id:                 warningLabel
+                    //         anchors.margins:    _margins
+                    //         anchors.top:        parent.top
+                    //         anchors.left:       parent.left
+                    //         anchors.right:      parent.right
+                    //         font.pointSize:     ScreenTools.smallFontPointSize
+                    //         wrapMode:           Text.WordWrap
+                    //         text:               qsTr("Note: These setting are not meant for use with an ADSB transponder which is situated on the vehicle.")
+                    //     }
 
-                        GridLayout {
-                            id:                         adsbGrid
-                            anchors.topMargin:          _margins
-                            anchors.top:                warningLabel.bottom
-                            Layout.fillWidth:           true
-                            anchors.horizontalCenter:   parent.horizontalCenter
-                            columns:                    2
+                    //     GridLayout {
+                    //         id:                         adsbGrid
+                    //         anchors.topMargin:          _margins
+                    //         anchors.top:                warningLabel.bottom
+                    //         Layout.fillWidth:           true
+                    //         anchors.horizontalCenter:   parent.horizontalCenter
+                    //         columns:                    2
 
-                            property var  adsbSettings:    QGroundControl.settingsManager.adsbVehicleManagerSettings
+                    //         property var  adsbSettings:    QGroundControl.settingsManager.adsbVehicleManagerSettings
 
-                            FactCheckBox {
-                                text:                   adsbGrid.adsbSettings.adsbServerConnectEnabled.shortDescription
-                                fact:                   adsbGrid.adsbSettings.adsbServerConnectEnabled
-                                visible:                adsbGrid.adsbSettings.adsbServerConnectEnabled.visible
-                                Layout.columnSpan:      2
-                            }
+                    //         FactCheckBox {
+                    //             text:                   adsbGrid.adsbSettings.adsbServerConnectEnabled.shortDescription
+                    //             fact:                   adsbGrid.adsbSettings.adsbServerConnectEnabled
+                    //             visible:                adsbGrid.adsbSettings.adsbServerConnectEnabled.visible
+                    //             Layout.columnSpan:      2
+                    //         }
 
-                            QGCLabel {
-                                text:               adsbGrid.adsbSettings.adsbServerHostAddress.shortDescription
-                                visible:            adsbGrid.adsbSettings.adsbServerHostAddress.visible
-                            }
-                            FactTextField {
-                                fact:                   adsbGrid.adsbSettings.adsbServerHostAddress
-                                visible:                adsbGrid.adsbSettings.adsbServerHostAddress.visible
-                                Layout.fillWidth:       true
-                            }
+                    //         QGCLabel {
+                    //             text:               adsbGrid.adsbSettings.adsbServerHostAddress.shortDescription
+                    //             visible:            adsbGrid.adsbSettings.adsbServerHostAddress.visible
+                    //         }
+                    //         FactTextField {
+                    //             fact:                   adsbGrid.adsbSettings.adsbServerHostAddress
+                    //             visible:                adsbGrid.adsbSettings.adsbServerHostAddress.visible
+                    //             Layout.fillWidth:       true
+                    //         }
 
-                            QGCLabel {
-                                text:               adsbGrid.adsbSettings.adsbServerPort.shortDescription
-                                visible:            adsbGrid.adsbSettings.adsbServerPort.visible
-                            }
-                            FactTextField {
-                                fact:                   adsbGrid.adsbSettings.adsbServerPort
-                                visible:                adsbGrid.adsbSettings.adsbServerPort.visible
-                                Layout.preferredWidth:  _valueFieldWidth
-                            }
-                        }
-                    }
+                    //         QGCLabel {
+                    //             text:               adsbGrid.adsbSettings.adsbServerPort.shortDescription
+                    //             visible:            adsbGrid.adsbSettings.adsbServerPort.visible
+                    //         }
+                    //         FactTextField {
+                    //             fact:                   adsbGrid.adsbSettings.adsbServerPort
+                    //             visible:                adsbGrid.adsbSettings.adsbServerPort.visible
+                    //             Layout.preferredWidth:  _valueFieldWidth
+                    //         }
+                    //     }
+                    // }
 
-                    Item { width: 1; height: _margins; visible: brandImageSectionLabel.visible }
-                    QGCLabel {
-                        id:         brandImageSectionLabel
-                        text:       qsTr("Brand Image")
-                        visible:    QGroundControl.settingsManager.brandImageSettings.visible && !ScreenTools.isMobile
-                    }
-                    Rectangle {
-                        Layout.preferredWidth:  brandImageGrid.width + (_margins * 2)
-                        Layout.preferredHeight: brandImageGrid.height + (_margins * 2)
-                        Layout.fillWidth:       true
-                        color:                  qgcPal.windowShade
-                        visible:                brandImageSectionLabel.visible
+                    // Item { width: 1; height: _margins; visible: brandImageSectionLabel.visible }
+                    // QGCLabel {
+                    //     id:         brandImageSectionLabel
+                    //     text:       qsTr("Brand Image")
+                    //     visible:    QGroundControl.settingsManager.brandImageSettings.visible && !ScreenTools.isMobile
+                    // }
+                    // Rectangle {
+                    //     Layout.preferredWidth:  brandImageGrid.width + (_margins * 2)
+                    //     Layout.preferredHeight: brandImageGrid.height + (_margins * 2)
+                    //     Layout.fillWidth:       true
+                    //     color:                  qgcPal.windowShade
+                    //     visible:                brandImageSectionLabel.visible
 
-                        GridLayout {
-                            id:                 brandImageGrid
-                            anchors.margins:    _margins
-                            anchors.top:        parent.top
-                            anchors.left:       parent.left
-                            anchors.right:      parent.right
-                            columns:            3
+                    //     GridLayout {
+                    //         id:                 brandImageGrid
+                    //         anchors.margins:    _margins
+                    //         anchors.top:        parent.top
+                    //         anchors.left:       parent.left
+                    //         anchors.right:      parent.right
+                    //         columns:            3
 
-                            QGCLabel {
-                                text:           qsTr("Indoor Image")
-                                visible:        _userBrandImageIndoor.visible
-                            }
-                            QGCTextField {
-                                readOnly:           true
-                                Layout.fillWidth:   true
-                                text:               _userBrandImageIndoor.valueString.replace("file:///","")
-                            }
-                            QGCButton {
-                                text:       qsTr("Browse")
-                                onClicked:  userBrandImageIndoorBrowseDialog.openForLoad()
-                                QGCFileDialog {
-                                    id:                 userBrandImageIndoorBrowseDialog
-                                    title:              qsTr("Choose custom brand image file")
-                                    folder:             _userBrandImageIndoor.rawValue.replace("file:///","")
-                                    selectExisting:     true
-                                    selectFolder:       false
-                                    onAcceptedForLoad:  _userBrandImageIndoor.rawValue = "file:///" + file
-                                }
-                            }
+                    //         QGCLabel {
+                    //             text:           qsTr("Indoor Image")
+                    //             visible:        _userBrandImageIndoor.visible
+                    //         }
+                    //         QGCTextField {
+                    //             readOnly:           true
+                    //             Layout.fillWidth:   true
+                    //             text:               _userBrandImageIndoor.valueString.replace("file:///","")
+                    //         }
+                    //         QGCButton {
+                    //             text:       qsTr("Browse")
+                    //             onClicked:  userBrandImageIndoorBrowseDialog.openForLoad()
+                    //             QGCFileDialog {
+                    //                 id:                 userBrandImageIndoorBrowseDialog
+                    //                 title:              qsTr("Choose custom brand image file")
+                    //                 folder:             _userBrandImageIndoor.rawValue.replace("file:///","")
+                    //                 selectExisting:     true
+                    //                 selectFolder:       false
+                    //                 onAcceptedForLoad:  _userBrandImageIndoor.rawValue = "file:///" + file
+                    //             }
+                    //         }
 
-                            QGCLabel {
-                                text:       qsTr("Outdoor Image")
-                                visible:    _userBrandImageOutdoor.visible
-                            }
-                            QGCTextField {
-                                readOnly:           true
-                                Layout.fillWidth:   true
-                                text:                _userBrandImageOutdoor.valueString.replace("file:///","")
-                            }
-                            QGCButton {
-                                text:       qsTr("Browse")
-                                onClicked:  userBrandImageOutdoorBrowseDialog.openForLoad()
-                                QGCFileDialog {
-                                    id:                 userBrandImageOutdoorBrowseDialog
-                                    title:              qsTr("Choose custom brand image file")
-                                    folder:             _userBrandImageOutdoor.rawValue.replace("file:///","")
-                                    selectExisting:     true
-                                    selectFolder:       false
-                                    onAcceptedForLoad:  _userBrandImageOutdoor.rawValue = "file:///" + file
-                                }
-                            }
-                            QGCButton {
-                                text:               qsTr("Reset Default Brand Image")
-                                Layout.columnSpan:  3
-                                Layout.alignment:   Qt.AlignHCenter
-                                onClicked:  {
-                                    _userBrandImageIndoor.rawValue = ""
-                                    _userBrandImageOutdoor.rawValue = ""
-                                }
-                            }
-                        }
-                    }
+                    //         QGCLabel {
+                    //             text:       qsTr("Outdoor Image")
+                    //             visible:    _userBrandImageOutdoor.visible
+                    //         }
+                    //         QGCTextField {
+                    //             readOnly:           true
+                    //             Layout.fillWidth:   true
+                    //             text:                _userBrandImageOutdoor.valueString.replace("file:///","")
+                    //         }
+                    //         QGCButton {
+                    //             text:       qsTr("Browse")
+                    //             onClicked:  userBrandImageOutdoorBrowseDialog.openForLoad()
+                    //             QGCFileDialog {
+                    //                 id:                 userBrandImageOutdoorBrowseDialog
+                    //                 title:              qsTr("Choose custom brand image file")
+                    //                 folder:             _userBrandImageOutdoor.rawValue.replace("file:///","")
+                    //                 selectExisting:     true
+                    //                 selectFolder:       false
+                    //                 onAcceptedForLoad:  _userBrandImageOutdoor.rawValue = "file:///" + file
+                    //             }
+                    //         }
+                    //         QGCButton {
+                    //             text:               qsTr("Reset Default Brand Image")
+                    //             Layout.columnSpan:  3
+                    //             Layout.alignment:   Qt.AlignHCenter
+                    //             onClicked:  {
+                    //                 _userBrandImageIndoor.rawValue = ""
+                    //                 _userBrandImageOutdoor.rawValue = ""
+                    //             }
+                    //         }
+                    //     }
+                    // }
 
                     Item { width: 1; height: _margins }
                     QGCLabel {
