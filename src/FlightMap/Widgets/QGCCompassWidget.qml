@@ -40,6 +40,7 @@ Item {
     property real _groundSpeed:         vehicle ? vehicle.groundSpeed.rawValue : 0
     property real _headingToNextWP:     vehicle ? vehicle.headingToNextWP.rawValue : 0
     property real _courseOverGround:    _activeVehicle ? _activeVehicle.gps.courseOverGround.rawValue : 0
+    property bool _whitePalette:        QGroundControl.settingsManager.appSettings.indoorPalette.rawValue
 
     property bool usedByMultipleVehicleList:  false
 
@@ -53,7 +54,7 @@ Item {
     }
 
     function isHeadingHomeOK(){
-        return vehicle && _showAdditionalIndicatorsCompass && !isNaN(_headingToHome)
+        return vehicle && !isNaN(_headingToHome)
     }
 
     function isHeadingToNextWPOK(){
@@ -119,7 +120,7 @@ Item {
         Image {
             id:                     homePointer
             width:                  size * 0.1
-            source:                 isHeadingHomeOK()  ? "/qmlimages/Home.svg" : ""
+            source:                 isHeadingHomeOK()  ? _whitePalette ? "/qmlimages/Home.svg": "/qmlimages/HomeBlack.svg" : ""
             mipmap:                 true
             fillMode:               Image.PreserveAspectFit
             anchors.centerIn:   	parent

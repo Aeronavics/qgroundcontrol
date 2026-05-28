@@ -215,6 +215,7 @@
         <file alias="spray.svg">src/ui/toolbar/Images/spray.svg</file>
         <file alias="video_swap.svg">src/Camera/images/video_swap.svg</file>
         <file alias="waterdrop.svg">src/FlightMap/Images/waterdrop.svg</file>
+        <file alias="HomeBlack.svg">src/FlightMap/Images/HomeBlack.svg</file>
     </qresource>
     <qresource prefix="/"/>
 </RCC>
