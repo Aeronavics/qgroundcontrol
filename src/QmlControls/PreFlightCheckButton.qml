@@ -74,8 +74,9 @@ QGCButton {
             color:          _color
             anchors.left:   parent.left
             anchors.top:    parent.top
-            anchors.bottom: parent.bottom
+            // anchors.bottom: parent.bottom
             width:          _stateFlagWidth
+            height:         _stateFlagWidth
         }
     }
 

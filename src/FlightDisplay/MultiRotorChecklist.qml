@@ -23,20 +23,20 @@ Item {
         id:     listModel
 
         PreFlightCheckGroup {
-            name: qsTr("Hand Controller Checks")
+            name: qsTr("Preflight Checks")
 
             PreFlightCheckButton {
-                name:           qsTr("Battery")
+                name:           qsTr("Hand Contoller Battery")
                 manualText:     qsTr("Charged?")
             }
 
             PreFlightCheckButton {
-                name:           qsTr("Antenna")
+                name:           qsTr("Hand Contoller Antenna")
                 manualText:     qsTr("Damage Free? Extended?")
             }
 
             PreFlightCheckButton {
-                name:           qsTr("Controls")
+                name:           qsTr("Hand Contoller Controls")
                 manualText:     qsTr("Damage Free?")
             }
 
@@ -44,10 +44,6 @@ Item {
                 name:           qsTr("Flight mode")
                 manualText:     qsTr("Set Correcty?")
             }
-        }
-
-        PreFlightCheckGroup {
-            name: qsTr("Aircraft Checks")
 
             PreFlightCheckButton {
                 name:           qsTr("Booms Connectors")
@@ -104,7 +100,7 @@ Item {
 
             PreFlightCheckButton {
                 name:           qsTr("Flight area")
-                manualText:     qsTr("Launch area and path free of obstacles/people?")
+                manualText:     qsTr("Free of obstacles/people?")
             }
 
             // PreFlightRCCheck {

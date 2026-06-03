@@ -20,7 +20,7 @@ PreFlightCheckButton {
     telemetryFailure:               _batLow
     telemetryTextFailure:           allowTelemetryFailureOverride ?
                                         qsTr("Warning - Battery charge below %1V.").arg(failureVoltage) :
-                                        qsTr("Battery charge below %1v. Please recharge.").arg(failureVoltage)
+                                        qsTr("Battery charge below %1v.").arg(failureVoltage)
     allowTelemetryFailureOverride:  allowFailureVoltageOverride
 
     property int    failureVoltage:                 56
