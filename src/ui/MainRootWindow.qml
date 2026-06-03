@@ -72,6 +72,10 @@ ApplicationWindow {
 
     readonly property real      _topBottomMargins:          ScreenTools.defaultFontPixelHeight * 0.5
 
+    property bool               allowCriticalMessagePopup:  true
+
+    property bool               toolSelectDialogOpen:       false
+
     //-------------------------------------------------------------------------
     //-- Global Scope Variables
 
@@ -275,6 +279,7 @@ ApplicationWindow {
     function showToolSelectDialog() {
         if (!mainWindow.preventViewSwitch()) {
             toolSelectDialogComponent.createObject(mainWindow).open()
+            toolSelectDialogOpen = true
         }
     }
 
@@ -285,6 +290,8 @@ ApplicationWindow {
             id:         toolSelectDialog
             title:      qsTr("Select Tool")
             buttons:    StandardButton.Close
+
+            Component.onDestruction: toolSelectDialogOpen = false
 
             property real _toolButtonHeight:    ScreenTools.defaultFontPixelHeight * 3
             property real _margins:             ScreenTools.defaultFontPixelWidth
@@ -307,6 +314,7 @@ ApplicationWindow {
                         imageResource:      "/qmlimages/Plan.svg"
                         onClicked: {
                             if (!mainWindow.preventViewSwitch()) {
+                                allowCriticalMessagePopup = false
                                 toolSelectDialog.close()
                                 mainWindow.showPlanView()
                             }
@@ -322,6 +330,7 @@ ApplicationWindow {
                         imageResource:      "/qmlimages/check.svg"
                         onClicked: {
                             if (!mainWindow.preventViewSwitch()) {
+                                allowCriticalMessagePopup = false
                                 toolSelectDialog.close()
                                 preFlightChecklistPopup.createObject(mainWindow).open()
                             }
@@ -337,6 +346,7 @@ ApplicationWindow {
                         imageResource:      "/qmlimages/Gears.svg"
                         onClicked: {
                             if (!mainWindow.preventViewSwitch()) {
+                                allowCriticalMessagePopup = false
                                 toolSelectDialog.close()
                                 mainWindow.showSetupTool()
                             }
@@ -353,6 +363,7 @@ ApplicationWindow {
                         // visible:            QGroundControl.corePlugin.showAdvancedUI
                         onClicked: {
                             if (!mainWindow.preventViewSwitch()) {
+                                allowCriticalMessagePopup = false
                                 toolSelectDialog.close()
                                 mainWindow.showAnalyzeTool()
                             }
@@ -369,6 +380,7 @@ ApplicationWindow {
                         visible:            !QGroundControl.corePlugin.options.combineSettingsAndSetup
                         onClicked: {
                             if (!mainWindow.preventViewSwitch()) {
+                                allowCriticalMessagePopup = false
                                 toolSelectDialog.close()
                                 mainWindow.showSettingsTool()
                             }
@@ -463,6 +475,8 @@ ApplicationWindow {
     Component {
         id: preFlightChecklistPopup
         FlyViewPreFlightChecklistPopup {
+            Component.onDestruction: allowCriticalMessagePopup = true
+            // onClose: allowCriticalMessagePopup = true
         }
     }
 
@@ -554,6 +568,7 @@ ApplicationWindow {
                 width:              (backTextLabel.x + backTextLabel.width) - backIcon.x
                 onClicked: {
                     toolDrawer.visible      = false
+                    allowCriticalMessagePopup = true
                 }
             }
         }
@@ -586,16 +601,18 @@ ApplicationWindow {
 
     function showCriticalVehicleMessage(message) {
         // indicatorPopup.close()
-        if (!indicatorPopup.visible) {
-            if (criticalVehicleMessagePopup.visible || QGroundControl.videoManager.fullScreen) {
-                // We received additional wanring message while an older warning message was still displayed.
-                // When the user close the older one drop the message indicator tool so they can see the rest of them.
-                criticalVehicleMessagePopup.dropMessageIndicatorOnClose = true;
-            } else {
-                criticalVehicleMessagePopup.criticalVehicleMessage      = message;
-                criticalVehicleMessagePopup.dropMessageIndicatorOnClose = false;
-                criticalVehicleMessagePopup.open();
-                criticalVehicleMessagePopupTimer.start();
+        if (allowCriticalMessagePopup && !toolSelectDialogOpen) {
+            if (!indicatorPopup.visible) {
+                if (criticalVehicleMessagePopup.visible || QGroundControl.videoManager.fullScreen) {
+                    // We received additional wanring message while an older warning message was still displayed.
+                    // When the user close the older one drop the message indicator tool so they can see the rest of them.
+                    criticalVehicleMessagePopup.dropMessageIndicatorOnClose = true;
+                } else {
+                    criticalVehicleMessagePopup.criticalVehicleMessage      = message;
+                    criticalVehicleMessagePopup.dropMessageIndicatorOnClose = false;
+                    criticalVehicleMessagePopup.open();
+                    criticalVehicleMessagePopupTimer.start();
+                }
             }
         }
     }
