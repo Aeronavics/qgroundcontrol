@@ -100,58 +100,87 @@ SprayLogDownloadController::refresh(void)
 {
     _setLoading(true);
     _setLoadingComplete(false);
-    QNetworkAccessManager *manager = new QNetworkAccessManager(this);
-    QNetworkRequest request(QUrl("http://192.168.144.1/spray_log"));
-    manager->get(request);
-    QObject::connect(manager, &QNetworkAccessManager::finished, this, [=](QNetworkReply *reply) {
-        if (reply->error() == QNetworkReply::NoError) {
-            QByteArray response = reply->readAll();
-            QJsonDocument jsonDoc = QJsonDocument::fromJson(response);
-            if (jsonDoc.isArray()) {
+    if (qgcApp()->toolbox()->multiVehicleManager()->activeVehicle())
+    {
+        QNetworkAccessManager *manager = new QNetworkAccessManager(this);
+        QNetworkRequest request(QUrl("http://192.168.144.1/spray_log"));
+        manager->get(request);
+        QObject::connect(manager, &QNetworkAccessManager::finished, this, [=](QNetworkReply *reply) {
+            if (reply->error() == QNetworkReply::NoError) {
+                QByteArray response = reply->readAll();
+                QJsonDocument jsonDoc = QJsonDocument::fromJson(response);
+                if (jsonDoc.isArray()) {
+                    _logEntriesModel.clear();
+                    QJsonArray log_list = jsonDoc.array();
+                    for(int i = 0; i < log_list.size(); i++)
+                    {
+                        QJsonObject logItem = log_list.at(i).toObject();
+                        QDateTime logTime = QDateTime::fromSecsSinceEpoch(logItem.value("date").toDouble());
+                        SprayLogEntry* logEntry = new SprayLogEntry(QString::number(logItem.value("id").toInt()), logTime, logItem.value("size").toInt());
+                        _logEntriesModel.append(logEntry);
+                    }
+                }
+                _logEntriesModel.sort_by_id();
+                _setLoadingComplete(true);
+                _setLoading(false);
+                qDebug() << "Request finished successfully";
+            } else {
+                qDebug() << "Error:" << reply->errorString();
+                qDebug() << "Error:" << reply->error();
+
                 _logEntriesModel.clear();
-                QJsonArray log_list = jsonDoc.array();
-                for(int i = 0; i < log_list.size(); i++)
-                {
-                    QJsonObject logItem = log_list.at(i).toObject();
-                    QDateTime logTime = QDateTime::fromSecsSinceEpoch(logItem.value("date").toDouble());
-                    SprayLogEntry* logEntry = new SprayLogEntry(QString::number(logItem.value("id").toInt()), logTime, logItem.value("size").toInt());
+
+                // Check Downloaded
+                QString dowload_path = qgcApp()->toolbox()->settingsManager()->appSettings()->logSavePath();
+                if(!dowload_path.endsWith(QDir::separator())) {
+                    dowload_path += QDir::separator();
+                }
+                dowload_path += "spray_logs";
+
+                QDir directory(dowload_path);
+                QStringList files = directory.entryList(QDir::Files | QDir::NoDotAndDotDot);
+
+                foreach(QString filename, files) {
+                    qDebug() << filename;
+                    QFileInfo file_info(dowload_path + QDir::separator() + filename);
+
+                    SprayLogEntry* logEntry = new SprayLogEntry(QString::number(file_info.baseName().toInt()), file_info.lastModified(), file_info.size());
+
                     _logEntriesModel.append(logEntry);
                 }
+                _logEntriesModel.sort_by_id();
+                _setLoadingComplete(true);
+                _setLoading(false);
             }
-            _logEntriesModel.sort_by_id();
-            _setLoadingComplete(true);
-            _setLoading(false);
-            qDebug() << "Request finished successfully";
-        } else {
-            qDebug() << "Error:" << reply->errorString();
-            qDebug() << "Error:" << reply->error();
+            reply->deleteLater(); // Ensure the reply object is deleted
+        });
+    }
+    else
+    {
+        _logEntriesModel.clear();
 
-            _logEntriesModel.clear();
-
-            // Check Downloaded
-            QString dowload_path = qgcApp()->toolbox()->settingsManager()->appSettings()->logSavePath();
-            if(!dowload_path.endsWith(QDir::separator())) {
-                dowload_path += QDir::separator();
-            }
-            dowload_path += "spray_logs";
-
-            QDir directory(dowload_path);
-            QStringList files = directory.entryList(QDir::Files | QDir::NoDotAndDotDot);
-
-            foreach(QString filename, files) {
-                qDebug() << filename;
-                QFileInfo file_info(dowload_path + QDir::separator() + filename);
-
-                SprayLogEntry* logEntry = new SprayLogEntry(QString::number(file_info.baseName().toInt()), file_info.lastModified(), file_info.size());
-
-                _logEntriesModel.append(logEntry);
-            }
-            _logEntriesModel.sort_by_id();
-            _setLoadingComplete(true);
-            _setLoading(false);
+        // Check Downloaded
+        QString dowload_path = qgcApp()->toolbox()->settingsManager()->appSettings()->logSavePath();
+        if(!dowload_path.endsWith(QDir::separator())) {
+            dowload_path += QDir::separator();
         }
-        reply->deleteLater(); // Ensure the reply object is deleted
-    });
+        dowload_path += "spray_logs";
+
+        QDir directory(dowload_path);
+        QStringList files = directory.entryList(QDir::Files | QDir::NoDotAndDotDot);
+
+        foreach(QString filename, files) {
+            qDebug() << filename;
+            QFileInfo file_info(dowload_path + QDir::separator() + filename);
+
+            SprayLogEntry* logEntry = new SprayLogEntry(QString::number(file_info.baseName().toInt()), file_info.lastModified(), file_info.size());
+
+            _logEntriesModel.append(logEntry);
+        }
+        _logEntriesModel.sort_by_id();
+        _setLoadingComplete(true);
+        _setLoading(false);
+    }
 }
 
 
