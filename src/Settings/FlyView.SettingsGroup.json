@@ -85,6 +85,12 @@
     "longDesc":  "File that defines custom actions to send connected vehicle",
     "type":      "string",
     "default":   ""
+},
+{
+    "name":      "photographSprayEvents",
+    "shortDesc": "Take a photo on spray events",
+    "type":      "bool",
+    "default":   true
 }
 ]
 }

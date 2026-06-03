@@ -1,6 +1,7 @@
 #include "VehicleSprayFactGroup.h"
 #include "Vehicle.h"
 #include <bitset>
+#include "SettingsManager.h"
 
 #include "QGCApplication.h"
 #include "QGCCorePlugin.h"
@@ -73,17 +74,20 @@ void VehicleSprayFactGroup::_handleSprayStatus(mavlink_message_t& message)
 
     if (desFlowrate()->rawValue().toUInt() == 0 && spray.desired_flowrate > 0)
     {
-        if (qgcApp()->toolbox()->videoManager()->primaryStream() && qgcApp()->toolbox()->videoManager()->decoding())
+        if (qgcApp()->toolbox()->settingsManager()->flyViewSettings()->updateHomePosition()->rawValue().toBool())
         {
-            qgcApp()->toolbox()->videoManager()->grabImage();
-        }
-        else if (qgcApp()->toolbox()->videoManager()->secondaryStream() && qgcApp()->toolbox()->videoManager()->secondaryDecoding())
-        {
-            qgcApp()->toolbox()->videoManager()->secondaryGrabImage();
-        }
-        else if (qgcApp()->toolbox()->videoManager()->tertiaryStream() && qgcApp()->toolbox()->videoManager()->tertiaryDecoding())
-        {
-            qgcApp()->toolbox()->videoManager()->tertiaryGrabImage();
+            if (qgcApp()->toolbox()->videoManager()->primaryStream() && qgcApp()->toolbox()->videoManager()->decoding())
+            {
+                qgcApp()->toolbox()->videoManager()->grabImage();
+            }
+            else if (qgcApp()->toolbox()->videoManager()->secondaryStream() && qgcApp()->toolbox()->videoManager()->secondaryDecoding())
+            {
+                qgcApp()->toolbox()->videoManager()->secondaryGrabImage();
+            }
+            else if (qgcApp()->toolbox()->videoManager()->tertiaryStream() && qgcApp()->toolbox()->videoManager()->tertiaryDecoding())
+            {
+                qgcApp()->toolbox()->videoManager()->tertiaryGrabImage();
+            }
         }
     }
 

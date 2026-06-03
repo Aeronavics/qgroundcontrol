@@ -173,6 +173,14 @@ Rectangle {
                                 property Fact _lockNoseUpCompass: QGroundControl.settingsManager.flyViewSettings.lockNoseUpCompass
                             }
 
+                            FactCheckBox {
+                                text:       qsTr("Take Photo on Spray Event")
+                                fact:       _photographSprayEvents
+                                visible:    _photographSprayEvents.visible
+
+                                property Fact _photographSprayEvents: QGroundControl.settingsManager.flyViewSettings.photographSprayEvents
+                            }
+
                             // FactCheckBox {
                             //     text:       qsTr("Show simple camera controls (DIGICAM_CONTROL)")
                             //     visible:    _showDumbCameraControl.visible
