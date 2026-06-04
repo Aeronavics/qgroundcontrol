@@ -37,10 +37,11 @@ Item {
     property int  _fontSize:            ScreenTools.defaultFontPointSize * _sizeRatio
     property real _heading:             vehicle ? vehicle.heading.rawValue : 0
     property real _headingToHome:       vehicle ? vehicle.headingToHome.rawValue : 0
+    property real _headingToRC:         vehicle ? vehicle.headingToGCS.rawValue : 0
     property real _groundSpeed:         vehicle ? vehicle.groundSpeed.rawValue : 0
     property real _headingToNextWP:     vehicle ? vehicle.headingToNextWP.rawValue : 0
     property real _courseOverGround:    _activeVehicle ? _activeVehicle.gps.courseOverGround.rawValue : 0
-    property bool _whitePalette:        QGroundControl.settingsManager.appSettings.indoorPalette.rawValue
+    property bool _blackPalette:        QGroundControl.settingsManager.appSettings.indoorPalette.rawValue
 
     property bool usedByMultipleVehicleList:  false
 
@@ -55,6 +56,10 @@ Item {
 
     function isHeadingHomeOK(){
         return vehicle && !isNaN(_headingToHome)
+    }
+
+    function isHeadingToRCOK(){
+        return vehicle && !isNaN(_headingToRC)
     }
 
     function isHeadingToNextWPOK(){
@@ -120,7 +125,7 @@ Item {
         Image {
             id:                     homePointer
             width:                  size * 0.1
-            source:                 isHeadingHomeOK()  ? _whitePalette ? "/qmlimages/Home.svg": "/qmlimages/HomeBlack.svg" : ""
+            source:                 isHeadingHomeOK()  ? _blackPalette ? "/qmlimages/Home.svg": "/qmlimages/HomeBlack.svg" : ""
             mipmap:                 true
             fillMode:               Image.PreserveAspectFit
             anchors.centerIn:   	parent
@@ -128,6 +133,22 @@ Item {
 
             transform: Translate {
                 property double _angle: isNoseUpLocked()?-_heading+_headingToHome:_headingToHome
+                x: size/2.3 * Math.sin((_angle)*(3.14/180))
+                y: - size/2.3 * Math.cos((_angle)*(3.14/180))
+            }
+        }
+
+        Image {
+            id:                     rcPointer
+            width:                  size * 0.1
+            source:                 isHeadingToRCOK()  ? _blackPalette ? "/qmlimages/RC.svg": "/qmlimages/RCBlack.svg" : ""
+            mipmap:                 true
+            fillMode:               Image.PreserveAspectFit
+            anchors.centerIn:   	parent
+            sourceSize.width:       width
+
+            transform: Translate {
+                property double _angle: isNoseUpLocked()?-_heading+_headingToRC:_headingToRC
                 x: size/2.3 * Math.sin((_angle)*(3.14/180))
                 y: - size/2.3 * Math.cos((_angle)*(3.14/180))
             }
