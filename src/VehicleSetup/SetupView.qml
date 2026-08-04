@@ -37,6 +37,7 @@ Rectangle {
     property bool   _vehicleArmed:                  QGroundControl.multiVehicleManager.activeVehicle ? QGroundControl.multiVehicleManager.activeVehicle.armed : false
     property string _messagePanelText:              qsTr("missing message panel text")
     property bool   _fullParameterVehicleAvailable: QGroundControl.multiVehicleManager.parameterReadyVehicleAvailable && !QGroundControl.multiVehicleManager.activeVehicle.parameterManager.missingParameters
+    property bool   _vehicleConnected:              QGroundControl.multiVehicleManager.activeVehicle ? !QGroundControl.multiVehicleManager.activeVehicle.vehicleLinkManager.communicationLost : false
     property var    _corePlugin:                    QGroundControl.corePlugin
 
     function showSummaryPanel() {
@@ -47,7 +48,9 @@ Rectangle {
     }
 
     function _showSummaryPanel() {
-        if (_fullParameterVehicleAvailable) {
+        if (!_vehicleConnected) {
+            panelLoader.setSourceComponent(disconnectedVehicleSummaryComponent)
+        } else if (_fullParameterVehicleAvailable) {
             if (QGroundControl.multiVehicleManager.activeVehicle.autopilot.vehicleComponents.length === 0) {
                 panelLoader.setSourceComponent(noComponentsVehicleSummaryComponent)
             } else {

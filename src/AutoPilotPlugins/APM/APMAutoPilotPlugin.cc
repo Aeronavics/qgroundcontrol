@@ -77,7 +77,10 @@ APMAutoPilotPlugin::~APMAutoPilotPlugin()
 
 const QVariantList& APMAutoPilotPlugin::vehicleComponents(void)
 {
-    if ((_components.count() == 0 && !_incorrectParameterVersion) || _showAdvanced != qgcApp()->toolbox()->corePlugin()->showAdvancedUI()) {
+    if (_vehicle->vehicleLinkManager()->communicationLost()) {
+        _components.erase(_components.begin(), _components.end());
+    }
+    else if ((_components.count() == 0 && !_incorrectParameterVersion) || _showAdvanced != qgcApp()->toolbox()->corePlugin()->showAdvancedUI()) {
         if (_vehicle->parameterManager()->parametersReady()) {
 
             _showAdvanced = qgcApp()->toolbox()->corePlugin()->showAdvancedUI();
