@@ -129,6 +129,10 @@ Item {
             color:          qgcPal.window
             border.color:   qgcPal.text
 
+            Component.onCompleted: {
+                    var _sprayMode = _activeVehicle.parameterManager.getParameter(_activeVehicle.id, "SPOT_MODE")
+            }
+
             ColumnLayout {
                 id:                 mainLayout
                 anchors.margins:    ScreenTools.defaultFontPixelWidth
@@ -150,6 +154,7 @@ Item {
                             spacing: 0
 
                             QGCLabel { text: qsTr("State"); }
+                            QGCLabel { text: qsTr("Mode"); }
                             QGCLabel { text: qsTr("Error"); }
                             QGCLabel { text: qsTr("Spray Remaining"); }
                             QGCLabel { text: qsTr("Total Vol Sprayed") }
@@ -166,8 +171,12 @@ Item {
 
                         ColumnLayout {
                             spacing: 0
-                            QGCLabel { text:
-                                    (sprayer.mesFlowrate.rawValue > 0) ? qsTr("Spraying") : qsTr("Stopped");
+                            QGCLabel {
+
+                                text: (sprayer.mesFlowrate.rawValue > 0) ? qsTr("Spraying") : qsTr("Stopped");
+                            }
+                            QGCLabel {
+                                text: (sprayer.sprayMode.rawValue === 0) ? qsTr("Flow Rate") : qsTr("Volume")
                             }
                             QGCLabel { text:
                                     (sprayer.error.rawValue & MAVLink.COM_AERONAVICS_SPRAYINFO_ERROR_FLOW_RATE_1) === MAVLink.COM_AERONAVICS_SPRAYINFO_ERROR_FLOW_RATE_1 ? qsTr("Possible Blockage") :

@@ -47,7 +47,7 @@
             "shortDesc":        "Remaining Spray",
             "type":             "float",
             "decimalPlaces":    1,
-            "units":            "%"
+            "units":            "l"
         },
         {
             "name":             "mesPressure",
@@ -58,6 +58,11 @@
         {
             "name":             "error",
             "shortDesc":        "Spray Error",
+            "type":             "uint8"
+        },
+        {
+            "name":             "sprayMode",
+            "shortDesc":        "Spray Mode",
             "type":             "uint8"
         }
     ]

@@ -6,6 +6,7 @@
 #include "QGCApplication.h"
 #include "QGCCorePlugin.h"
 #include "VideoManager.h"
+#include "ParameterManager.h"
 
 
 const char* VehicleSprayFactGroup::_mesFlowrateFactName =           "mesFlowrate";
@@ -18,6 +19,7 @@ const char* VehicleSprayFactGroup::_sprayRemainingFactName =        "sprayRemain
 const char* VehicleSprayFactGroup::_mesPressureFactName =           "mesPressure";
 const char* VehicleSprayFactGroup::_errorFactName =                 "error";
 const char* VehicleSprayFactGroup::_sprayerSeenFactName =           "sprayerEnabled";
+const char* VehicleSprayFactGroup::_sprayModeFactName =             "sprayMode";
 
 VehicleSprayFactGroup::VehicleSprayFactGroup(QObject* parent)
     : FactGroup(1000, ":/json/Vehicle/SprayFact.json", parent)
@@ -31,6 +33,7 @@ VehicleSprayFactGroup::VehicleSprayFactGroup(QObject* parent)
     , _mesPressureFact          (0, _mesPressureFactName,           FactMetaData::valueTypeUint16)
     , _errorFact                (0, _errorFactName,                 FactMetaData::valueTypeUint8)
     , _sprayerSeenFact          (0, _sprayerSeenFactName,           FactMetaData::valueTypeBool)
+    , _sprayModeFact            (0, _sprayModeFactName,             FactMetaData::valueTypeUint8)
 {
     _addFact(&_mesFlowrateFact,         _mesFlowrateFactName);
     _addFact(&_desFlowrateFact,         _desFlowrateFactName);
@@ -42,6 +45,7 @@ VehicleSprayFactGroup::VehicleSprayFactGroup(QObject* parent)
     _addFact(&_mesPressureFact,         _mesPressureFactName);
     _addFact(&_errorFact,               _errorFactName);
     _addFact(&_sprayerSeenFact,         _sprayerSeenFactName);
+    _addFact(&_sprayModeFact,           _sprayModeFactName);
 
     // Start out as not available "--.--"
     _mesFlowrateFact.setRawValue(qQNaN());
@@ -54,6 +58,7 @@ VehicleSprayFactGroup::VehicleSprayFactGroup(QObject* parent)
     _mesPressureFact.setRawValue(qQNaN());
     _errorFact.setRawValue(qQNaN());
     _sprayerSeenFact.setRawValue(false);
+    _sprayModeFact.setRawValue(qQNaN());
 }
 
 void VehicleSprayFactGroup::handleMessage(Vehicle* /* vehicle */, mavlink_message_t& message)
@@ -97,8 +102,21 @@ void VehicleSprayFactGroup::_handleSprayStatus(mavlink_message_t& message)
     totalSprayedVolume()->setRawValue   (spray.total_sprayed_volume);
     armedSprayedVolume()->setRawValue   (spray.armed_sprayed_volume);
     lastTreeVolume()->setRawValue       (spray.last_tree_volume);
-    sprayRemaining()->setRawValue       (spray.spray_remaining);
+    sprayRemaining()->setRawValue       ((spray.spray_remaining / 100) * 12);
     mesPressure()->setRawValue          (spray.pressure);
     error()->setRawValue                (spray.error);
     sprayerSeen()->setRawValue          (true);
+
+
+    Vehicle* vehicle = qgcApp()->toolbox()->multiVehicleManager()->activeVehicle();
+
+    if (vehicle) {
+        if (vehicle->parameterManager()->parameterExists(1, QStringLiteral("SPOT_MODE"))) {
+            Fact* sprayModeFact = vehicle->parameterManager()->getParameter(1, QStringLiteral("SPOT_MODE"));
+            if (sprayModeFact) {
+                QVariant val = sprayModeFact->rawValue();
+                sprayMode()->setRawValue(val.toUInt());
+            }
+        }
+    }
 }
