@@ -508,6 +508,10 @@ VideoManager::grabImage(const QString& imageFile)
         return;
     }
 
+    if (!_decoding){
+        return;
+    }
+
     if (imageFile.isEmpty()) {
         _imageFile = qgcApp()->toolbox()->settingsManager()->appSettings()->photoSavePath();
         _imageFile += + "/" + QDateTime::currentDateTime().toString("yyyy-MM-dd_hh.mm.ss.zzz") + ".jpg";
@@ -531,6 +535,9 @@ VideoManager::secondaryGrabImage(const QString& secondaryImageFile)
     }
 #if defined(QGC_GST_STREAMING)
     if (!_videoReceiver[1]) {
+        return;
+    }
+    if (!_secondaryDecoding){
         return;
     }
 
@@ -558,6 +565,10 @@ VideoManager::tertiaryGrabImage(const QString& tertiaryImageFile)
     }
 #if defined(QGC_GST_STREAMING)
     if (!_videoReceiver[2]) {
+        return;
+    }
+
+    if (!_tertiaryDecoding){
         return;
     }
 
