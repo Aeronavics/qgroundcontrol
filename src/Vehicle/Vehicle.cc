@@ -847,6 +847,9 @@ void Vehicle::_mavlinkMessageReceived(LinkInterface* link, mavlink_message_t mes
     case MAVLINK_MSG_ID_ANV_SPRAY_STATUS:
         _handleSprayFeedback(message);
         break;
+    case MAVLINK_MSG_ID_ANV_TAG_LOCATION:
+        _handleTaggedLocationFeedback(message);
+        break;
 #endif
     }
 
@@ -897,6 +900,16 @@ void Vehicle::_handleSprayFeedback(mavlink_message_t& message)
         _spraying_status = false;
     }
 }
+
+void Vehicle::_handleTaggedLocationFeedback(mavlink_message_t& message)
+{
+    mavlink_anv_tag_location_t tagged_location;
+    mavlink_msg_anv_tag_location_decode(&message, &tagged_location);
+
+    QGeoCoordinate taggedPoint(tagged_location.latitude / qPow(10.0, 7.0), tagged_location.longitude / qPow(10.0, 7.0), 0.0);
+    _taggedPoints.append(new QGCQGeoCoordinate(taggedPoint, this));
+}
+
 
 #endif
 
@@ -2472,6 +2485,12 @@ void Vehicle::addSprayTriggerPoint(QGeoCoordinate point)
 void Vehicle::addSprayingPoint(QGeoCoordinate point)
 {
     _sprayingPoints.append(new QGCQGeoCoordinate(point, this));
+}
+
+void Vehicle::clearTaggedPoints()
+{
+    _taggedPoints.clearAndDeleteContents();
+    _taggedPoints.clearAndDeleteContents();
 }
 
 void Vehicle::_flightTimerStart()

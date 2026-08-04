@@ -31,4 +31,5 @@ ProximityRadarMapView       1.0 ProximityRadarMapView.qml
 SplitIndicator              1.0 SplitIndicator.qml
 SprayTriggerIndicator       1.0 SprayTriggerIndicator.qml
 SprayingIndicator           1.0 SprayingIndicator.qml
+TaggedIndicator             1.0 TaggedIndicator.qml
 VehicleMapItem              1.0 VehicleMapItem.qml

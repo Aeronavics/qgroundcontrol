@@ -175,6 +175,7 @@ public:
     Q_PROPERTY(QmlObjectListModel*  cameraTriggerPoints         READ cameraTriggerPoints                                            CONSTANT)
     Q_PROPERTY(QmlObjectListModel*  sprayTriggerPoints          READ sprayTriggerPoints                                             CONSTANT)
     Q_PROPERTY(QmlObjectListModel*  sprayingPoints              READ sprayingPoints                                                 CONSTANT)
+    Q_PROPERTY(QmlObjectListModel*  taggedPoints                READ taggedPoints                                                   CONSTANT)
     Q_PROPERTY(float                latitude                    READ latitude                                                       NOTIFY coordinateChanged)
     Q_PROPERTY(float                longitude                   READ longitude                                                      NOTIFY coordinateChanged)
     Q_PROPERTY(bool                 messageTypeNone             READ messageTypeNone                                                NOTIFY messageTypeChanged)
@@ -481,6 +482,9 @@ public:
     /// Clear the Spray marker on the map
     Q_INVOKABLE void clearSprayTriggerPoints(void);
 
+    /// Clear the tagged points on the map
+    Q_INVOKABLE void clearTaggedPoints(void);
+
     void addSprayTriggerPoint(QGeoCoordinate point);
     void addSprayingPoint(QGeoCoordinate point);
 
@@ -583,6 +587,7 @@ public:
     QmlObjectListModel* cameraTriggerPoints () { return &_cameraTriggerPoints; }
     QmlObjectListModel* sprayTriggerPoints  () { return &_sprayTriggerPoints; }
     QmlObjectListModel* sprayingPoints      () { return &_sprayingPoints; }
+    QmlObjectListModel* taggedPoints  () { return &_taggedPoints; }
 
     int  flowImageIndex() const{ return _flowImageIndex; }
 
@@ -1121,6 +1126,7 @@ private:
     void _handleCameraFeedback          (const mavlink_message_t& message);
     void _handleRangefinder             (mavlink_message_t& message);
     void _handleSprayFeedback           (mavlink_message_t& message);
+    void _handleTaggedLocationFeedback  (mavlink_message_t& message);
 #endif
     void _handleCameraImageCaptured     (const mavlink_message_t& message);
     void _handleADSBVehicle             (const mavlink_message_t& message);
@@ -1263,6 +1269,7 @@ private:
     QmlObjectListModel              _cameraTriggerPoints;
     QmlObjectListModel              _sprayTriggerPoints;
     QmlObjectListModel              _sprayingPoints;
+    QmlObjectListModel              _taggedPoints;
     //QMap<QString, ADSBVehicle*>     _trafficVehicleMap;
 
     // Toolbox references

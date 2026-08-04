@@ -402,6 +402,16 @@ FlightMap {
         }
     }
 
+    // Tagged Points
+    MapItemView {
+        model: _activeVehicle ? _activeVehicle.taggedPoints : 0
+
+        delegate: TaggedIndicator {
+            coordinate:     object.coordinate
+            z:              QGroundControl.zOrderTopMost
+        }
+    }
+
     // GoTo Location visuals
     MapQuickItem {
         id:             gotoLocationItem
@@ -686,6 +696,16 @@ FlightMap {
                         popup.close()
                     }
                     _activeVehicle.clearSprayTriggerPoints()
+                }
+            }
+            QGCButton {
+                Layout.fillWidth:   true
+                text:               qsTr("Clear Tagged Points")
+                onClicked: {
+                    if (popup.opened) {
+                        popup.close()
+                    }
+                    _activeVehicle.clearTaggedPoints()
                 }
             }
         }

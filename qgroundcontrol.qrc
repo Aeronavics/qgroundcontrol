@@ -301,6 +301,7 @@
         <file alias="SprayLogDownloadPage.qml">src/AnalyzeView/SprayLogDownloadPage.qml</file>
         <file alias="QGroundControl/FlightMap/SprayingIndicator.qml">src/FlightMap/MapItems/SprayingIndicator.qml</file>
         <file>src/PlanView/PlanViewTool.qml</file>
+        <file alias="QGroundControl/FlightMap/TaggedIndicator.qml">src/FlightMap/MapItems/TaggedIndicator.qml</file>
     </qresource>
     <qresource prefix="/FirstRunPromptDialogs">
         <file alias="UnitsFirstRunPrompt.qml">src/FirstRunPromptDialogs/UnitsFirstRunPrompt.qml</file>
