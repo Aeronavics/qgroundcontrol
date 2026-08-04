@@ -192,6 +192,7 @@ QVariantList& QGCCorePlugin::analyzePages()
 {
     _p->analyzeList.erase(_p->analyzeList.begin(), _p->analyzeList.end());
     _p->analyzeList.append(QVariant::fromValue(new QmlComponentInfo(tr("Spray Logs"),     QUrl::fromUserInput("qrc:/qml/SprayLogDownloadPage.qml"),     QUrl::fromUserInput("qrc:/qmlimages/SprayIcon"))));
+    _p->analyzeList.append(QVariant::fromValue(new QmlComponentInfo(tr("DroneOps Sync"),  QUrl::fromUserInput("qrc:/qml/DroneOpsPage.qml"),             QUrl::fromUserInput("qrc:/qmlimages/LogDownloadIcon"))));
     if (_showAdvancedUI)
     {
         _p->analyzeList.append(QVariant::fromValue(new QmlComponentInfo(tr("Flight Log"),     QUrl::fromUserInput("qrc:/qml/DFLogDownloadPage.qml"),        QUrl::fromUserInput("qrc:/qmlimages/LogDownloadIcon"))));

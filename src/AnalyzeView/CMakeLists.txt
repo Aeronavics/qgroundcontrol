@@ -12,6 +12,8 @@ add_library(AnalyzeView
 	ExifParser.h
 	GeoTagController.cc
 	GeoTagController.h
+	DroneOpsController.cc
+	DroneOpsController.h
 	LogDownloadController.cc
 	LogDownloadController.h
 	MavlinkConsoleController.cc
@@ -32,6 +34,7 @@ add_custom_target(AnalyzeViewQml
 		AnalyzeView.qml
 		GeoTagPage.qml
 		DFLogDownloadPage.qml
+		DroneOpsPage.qml
 
 		MavlinkConsolePage.qml
 		MAVLinkInspectorPage.qml

@@ -44,6 +44,10 @@ Rectangle {
         id: dflogController
     }
 
+    DroneOpsController {
+        id: droneOpsController
+    }
+
     QGCFlickable {
         id:                 buttonScroll
         width:              buttonColumn.width

@@ -582,6 +582,7 @@ HEADERS += \
     src/AnalyzeView/LogDownloadController.h \
     src/AnalyzeView/DFLogDownloadController.h \
     src/AnalyzeView/SprayLogDownloadController.h \
+    src/AnalyzeView/DroneOpsController.h \
     src/AnalyzeView/PX4LogParser.h \
     src/AnalyzeView/ULogParser.h \
     src/AnalyzeView/MavlinkConsoleController.h \
@@ -849,6 +850,7 @@ SOURCES += \
     src/AnalyzeView/LogDownloadController.cc \
     src/AnalyzeView/DFLogDownloadController.cc \
     src/AnalyzeView/SprayLogDownloadController.cc \
+    src/AnalyzeView/DroneOpsController.cc \
     src/AnalyzeView/PX4LogParser.cc \
     src/AnalyzeView/ULogParser.cc \
     src/AnalyzeView/MavlinkConsoleController.cc \
