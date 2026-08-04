@@ -318,7 +318,7 @@ SprayLogDownloadController::downloadFinished()
             _downloadPath += QDir::separator();
         }
         QByteArray b = _reply->readAll();
-        qDebug() << "byte array length" << b.length();\
+        qDebug() << "byte array length" << b.length();
 
         if (!QDir(_downloadPath + "spray_logs").exists())
         {
