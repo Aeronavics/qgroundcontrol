@@ -21,16 +21,6 @@ MapQuickItem {
     anchorPoint.x:  sourceItem.width / 2
     anchorPoint.y:  sourceItem.height / 2
 
-    // sourceItem: Rectangle {
-    //     width:      _radius * 2
-    //     height:     _radius * 2
-    //     radius:     _radius
-    //     color:      qgcPal.colorBlue
-    //     opacity:    0.7
-
-    //     readonly property real _radius: ScreenTools.defaultFontPixelHeight * 0.45
-    // }
-
     sourceItem: Canvas {
        id: pinCanvas
        width: 40
@@ -41,18 +31,18 @@ MapQuickItem {
               var ctx = getContext("2d");
               ctx.reset();
 
-              var cx = width / 2;      // Center X (20)
-              var cy = width / 2;      // Center Y of the top circle (20)
-              var r = width / 2 - 2;   // Radius of top circle (18) to leave padding
-              var tipY = height - 2;   // Bottom tip of the pin (58)
+              var cx = width / 2;      // Center X
+              var cy = width / 2;      // Center Y of the top circle
+              var r = width / 2 - 2;   // Radius of top circle to leave padding
+              var tipY = height - 2;   // Bottom tip of the pin
 
-              // 1. Draw Pin Drop Shadow (Optional but realistic)
+              // 1. Draw Pin Drop Shadow
               ctx.beginPath();
               ctx.ellipse(cx, tipY, 8, 3);
               ctx.fillStyle = "rgba(0, 0, 0, 0.25)";
               ctx.fill();
 
-              // 2. Build the main Google Map Pin path (teardrop)
+              // 2. Build the main Map Pin path (teardrop)
               ctx.beginPath();
               // Arc around the top circle (from right-bottom angle back to left-bottom angle)
               ctx.arc(cx, cy, r, 0.15 * Math.PI, 0.85 * Math.PI, true);
@@ -60,11 +50,11 @@ MapQuickItem {
               ctx.lineTo(cx, tipY);
               ctx.closePath();
 
-              // Fill pin body with classic Google Red
+              // Fill pin body with blue
               ctx.fillStyle = "#0039e3";
               ctx.fill();
 
-              // Add a subtle darker red border for definition
+              // Add a subtle darker blue border for definition
               ctx.lineWidth = 1.5;
               ctx.strokeStyle = "#002db5";
               ctx.stroke();
