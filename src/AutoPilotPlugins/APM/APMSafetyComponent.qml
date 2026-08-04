@@ -597,14 +597,62 @@ SetupPage {
                             onClicked: _rtlAltFact.value = 1500
                         }
 
-                        FactTextField {
-                            id:                 rltAltField
+                        // FactTextField {
+                        //     id:                 rltAltField
+                        //     anchors.leftMargin: _margins
+                        //     anchors.left:       returnAltRadio.right
+                        //     anchors.baseline:   returnAltRadio.baseline
+                        //     fact:               _rtlAltFact
+                        //     showUnits:          true
+                        //     enabled:            returnAltRadio.checked
+                        // }
+
+                        QGCTextField {
+                            id:                 rtlAltMetersField
                             anchors.leftMargin: _margins
                             anchors.left:       returnAltRadio.right
                             anchors.baseline:   returnAltRadio.baseline
-                            fact:               _rtlAltFact
+                            text:               _rtlAltFact.rawValue / 100
+                            unitsLabel:         "m"
                             showUnits:          true
+                            numericValuesOnly:  true
+                            showHelp:           true
                             enabled:            returnAltRadio.checked
+
+                            property string _validateString
+
+                            onEditingFinished: {
+                                var errorString = _rtlAltFact.validate(text * 100, false /* convertOnly */)
+                                if (errorString === "") {
+                                    _rtlAltFact.value = text * 100
+                                    rtlAltMetersField.updated()
+                                } else {
+                                    _validateString = text * 100
+                                    validationErrorDialogComponent.createObject(mainWindow).open()
+                                }
+                            }
+
+                            onHelpClicked: helpDialogComponent.createObject(mainWindow).open()
+
+                            Component {
+                                id: validationErrorDialogComponent
+
+                                ParameterEditorDialog {
+                                    title:          qsTr("Invalid Value")
+                                    validate:       true
+                                    validateValue:  _validateString
+                                    fact:           _rtlAltFact
+                                }
+                            }
+
+                            Component {
+                                id: helpDialogComponent
+
+                                ParameterEditorDialog {
+                                    title:          qsTr("Value Details")
+                                    fact:           _rtlAltFact
+                                }
+                            }
                         }
 
                         QGCCheckBox {
@@ -620,8 +668,8 @@ SetupPage {
                         FactTextField {
                             id:                 landDelayField
                             anchors.topMargin:  _innerMargin
-                            anchors.left:       rltAltField.left
-                            anchors.top:        rltAltField.bottom
+                            anchors.left:       rtlAltMetersField.left
+                            anchors.top:        rtlAltMetersField.bottom
                             fact:               _rtlLoitTimeFact
                             showUnits:          true
                             enabled:            homeLoiterCheckbox.checked === true
@@ -636,7 +684,7 @@ SetupPage {
                         FactTextField {
                             id:                 rltAltFinalField
                             anchors.topMargin:  _innerMargin
-                            anchors.left:       rltAltField.left
+                            anchors.left:       rtlAltMetersField.left
                             anchors.top:        landDelayField.bottom
                             fact:               _rtlAltFinalFact
                             showUnits:          true
@@ -651,7 +699,7 @@ SetupPage {
                         FactTextField {
                             id:                 landSpeedField
                             anchors.topMargin: _innerMargin
-                            anchors.left:       rltAltField.left
+                            anchors.left:       rtlAltMetersField.left
                             anchors.top:        rltAltFinalField.bottom
                             fact:               _landSpeedFact
                             showUnits:          true
