@@ -217,6 +217,8 @@
         <file alias="waterdrop.svg">src/FlightMap/Images/waterdrop.svg</file>
         <file alias="HomeBlack.svg">src/FlightMap/Images/HomeBlack.svg</file>
         <file alias="RCBlack.svg">src/ui/toolbar/Images/RC-Black.svg</file>
+        <file alias="HomeGreen.svg">src/FlightMap/Images/HomeGreen.svg</file>
+        <file alias="RCOrange.svg">src/ui/toolbar/Images/RCOrange.svg</file>
     </qresource>
     <qresource prefix="/"/>
 </RCC>

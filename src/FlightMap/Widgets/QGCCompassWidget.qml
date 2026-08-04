@@ -123,25 +123,9 @@ Item {
         }
 
         Image {
-            id:                     homePointer
-            width:                  size * 0.1
-            source:                 isHeadingHomeOK()  ? _blackPalette ? "/qmlimages/Home.svg": "/qmlimages/HomeBlack.svg" : ""
-            mipmap:                 true
-            fillMode:               Image.PreserveAspectFit
-            anchors.centerIn:   	parent
-            sourceSize.width:       width
-
-            transform: Translate {
-                property double _angle: isNoseUpLocked()?-_heading+_headingToHome:_headingToHome
-                x: size/2.3 * Math.sin((_angle)*(3.14/180))
-                y: - size/2.3 * Math.cos((_angle)*(3.14/180))
-            }
-        }
-
-        Image {
             id:                     rcPointer
-            width:                  size * 0.1
-            source:                 isHeadingToRCOK()  ? _blackPalette ? "/qmlimages/RC.svg": "/qmlimages/RCBlack.svg" : ""
+            width:                  size * 0.2
+            source:                 isHeadingToRCOK()  ? _blackPalette ? "/qmlimages/RC.svg": "/qmlimages/RCOrange.svg" : ""
             mipmap:                 true
             fillMode:               Image.PreserveAspectFit
             anchors.centerIn:   	parent
@@ -149,6 +133,22 @@ Item {
 
             transform: Translate {
                 property double _angle: isNoseUpLocked()?-_heading+_headingToRC:_headingToRC
+                x: size/2.3 * Math.sin((_angle)*(3.14/180))
+                y: - size/2.3 * Math.cos((_angle)*(3.14/180))
+            }
+        }
+
+        Image {
+            id:                     homePointer
+            width:                  size * 0.15
+            source:                 isHeadingHomeOK()  ? _blackPalette ? "/qmlimages/Home.svg": "/qmlimages/HomeGreen.svg" : ""
+            mipmap:                 true
+            fillMode:               Image.PreserveAspectFit
+            anchors.centerIn:   	parent
+            sourceSize.width:       width
+
+            transform: Translate {
+                property double _angle: isNoseUpLocked()?-_heading+_headingToHome:_headingToHome
                 x: size/2.3 * Math.sin((_angle)*(3.14/180))
                 y: - size/2.3 * Math.cos((_angle)*(3.14/180))
             }
