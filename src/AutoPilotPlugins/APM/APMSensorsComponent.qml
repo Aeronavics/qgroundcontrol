@@ -458,6 +458,7 @@ SetupPage {
 
                         Column {
                             QGCLabel { text: qsTr("Autopilot Rotation:") }
+                            visible: QGroundControl.corePlugin.showAdvancedUI
 
                             FactComboBox {
                                 width:      rotationColumnWidth
