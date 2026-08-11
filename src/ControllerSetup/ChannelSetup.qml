@@ -1,7 +1,7 @@
 import QtQuick              2.15
 import QtQuick.Controls     2.15
 import QtGraphicalEffects   1.0
-import QtQuick.Layouts      1.2
+import QtQuick.Layouts      1.15
 import QtQuick.Dialogs  1.2
 
 import QGroundControl               1.0
@@ -19,6 +19,9 @@ SetupPage {
     property var channels: controller.channels
     property var channelMappings: controller.channelMappings
     property var channelReverses: controller.channelReverses
+    property int flightChannel: controller.flightChannel
+    property var inputNames: controller.inputList
+    property var buttonMap: controller.buttonMap
 
     Component {
         id: channelPageComponent
@@ -40,10 +43,14 @@ SetupPage {
                 Column {
                     spacing: _margins
                     Repeater {
+                        id: rowRepeater
                         model: 16
 
                         RowLayout{
                             spacing: _margins
+
+                            property bool isFlightMode: index + 1 === flightChannel
+
                             Item {
                                 Layout.preferredWidth: 50
                                 Layout.fillHeight: true
@@ -96,7 +103,9 @@ SetupPage {
                                 id: reverseSwitch
                                 Layout.preferredWidth: 120
                                 Layout.fillHeight: true
-                                checked: channelReverses[index]
+                                checked: isFlightMode ? false : channelReverses[index]
+
+                                enabled: isFlightMode ? false : true
 
                                 contentItem: Text {
                                     text: reverseSwitch.checked ? "R" : ""
@@ -104,10 +113,62 @@ SetupPage {
                                 }
                                 onToggled: controller.setChannelReverse(index + 1, reverseSwitch.checked)
                             }
+                            Item
+                            {
+                                Layout.fillWidth: true
+                                Layout.fillHeight: true
+                            }
                             Button {
-                                text: channelMappings[index]
+                                property int buttonValue: functionButton.text in buttonMap ? parseInt(buttonMap[functionButton.text]) : -1
+                                text: buttonValue == 0 ? "Reset" : buttonValue == 1 ? "Lock" : buttonValue == 2 ? "3-Stage" : " "
+                                visible: buttonValue >= 0
+
+                                onClicked:
+                                {
+                                    controller.toggleButtonMode(functionButton.text)
+                                    buttonMap[functionButton.text] = toString((parseInt(buttonMap[functionButton.text]) + 1) % 3)
+                                }
+                            }
+
+                            Button {
+                                id: functionButton
+                                text: isFlightMode ? "Flight" : channelMappings[index]
                                 font.pointSize: 15
                                 Layout.fillHeight: true
+                                enabled: isFlightMode ? false : true
+
+                                onClicked: {
+                                    buttonPopup.channel = index + 1
+                                    buttonPopup.open()
+                                }
+                            }
+
+                            QGCPopupDialog {
+                                id: buttonPopup
+                                title: "Change Input"
+                                buttons: StandardButton.Cancel
+                                destroyOnClose: false
+
+                                property int channel: 0
+
+                                GridLayout {
+                                    columns: 7
+
+                                    Repeater {
+                                        model: 28
+
+                                        Button {
+                                            text: inputNames[index]
+                                            font.pointSize: 15
+
+                                            onClicked: {
+                                                controller.callSetChannelMapping(buttonPopup.channel, index)
+                                                functionButton.text = inputNames[index]
+                                                buttonPopup.close()
+                                            }
+                                        }
+                                    }
+                                }
                             }
                         }
                     }
@@ -116,24 +177,6 @@ SetupPage {
             Loader {
                 sourceComponent:    channelComponent
             }
-
-            // Column {
-            //     spacing: _margins / 2
-
-            //     Rectangle {
-            //         width:  parent.width
-            //         height: channelLoader.y + channelLoader.height + _margins
-            //         color:  ggcPal.colorBlue
-
-            //         Loader {
-            //             id:                 channelLoader
-            //             anchors.margins:    _margins
-            //             anchors.top:        parent.top
-            //             anchors.left:       parent.left
-            //             sourceComponent:    channelComponent
-            //         }
-            //     } // Rectangle
-            // } // Column - channel Settings
         } // Flow
     } // Component - channelPageComponent
 } // SetupView

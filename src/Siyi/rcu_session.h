@@ -19,6 +19,18 @@
 // NOTE: only one process may own ttyHS1 — stop/uninstall UniGCS (rcuservice)
 // first, or reads collide.
 //
+// HANDSHAKE / "must open UniGCS first" (verified cold-boot, 2026-08-06):
+//   open (0x14) + keepalive (0x35) is the WHOLE handshake — there is no extra
+//   "start streaming" command, and UniGCS is NOT required for this internal link.
+//   BUT /dev/ttyHS1 comes up at 9600 baud on a fresh boot; you MUST set 230400
+//   (open() does this). An app that skips the baud set reads half-rate garble
+//   until UniGCS's native init has run once — the usual "open UniGCS first" symptom.
+//   (The External SDK on ttyHS3/UDP is separately gated by SDK-connect-type 0x82.)
+//   Full analysis + the complete command catalog: ../RCU_INTERNAL_PROTOCOL.md.
+//
+// GET queries: send the (odd) GET cmd with an empty payload; the MCU replies on
+//   the same id — read it via setFrameListener(). SET is the paired even id.
+//
 // Faithful C++14 port of RcuSession.java. std + POSIX only; no Qt.
 //
 #include <cstdint>
@@ -50,17 +62,27 @@ public:
     static constexpr int CMD_CHANNELS  = 0x01;   // MCU -> app live channel data
 
     // ---- config command ids (verified byte-perfect vs UniGCS) ----
-    static constexpr int CMD_CALIBRATION        = 0x04;
-    static constexpr int CMD_FAILSAFE           = 0x1B;
-    static constexpr int CMD_CHANNEL15          = 0x17;
-    static constexpr int CMD_BUTTON_MODE        = 0x32;
-    static constexpr int CMD_DEADZONE           = 0x54;
-    static constexpr int CMD_GET_FLIGHT_MODE    = 0x61;
-    static constexpr int CMD_FLIGHT_MODE        = 0x62;
-    static constexpr int CMD_GET_FLIGHT_CHANNEL = 0x61;
-    static constexpr int CMD_FLIGHT_CHANNEL     = 0x62;
-    static constexpr int CMD_SET_SDK_CONNECT    = 0x82;
-    static constexpr int CMD_CHANNEL_ADAPTION   = 0x72;
+    static constexpr int CMD_CALIBRATION     = 0x04;
+    static constexpr int CMD_FAILSAFE        = 0x1B;
+    static constexpr int CMD_CHANNEL15       = 0x17;
+    static constexpr int CMD_BUTTON_MODE     = 0x32;
+    static constexpr int CMD_DEADZONE        = 0x54;
+    static constexpr int CMD_FLIGHT_MODE     = 0x62;
+    static constexpr int CMD_FLIGHT_CHANNEL  = 0x64;   // set which comm channel the flight mode drives
+    static constexpr int CMD_SET_SDK_CONNECT = 0x82;
+    static constexpr int CMD_CHANNEL_ADAPTION= 0x72;
+
+    // ---- GET/query command ids (send with EMPTY payload; MCU replies on the same
+    //      cmd id with the value). Pattern across the RCU config space: GET = odd,
+    //      SET = GET+1. Replies arrive through the FrameListener / dispatch(). ----
+    static constexpr int CMD_GET_DEADZONE       = 0x53;  // reply [value]                 (SET 0x54)
+    static constexpr int CMD_GET_FLIGHT_MODE    = 0x61;  // reply [mode 0/1/2]            (SET 0x62)
+    static constexpr int CMD_GET_FLIGHT_CHANNEL = 0x63;  // reply [channel 1..16]         (SET 0x64)
+    static constexpr int CMD_GET_SDK_CONNECT    = 0x81;  // reply [type]                  (SET 0x82)
+    static constexpr int CMD_GET_BUTTON_MODE    = 0x34;  // reply list of {keyId, mode}   (SET 0x32 per-key)
+    static constexpr int CMD_GET_FAILSAFE       = 0x19;  // reply [enabled, 16x{mode,PWM_LE16}] (master SET 0x1B)
+    static constexpr int CMD_GET_CHANNEL_MAP    = 0x0C;  // reply 16x{type, entity}       (also External SDK 0x48)
+    static constexpr int CMD_GET_CHANNEL_ADAPTION = 0x71; // target 0x14; reply [enabled, channel] (SET 0x72)
 
     // ---- calibration constants ----
     static constexpr int CAL_JOYSTICKS = 0x01;
@@ -118,6 +140,7 @@ public:
     void setDeadzone(int v);                       // clamped to 10..80
     void setFlightMode(int m);
     void setFlightMode(FlightMode m) { setFlightMode(static_cast<int>(m)); }
+    void setFlightChannel(int ch);                 // ch = 1..16 (clamped); cmd 0x64
     void setSdkConnectType(int t);
     void setSdkConnectType(SdkConnectType t) { setSdkConnectType(static_cast<int>(t)); }
     void setChannel15Mode(int m);
@@ -125,6 +148,21 @@ public:
     void setButtonMode(int buttonId, int mode);
     void setButtonMode(int buttonId, ButtonMode mode) { setButtonMode(buttonId, static_cast<int>(mode)); }
     void setChannelAdaption(bool en, int ch);
+
+    // ---- GET / query ----
+    // Fire a query: send the GET cmd with an empty payload. The MCU answers on the
+    // same cmd id; register a FrameListener (setFrameListener) to receive the reply.
+    // target defaults to the RC MCU (0x10); pass TARGET_IMAGE for 0x14 queries
+    // (e.g. CMD_GET_CHANNEL_ADAPTION).
+    void requestGet(int getCmd, int target = TARGET_RC_MCU);
+    void getFlightMode()      { requestGet(CMD_GET_FLIGHT_MODE); }
+    void getFlightChannel()   { requestGet(CMD_GET_FLIGHT_CHANNEL); }
+    void getDeadzone()        { requestGet(CMD_GET_DEADZONE); }
+    void getSdkConnectType()  { requestGet(CMD_GET_SDK_CONNECT); }
+    void getButtonModes()     { requestGet(CMD_GET_BUTTON_MODE); }
+    void getFailsafe()        { requestGet(CMD_GET_FAILSAFE); }
+    void getChannelMap()      { requestGet(CMD_GET_CHANNEL_MAP); }
+    void getChannelAdaption() { requestGet(CMD_GET_CHANNEL_ADAPTION, TARGET_IMAGE); }
 
     // ---- calibration (poll-driven state machine) ----
     // Live step reported in the last 0x04 reply's data[1].

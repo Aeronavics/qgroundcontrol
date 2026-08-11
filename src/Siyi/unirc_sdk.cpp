@@ -63,7 +63,7 @@ std::string UniRcSdk::Mapping::name() const {
         case PHY_VIRTUAL:
         {
             switch (entityId) {
-                case 0: return "";
+                case 0: return " ";
                 case 1: return "RSSI";
                 default: return "";
             }

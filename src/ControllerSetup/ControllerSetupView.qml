@@ -118,14 +118,24 @@ Rectangle {
             }
 
             SubMenuButton {
-                id:                 buttonsButton
+                id:                 calibrationButton
                 imageResource:      "/qmlimages/FirmwareUpgradeIcon.png"
                 setupIndicator:     false
                 exclusiveGroup:     setupButtonGroup
-                text:               qsTr("Buttons")
+                text:               qsTr("Calibration")
                 Layout.fillWidth:   true
 
-                onClicked: showPanel(this, "ButtonSetup.qml")
+                onClicked: showPanel(this, "ControllerCalibration.qml")
+            }
+            SubMenuButton {
+                id:                 systemButton
+                imageResource:      "/qmlimages/FirmwareUpgradeIcon.png"
+                setupIndicator:     false
+                exclusiveGroup:     setupButtonGroup
+                text:               qsTr("System")
+                Layout.fillWidth:   true
+
+                onClicked: showPanel(this, "ControllerSystem.qml")
             }
             // SubMenuButton {
             //     id:                 calibrationButton

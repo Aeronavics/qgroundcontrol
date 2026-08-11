@@ -131,6 +131,15 @@ void RcuSession::setFlightMode(int m) {
     send(TARGET_RC_MCU, CMD_FLIGHT_MODE, std::vector<uint8_t>{ static_cast<uint8_t>(m) });
 }
 
+void RcuSession::setFlightChannel(int ch) {
+    ch = std::max(1, std::min(16, ch));            // 1-based comm channel
+    send(TARGET_RC_MCU, CMD_FLIGHT_CHANNEL, std::vector<uint8_t>{ static_cast<uint8_t>(ch) });
+}
+
+void RcuSession::requestGet(int getCmd, int target) {
+    send(target, getCmd, std::vector<uint8_t>());  // empty payload = query; reply on same cmd id
+}
+
 void RcuSession::setSdkConnectType(int t) {
     send(TARGET_RC_MCU, CMD_SET_SDK_CONNECT, std::vector<uint8_t>{ static_cast<uint8_t>(t) });
 }

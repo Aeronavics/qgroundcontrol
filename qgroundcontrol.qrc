@@ -304,8 +304,9 @@
         <file>src/PlanView/PlanViewTool.qml</file>
         <file alias="QGroundControl/FlightMap/TaggedIndicator.qml">src/FlightMap/MapItems/TaggedIndicator.qml</file>
         <file alias="ControllerSetupView.qml">src/ControllerSetup/ControllerSetupView.qml</file>
-        <file alias="ButtonSetup.qml">src/ControllerSetup/ButtonSetup.qml</file>
+        <file alias="ControllerCalibration.qml">src/ControllerSetup/ControllerCalibration.qml</file>
         <file alias="ChannelSetup.qml">src/ControllerSetup/ChannelSetup.qml</file>
+        <file alias="ControllerSystem.qml">src/ControllerSetup/ControllerSystem.qml</file>
     </qresource>
     <qresource prefix="/FirstRunPromptDialogs">
         <file alias="UnitsFirstRunPrompt.qml">src/FirstRunPromptDialogs/UnitsFirstRunPrompt.qml</file>
