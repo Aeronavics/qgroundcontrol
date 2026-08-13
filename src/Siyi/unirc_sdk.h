@@ -148,6 +148,14 @@ private:
     void dispatch(const UniRcFrame& f);
     bool send(int cmdId, bool needAck, const std::vector<uint8_t>& data);
     bool setBinding(bool start);
+    // Live read with a fallback to the last-known-good settings. The MCU stops
+    // answering CMD_GET_SYS_SETTINGS while a bind is actively in progress, so a
+    // plain getSystemSettings() call inside setBinding() would fail and abort
+    // *before ever sending the stop command* — making binding unstoppable once
+    // started. Falling back to the last successful read (com1Baud/joyType/
+    // com2Baud don't change mid-bind) keeps start/stopBinding() working even
+    // while the device is momentarily silent.
+    bool getSystemSettingsOrCached(SystemSettings& out);
 
     static long long nowMs();
 
@@ -178,6 +186,21 @@ private:
     std::mutex reqMutex_;
     std::condition_variable reqCv_;
     std::map<int, std::shared_ptr<Pending>> pending_;
+
+    std::mutex settingsCacheMutex_;
+    SystemSettings lastKnownSettings_;
+    bool haveLastKnownSettings_ = false;
+
+    // Replies are matched by cmd id only (no seq echo — see class comment), so
+    // pending_ can only ever hold one in-flight transaction per cmd id. Callers
+    // like the binding-status poller and startBinding()/stopBinding() issue the
+    // same cmd id (CMD_GET_SYS_SETTINGS) from different threads; without this
+    // lock a second concurrent request() would overwrite the first's pending_
+    // entry and then unconditionally erase it, causing the loser to time out or
+    // silently miss its reply. Serialising whole request() transactions (send
+    // through wait) fixes it — the link is a single serial port handling one
+    // command at a time anyway, so this costs nothing in practice.
+    std::mutex callMutex_;
 };
 
 } // namespace unircsdk

@@ -22,6 +22,7 @@
 #include <QVariantMap>
 #include <QtConcurrent/QtConcurrentRun>
 #include <QFuture>
+#include <atomic>
 
 #include <Siyi/unirc_sdk.h>
 #include <Siyi/rcu_session.h>
@@ -35,6 +36,7 @@ public:
     ~ControllerHandler();
 
     Q_PROPERTY(QVariantList channels                READ channels               NOTIFY channelsChanged)
+    Q_PROPERTY(QVariantList rawAnalog               READ rawAnalog              NOTIFY rawAnalogChanged)
     Q_PROPERTY(QVariantList channelMappings         READ channelMappings        NOTIFY channelMappingsChanged)
     Q_PROPERTY(QVariantList channelReverses         READ channelReverses        NOTIFY channelReversesChanged)
     Q_PROPERTY(qint8        flightChannel           READ flightChannel          NOTIFY flightChannelChanged)
@@ -44,8 +46,10 @@ public:
     Q_PROPERTY(qint8        dialCalibrationState    READ dialCalibrationState   NOTIFY dialCalibrationStateChanged)
     Q_PROPERTY(qint8        bindingStatus           READ bindingStatus          NOTIFY bindingStatusChanged)
     Q_PROPERTY(qint8        flightMode              READ flightMode             NOTIFY flightModeChanged)
+    Q_PROPERTY(qint8        deadzone                READ deadzone               NOTIFY deadzoneChanged)
 
     QVariantList    channels                ()  {return _channels;}
+    QVariantList    rawAnalog               ()  {return _rawAnalog;}
     QVariantList    channelMappings         ()  {return _channelMappings;}
     QVariantList    channelReverses         ()  {return _channelReverses;}
     qint8           flightChannel           ()  {return _flightChannel;}
@@ -55,6 +59,7 @@ public:
     qint8           dialCalibrationState    ()  {return _dialCalibrationState;}
     qint8           bindingStatus           ()  {return _bindingStatus;}
     qint8           flightMode              ()  {return _flightMode;}
+    qint8           deadzone                ()  {return _deadzone;}
 
     Q_INVOKABLE void setChannelReverse(int channel, bool reverse);
     void setChannelReverseThread(int channel, bool reverse);
@@ -70,9 +75,11 @@ public:
     Q_INVOKABLE void stopBinding();
     Q_INVOKABLE void callSetFlightMode(qint8 mode);
     Q_INVOKABLE void callSetFlightChannel(qint8 channelId);
+    Q_INVOKABLE void callSetDeadzone(qint8 value);
 
 signals:
     void channelsChanged();
+    void rawAnalogChanged();
     void channelMappingsChanged();
     void channelReversesChanged();
     void flightChannelChanged();
@@ -82,6 +89,7 @@ signals:
     void dialCalibrationStateChanged();
     void bindingStatusChanged();
     void flightModeChanged();
+    void deadzoneChanged();
 
 private slots:
 
@@ -89,6 +97,7 @@ private:
     unircsdk::UniRcSdk  _siyiSdk;
     unircsdk::RcuSession _rcu;
     QVariantList _channels;
+    QVariantList _rawAnalog;
     QVariantList _channelMappings;
     QVariantList _channelReverses;
     qint8 _flightChannel;
@@ -96,9 +105,11 @@ private:
     QVariantList _inputList;
     QVariantMap _buttonMap;
     QList<QString> _buttonList;
-    qint8 _stickCalibrationState;
-    qint8 _dialCalibrationState;
+    qint8 _stickCalibrationState = 0;
+    qint8 _dialCalibrationState  = 0;
     qint8 _bindingStatus;
+    qint8 _deadzone;
+    std::atomic<bool> _haveFlightChannel{false};
 
     std::pair<int, int> mapInputArrayToControlValues(qint8 inputArrayValue);
     void setChannelMapping(qint8 channel, qint8 input);
@@ -112,14 +123,19 @@ private:
     void dialCalibrationCallback(int cb);
 
     void monitorBindingStatus();
+    void startBindingThread();
+    void stopBindingThread();
 
     void setAllChannelValues    (std::array<qint16,16> channels);
+    void setRawAnalogValues     (std::array<qint16,12> values);
     void pullChannelMappings    ();
     void pullChannelReverse     ();
     void getFlightModeChannel   ();
+    void pullFlightChannel      ();
     void setFlightModeChannel   (qint8 channelId);
     void getFlightMode          ();
     void setFlightMode          (qint8 mode);
+    void setDeadzone            (qint8 value);
 };
 
 #endif

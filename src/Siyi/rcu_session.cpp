@@ -22,6 +22,11 @@ void RcuSession::setChannelListener(ChannelListener l) {
     channelListener_ = std::move(l);
 }
 
+void RcuSession::setAnalogListener(AnalogListener l) {
+    std::lock_guard<std::mutex> lk(listenerMutex_);
+    analogListener_ = std::move(l);
+}
+
 void RcuSession::setFrameListener(FrameListener l) {
     std::lock_guard<std::mutex> lk(listenerMutex_);
     frameListener_ = std::move(l);
@@ -34,6 +39,15 @@ std::array<int16_t, 16> RcuSession::channels() {
 std::array<int16_t, 16> RcuSession::channelsCopy() {
     std::lock_guard<std::mutex> lk(channelsMutex_);
     return channels_;
+}
+
+std::array<int16_t, 12> RcuSession::analogRaw() {
+    return analogRawCopy();
+}
+
+std::array<int16_t, 12> RcuSession::analogRawCopy() {
+    std::lock_guard<std::mutex> lk(analogMutex_);
+    return analog_;
 }
 
 bool RcuSession::isReceiving(long withinMs) {
@@ -56,6 +70,8 @@ bool RcuSession::open() {
 
     rxThread_ = std::thread(&RcuSession::rxLoop, this);
     kaThread_ = std::thread(&RcuSession::keepAliveLoop, this);
+
+    startAnalogStream();
     return true;
 }
 
@@ -115,6 +131,13 @@ std::vector<uint8_t> RcuSession::buildFrame(int target, int cmd,
     f[f.size() - 2] = static_cast<uint8_t>(crc & 0xFF);
     f[f.size() - 1] = static_cast<uint8_t>((crc >> 8) & 0xFF);
     return f;
+}
+
+bool RcuSession::startAnalogStream(int payload) {
+    std::vector<uint8_t> d{ static_cast<uint8_t>(payload) };
+    bool ok = true;
+    for (int i = 0; i < 3; ++i) ok = send(TARGET_RC_MCU, CMD_ANALOG_RAW, d) && ok;
+    return ok;
 }
 
 // ---------------------------------------------------------------- config
@@ -202,10 +225,12 @@ int RcuSession::runCalibration(int calTarget, CalProgress cb, long sweepMillis) 
                 while (nowMs() - t1 < 5000) {
                     calPoll(calTarget);
                     int cs = calStep_.load();
-                    if (cs == 3 || cs == 4) { if (cb) cb(cs); return cs; }
+                    if (cs == 4) { if (cb) cb(cs); return cs; }
+                    if (cs == 3 || cs == 0) { if (cb) cb(3); return 3; }
                     sleepMs(150);
                 }
-                return calStep_.load();
+                if (cb) cb(3);
+                return 3;
             }
         }
         sleepMs(150);
@@ -260,6 +285,16 @@ void RcuSession::dispatch(int cmd, const std::vector<uint8_t>& d) {
         ChannelListener l;
         { std::lock_guard<std::mutex> lk(listenerMutex_); l = channelListener_; }
         if (l) l(channelsCopy());
+    }
+    if (cmd == CMD_ANALOG_RAW && d.size() >= 24) {
+        {
+            std::lock_guard<std::mutex> lk(analogMutex_);
+            for (size_t c = 0; c < 12; ++c)
+                analog_[c] = static_cast<int16_t>(d[c * 2] | (d[c * 2 + 1] << 8));
+        }
+        AnalogListener al;
+        { std::lock_guard<std::mutex> lk(listenerMutex_); al = analogListener_; }
+        if (al) al(analogRawCopy());
     }
     FrameListener fl;
     { std::lock_guard<std::mutex> lk(listenerMutex_); fl = frameListener_; }

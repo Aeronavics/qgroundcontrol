@@ -19,6 +19,7 @@ SetupPage {
     property int flightMode: controller.flightMode
     property int flightChannel: controller.flightChannel
     property int bindingStatus: controller.bindingStatus
+    property int deadzone: controller.deadzone
 
     Component {
         id: systemPageComponent
@@ -28,123 +29,255 @@ SetupPage {
             width:      availableWidth
             spacing:    _margins
 
-            QGCPalette { id: ggcPal; colorGroupEnabled: true }
+            QGCPalette { id: qgcPal; colorGroupEnabled: true }
 
             property real _margins:         ScreenTools.defaultFontPixelHeight
             property real _innerMargin:     _margins / 2
             property bool _showIcon:        !ScreenTools.isTinyScreen
+            property real _cardWidth:       ScreenTools.defaultFontPixelWidth * 55
+            property real _labelWidth:      ScreenTools.defaultFontPixelWidth * 21
 
+            //-----------------------------------------------------------------
+            //-- Flight Mode
             Component {
-                id: systemComponent
+                id: flightModeComponent
 
                 Column {
-                    spacing: _margins
+                    spacing: _margins / 2
 
-                    RowLayout {
-                        Item {
-                            Layout.preferredWidth: 300
-                            Layout.fillHeight: true
+                    QGCLabel {
+                        text:           qsTr("Flight Mode")
+                        font.family:    ScreenTools.demiboldFontFamily
+                    }
+                    QGCLabel {
+                        text:       qsTr("Assign the M1-M6 flight-mode switch to a channel and set its gearing.")
+                        opacity:    0.7
+                        width:      _cardWidth
+                        wrapMode:   Text.WordWrap
+                    }
 
-                            QGCLabel {
-                                text: "Flight Mode"
-                                font.pointSize: 20
+                    Rectangle {
+                        width:  _cardWidth
+                        height: flightModeGrid.y + flightModeGrid.height + _margins
+                        color:  qgcPal.windowShade
+
+                        GridLayout {
+                            id:                 flightModeGrid
+                            anchors.margins:    _margins
+                            anchors.top:        parent.top
+                            anchors.left:       parent.left
+                            width:              parent.width - (_margins * 2)
+                            columnSpacing:      _margins
+                            rowSpacing:         _innerMargin
+                            columns:            2
+
+                            QGCLabel { Layout.preferredWidth: _labelWidth; text: qsTr("Mode:") }
+                            QGCButton {
+                                id:                 flightModeButton
+                                text:               flightMode === 0 ? qsTr("OFF") : flightMode === 1 ? qsTr("3 Button") : flightMode === 2 ? qsTr("6 Button") : " "
+                                Layout.fillWidth:   true
+
+                                onClicked: flightModePopup.open()
                             }
-                        }
-                        Button {
-                            id: flightModeButton
-                            text: flightMode == 0 ? "OFF" : flightMode == 1 ? "3-Gear" : flightMode == 2 ? "6-Gear" : " "
-                            font.pointSize: 15
-                            Layout.fillHeight: true
 
-                            onClicked: {
-                                buttonPopup.open()
-                            }
-                        }
+                            QGCPopupDialog {
+                                id:                 flightModePopup
+                                title:              qsTr("Change Mode")
+                                buttons:            StandardButton.Cancel
+                                destroyOnClose:     false
 
-                        QGCPopupDialog {
-                            id: buttonPopup
-                            title: "Change Input"
-                            buttons: StandardButton.Cancel
-                            destroyOnClose: false
+                                GridLayout {
+                                    columns: 3
 
-                            GridLayout {
-                                columns: 3
-                                Button {
-                                    text: "OFF"
-                                    font.pointSize: 15
+                                    QGCButton {
+                                        text: qsTr("OFF")
+                                        onClicked: {
+                                            controller.callSetFlightMode(0)
+                                            flightModePopup.close()
+                                        }
+                                    }
 
-                                    onClicked: {
-                                        controller.callSetFlightMode(0)
-                                        flightModeButton.text = "OFF"
-                                        buttonPopup.close()
+                                    QGCButton {
+                                        text: qsTr("3 Button")
+                                        onClicked: {
+                                            controller.callSetFlightMode(1)
+                                            flightModePopup.close()
+                                        }
+                                    }
+
+                                    QGCButton {
+                                        text: qsTr("6 Button")
+                                        onClicked: {
+                                            controller.callSetFlightMode(2)
+                                            flightModePopup.close()
+                                        }
                                     }
                                 }
-
-                                Button {
-                                    text: "3-Gear"
-                                    font.pointSize: 15
-
-                                    onClicked: {
-                                        controller.callSetFlightMode(1)
-                                        flightModeButton.text = "3-Gear"
-                                        buttonPopup.close()
-                                    }
-                                }
-
-                                Button {
-                                    text: "6-Gear"
-                                    font.pointSize: 15
-
-                                    onClicked: {
-                                        controller.callSetFlightMode(2)
-                                        flightModeButton.text = "6-Gear"
-                                        buttonPopup.close()
-                                    }
-                                }
                             }
-                        }
-                    }
-                    RowLayout {
-                        Item {
-                            Layout.preferredWidth: 300
-                            Layout.fillHeight: true
 
-                            QGCLabel {
-                                text: "Flight Channel"
-                                font.pointSize: 20
-                            }
-                        }
-                        ComboBox {
-                            model: 16
-                            currentIndex: flightChannel - 1
-                            delegate: ItemDelegate {
-                                text: index + 1
-                                width: parent.width
-                            }
-                            displayText: currentIndex + 1
-                            onActivated: {
-                                controller.callSetFlightChannel(currentIndex + 1)
-                            }
-                        }
-                    }
-                    Button {
-                        text: bindingStatus == 0 ? "Bind" : bindingStatus == 1 || bindingStatus == 2 ? "Stop Binding" : bindingStatus == 3 ? "Bound" : "Unknown"
-                        onClicked: {
-                            bindingStatus == 0 || bindingStatus == 3 ? controller.startBinding() : controller.stopBinding()
-                        }
-                    }
+                            QGCLabel { Layout.preferredWidth: _labelWidth; text: qsTr("Flight Mode Channel:") }
+                            QGCComboBox {
+                                Layout.fillWidth:   true
+                                centeredLabel:      true
+                                model:              [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16]
+                                currentIndex:       flightChannel - 1
 
-                    Button {
-                        text: "Stop Binding"
-                        onClicked: {
-                           controller.stopBinding()
-                        }
-                    }
-                } // Column
-            } // Component - channelComponent
-            Loader {
-                sourceComponent:    systemComponent
+                                onActivated: controller.callSetFlightChannel(currentIndex + 1)
+                            }
+                        } // GridLayout
+                    } // Rectangle - Flight Mode Settings
+                } // Column - Flight Mode Settings
             }
-        } // Flow
-    } // Component - channelPageComponent
+
+            Loader { sourceComponent: flightModeComponent }
+
+            //-----------------------------------------------------------------
+            //-- Deadzone
+            Component {
+                id: deadzoneComponent
+
+                Column {
+                    spacing: _margins / 2
+
+                    QGCLabel {
+                        text:           qsTr("Deadzone")
+                        font.family:    ScreenTools.demiboldFontFamily
+                    }
+                    QGCLabel {
+                        text:       qsTr("Sets how far a stick can move from centre before its position is reported as changed.")
+                        opacity:    0.7
+                        width:      _cardWidth
+                        wrapMode:   Text.WordWrap
+                    }
+
+                    Rectangle {
+                        width:  _cardWidth
+                        height: deadzoneGrid.y + deadzoneGrid.height + _margins
+                        color:  qgcPal.windowShade
+
+                        GridLayout {
+                            id:                 deadzoneGrid
+                            anchors.margins:    _margins
+                            anchors.top:        parent.top
+                            anchors.left:       parent.left
+                            width:              parent.width - (_margins * 2)
+                            columnSpacing:      _margins
+                            rowSpacing:         _innerMargin
+                            columns:            2
+
+                            QGCLabel { Layout.preferredWidth: _labelWidth; text: qsTr("Stick Deadzone:") }
+                            RowLayout {
+                                Layout.fillWidth:   true
+                                spacing:            _innerMargin
+
+                                QGCSlider {
+                                    id:                         deadzoneSlider
+                                    Layout.fillWidth:           true
+                                    minimumValue:               10
+                                    maximumValue:               80
+                                    stepSize:                   1
+                                    implicitHeight:             ScreenTools.defaultFontPixelHeight * 2
+                                    updateValueWhileDragging:   false
+                                    value:                      deadzone
+
+                                    onValueChanged: controller.callSetDeadzone(value)
+                                }
+
+                                QGCTextField {
+                                    id:                     deadzoneField
+                                    Layout.preferredWidth:  ScreenTools.defaultFontPixelWidth * 5
+                                    numericValuesOnly:      true
+                                    validator:              IntValidator { bottom: 10; top: 80 }
+                                    text:                   activeFocus ? text : deadzone.toString()
+
+                                    onEditingFinished: {
+                                        var v = parseInt(text)
+                                        if (!isNaN(v)) {
+                                            controller.callSetDeadzone(v)
+                                        }
+
+                                        if (ScreenTools.isMobile) {
+                                            focus = false
+                                        }
+                                    }
+                                }
+                            }
+                        } // GridLayout
+                    } // Rectangle - Deadzone Settings
+                } // Column - Deadzone Settings
+            }
+
+            Loader { sourceComponent: deadzoneComponent }
+
+            //-----------------------------------------------------------------
+            //-- Binding
+            Component {
+                id: bindingComponent
+
+                Column {
+                    spacing: _margins / 2
+
+                    QGCLabel {
+                        text:           qsTr("Binding")
+                        font.family:    ScreenTools.demiboldFontFamily
+                    }
+                    QGCLabel {
+                        text:       qsTr("Pairs this controller with a powered air unit within range.")
+                        opacity:    0.7
+                        width:      _cardWidth
+                        wrapMode:   Text.WordWrap
+                    }
+
+                    Rectangle {
+                        width:  _cardWidth
+                        height: bindingGrid.y + bindingGrid.height + _margins
+                        color:  qgcPal.windowShade
+
+                        GridLayout {
+                            id:                 bindingGrid
+                            anchors.margins:    _margins
+                            anchors.top:        parent.top
+                            anchors.left:       parent.left
+                            width:              parent.width - (_margins * 2)
+                            columnSpacing:      _margins
+                            rowSpacing:         _innerMargin
+                            columns:            2
+
+                            QGCLabel { Layout.preferredWidth: _labelWidth; text: qsTr("Ground Unit:") }
+                            RowLayout {
+                                Layout.fillWidth:   true
+                                spacing:            _innerMargin
+
+                                // Status dot, coloured to match the button's
+                                // state rather than relying on the text alone.
+                                Rectangle {
+                                    Layout.preferredWidth:  ScreenTools.defaultFontPixelHeight * 0.6
+                                    Layout.preferredHeight: width
+                                    radius:                 width / 2
+                                    color:
+                                        bindingStatus === 3 ? qgcPal.colorGreen :
+                                        bindingStatus === 1 || bindingStatus === 2 || bindingStatus === 4 ? qgcPal.colorOrange :
+                                                               qgcPal.colorGrey
+                                }
+
+                                QGCButton {
+                                    Layout.fillWidth:   true
+                                    text:
+                                        bindingStatus === 0 ? qsTr("Bind") :
+                                        bindingStatus === 1 || bindingStatus === 2 || bindingStatus === 4 ? qsTr("Binding") :
+                                        bindingStatus === 3 ? qsTr("Bound") :
+                                                               qsTr("Unknown")
+                                    enabled:    bindingStatus === 0
+
+                                    onClicked: controller.startBinding()
+                                }
+                            }
+                        } // GridLayout
+                    } // Rectangle - Binding Settings
+                } // Column - Binding Settings
+            }
+
+            Loader { sourceComponent: bindingComponent }
+        } // Column
+    } // Component - systemPageComponent
 } // SetupView

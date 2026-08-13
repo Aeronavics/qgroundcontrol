@@ -202,6 +202,8 @@ bool UniRcSdk::send(int cmdId, bool needAck, const std::vector<uint8_t>& data) {
 
 bool UniRcSdk::request(int cmdId, const std::vector<uint8_t>& data, int timeoutMs,
                        UniRcFrame& out) {
+    // Serialise whole transactions — see callMutex_ comment in the header.
+    std::lock_guard<std::mutex> callLock(callMutex_);
     auto p = std::make_shared<Pending>();
     {
         std::lock_guard<std::mutex> lk(reqMutex_);
@@ -278,13 +280,29 @@ bool UniRcSdk::getSystemSettings(SystemSettings& out) {
     if (d.size() >= 4) s.rcBatteryX10 = d[3];
     if (d.size() >= 5) s.com2Baud = d[4];
     out = s;
+    {
+        std::lock_guard<std::mutex> lk(settingsCacheMutex_);
+        lastKnownSettings_ = s;
+        haveLastKnownSettings_ = true;
+    }
+    return true;
+}
+
+bool UniRcSdk::getSystemSettingsOrCached(SystemSettings& out) {
+    if (getSystemSettings(out)) return true;
+    // MCU goes quiet on 0x16 while a bind is actively in progress. Fall back to
+    // the last successful read so callers that only need com1Baud/joyType/
+    // com2Baud (setBinding/setStickMode) can still proceed.
+    std::lock_guard<std::mutex> lk(settingsCacheMutex_);
+    if (!haveLastKnownSettings_) return false;
+    out = lastKnownSettings_;
     return true;
 }
 
 bool UniRcSdk::setStickMode(int joyType) {
     // 0x17 payload: match, com1Baud, joyType, reserved, com2Baud. Preserve baud.
     SystemSettings cur;
-    if (!getSystemSettings(cur)) return false;
+    if (!getSystemSettingsOrCached(cur)) return false;
     std::vector<uint8_t> d{
         0,
         static_cast<uint8_t>(cur.com1Baud == 0 ? 5 : cur.com1Baud),
@@ -303,7 +321,10 @@ bool UniRcSdk::stopBinding()  { return setBinding(false); }
 
 bool UniRcSdk::setBinding(bool start) {
     SystemSettings cur;
-    if (!getSystemSettings(cur)) return false;   // preserve baud/joyType
+    // A live read fails while a bind is actively in progress (the MCU stops
+    // answering 0x16 mid-negotiation) — that must not block stopBinding(), so
+    // fall back to the last-known baud/joyType rather than aborting outright.
+    if (!getSystemSettingsOrCached(cur)) return false;
     std::vector<uint8_t> d{
         static_cast<uint8_t>(start ? 1 : 0),
         static_cast<uint8_t>(cur.com1Baud == 0 ? 5 : cur.com1Baud),
@@ -311,9 +332,21 @@ bool UniRcSdk::setBinding(bool start) {
         0,
         static_cast<uint8_t>(cur.com2Baud == 0 ? 5 : cur.com2Baud)
     };
-    UniRcFrame r;
-    if (!request(CMD_SET_SYS_SETTINGS, d, 800, r)) return false;
-    return r.data.size() >= 1 && r.data[0] == 1;
+    // Verified on hardware: while a bind is actively negotiating, the MCU
+    // doesn't ack CMD_SET_SYS_SETTINGS at all (not even a NACK) — a single
+    // 800ms attempt routinely fails here, which is exactly the case
+    // stopBinding() needs to survive (cancelling an in-progress bind). Retry
+    // for up to ~10s so the command still lands once the MCU frees up, rather
+    // than the caller (e.g. the UI's "Stop Binding" button) seeing an outright
+    // failure while the negotiation is simply still running.
+    const auto deadline = std::chrono::steady_clock::now() + std::chrono::seconds(10);
+    do {
+        UniRcFrame r;
+        if (request(CMD_SET_SYS_SETTINGS, d, 800, r) && r.data.size() >= 1 && r.data[0] == 1) {
+            return true;
+        }
+    } while (std::chrono::steady_clock::now() < deadline);
+    return false;
 }
 
 bool UniRcSdk::getBindingStatus(int& out) {

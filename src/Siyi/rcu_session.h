@@ -20,8 +20,20 @@
 // first, or reads collide.
 //
 // HANDSHAKE / "must open UniGCS first" (verified cold-boot, 2026-08-06):
-//   open (0x14) + keepalive (0x35) is the WHOLE handshake — there is no extra
-//   "start streaming" command, and UniGCS is NOT required for this internal link.
+//   open (0x14) + keepalive (0x35) is the WHOLE handshake for CMD_CHANNELS
+//   and ordinary config GET/SET — confirmed still true (2026-08-13): flight
+//   mode/channel/deadzone GETs and calibration all work over a cold-boot
+//   session with no UniGCS involvement. BUT CMD_ANALOG_RAW (0x3E) is its own
+//   exception - verified by isolated capture (2026-08-13) to sit completely
+//   silent after a fresh boot until something arms it, and once armed it
+//   stays armed across app restarts (only a real reboot disarms it again).
+//   Found the trigger by testing raw commands directly: CMD_ANALOG_RAW
+//   follows the exact same request/reply-share-the-same-id pattern as
+//   UniRcSdk::startChannelStream() on the External SDK - send the cmd id
+//   itself with a one-byte payload (3x, same "send three times" idiom) to
+//   start it, 0 to stop it. Unlike that External SDK command, the payload
+//   isn't a rate selector here (tested and disproved) - just on/off. See
+//   startAnalogStream()/stopAnalogStream().
 //   BUT /dev/ttyHS1 comes up at 9600 baud on a fresh boot; you MUST set 230400
 //   (open() does this). An app that skips the baud set reads half-rate garble
 //   until UniGCS's native init has run once — the usual "open UniGCS first" symptom.
@@ -60,6 +72,38 @@ public:
     static constexpr int CMD_OPEN      = 0x14;   // open/init the link
     static constexpr int CMD_KEEPALIVE = 0x35;   // request-debug-info (keepalive)
     static constexpr int CMD_CHANNELS  = 0x01;   // MCU -> app live channel data
+    // MCU -> app raw analog input stream, 12x int16 LE, small signed range
+    // (observed roughly -100..100), independent of channel mapping and always
+    // live (not gated by calibration state) - this is what UniGCS's
+    // calibration screens actually read for their live crosshairs, NOT
+    // CMD_CALIBRATION (0x04, which carries no position data at all - see the
+    // ANALOG_* slot indices below). Reverse-engineered by isolated capture
+    // (2026-08-12): each physical stick/dial/HAT axis wiggled alone, one at a
+    // time, and matched to whichever of the 12 slots moved.
+    static constexpr int CMD_ANALOG_RAW = 0x3E;
+    // Confirmed slot -> physical control mapping (isolated single-axis
+    // captures; slots 6,7,10,11 never carried real movement - 6 was flat
+    // low-magnitude noise, 10/11 were single-frame outliers with no smooth
+    // ramp in/out, most likely CRC-16 coincidence on a corrupted byte rather
+    // than real data, and 7 never moved at all).
+    static constexpr int ANALOG_J1           = 0;
+    static constexpr int ANALOG_J2           = 1;
+    static constexpr int ANALOG_J3           = 2;
+    static constexpr int ANALOG_J4           = 3;
+    static constexpr int ANALOG_LD           = 4;
+    static constexpr int ANALOG_RD           = 5;
+    static constexpr int ANALOG_HAT_VERTICAL   = 8;
+    static constexpr int ANALOG_HAT_HORIZONTAL = 9;
+    // One-byte payload for CMD_ANALOG_RAW as a request (see
+    // startAnalogStream()): 0 stops the stream, any nonzero value starts it.
+    // Initially assumed (by analogy with UniRcSdk::FREQ_* on the External
+    // SDK, which shares the small 0-7 value range) that nonzero values
+    // select a delivery rate - tested directly on hardware (2026-08-13) and
+    // disproved: values 1, 5, and 7 all measured the same ~38Hz. So this
+    // parameter isn't a rate selector here, just on/off; the value used
+    // below is arbitrary among the nonzero ones that were tested.
+    static constexpr int ANALOG_STREAM_OFF = 0;
+    static constexpr int ANALOG_STREAM_ON  = 5;
 
     // ---- config command ids (verified byte-perfect vs UniGCS) ----
     static constexpr int CMD_CALIBRATION     = 0x04;
@@ -103,6 +147,7 @@ public:
 
     // ---- callbacks ----
     using ChannelListener = std::function<void(const std::array<int16_t, 16>&)>;
+    using AnalogListener  = std::function<void(const std::array<int16_t, 12>&)>;
     using FrameListener   = std::function<void(int cmd, const std::vector<uint8_t>&)>;
     using CalProgress     = std::function<void(int step)>;
 
@@ -113,11 +158,23 @@ public:
     RcuSession& operator=(const RcuSession&) = delete;
 
     void setChannelListener(ChannelListener l);
+    void setAnalogListener(AnalogListener l);
     void setFrameListener(FrameListener l);
 
     // Snapshot of the latest 16 live channel values (mutex-guarded copy).
     std::array<int16_t, 16> channels();
+    // Snapshot of the latest 12 raw analog values (CMD_ANALOG_RAW) - see the
+    // ANALOG_* constants above for which slot is which physical control.
+    std::array<int16_t, 12> analogRaw();
     bool isReceiving(long withinMs);
+
+    // Arms/disarms the CMD_ANALOG_RAW stream - see the class comment above
+    // for how this was found. Sends the cmd id itself 3x as the request,
+    // matching UniRcSdk::startChannelStream()'s "send three times" idiom on
+    // the External SDK. open() calls this automatically; call again
+    // explicitly only if you need to stop it.
+    bool startAnalogStream(int payload = ANALOG_STREAM_ON);
+    bool stopAnalogStream() { return startAnalogStream(ANALOG_STREAM_OFF); }
 
     // Configure 230400/8N1, send open (0x14), start rx + keepalive threads.
     // Returns true on success.
@@ -185,6 +242,7 @@ private:
     void feed(const uint8_t* data, size_t n);
     void dispatch(int cmd, const std::vector<uint8_t>& d);
     std::array<int16_t, 16> channelsCopy();
+    std::array<int16_t, 12> analogRawCopy();
 
     static long long nowMs();
     static void sleepMs(long ms);
@@ -206,8 +264,12 @@ private:
     std::array<int16_t, 16> channels_{};   // value-initialised to zero
     std::atomic<long long> lastChannelMs_{0};
 
+    std::mutex analogMutex_;
+    std::array<int16_t, 12> analog_{};     // value-initialised to zero
+
     std::mutex listenerMutex_;
     ChannelListener channelListener_;
+    AnalogListener analogListener_;
     FrameListener frameListener_;
 
     std::atomic<int> calStep_{0};

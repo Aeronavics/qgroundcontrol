@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Mimics the Unicode "↺" (U+21BA ANTICLOCKWISE OPEN CIRCLE ARROW) glyph -
+     mirror of RotateClockwise.svg, see that file and
+     CalibrationDialIndicator.qml for why this exists as a standalone icon. -->
+<svg version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+    <path d="M 12 4 A 8 8 0 1 0 20 12"
+          fill="none" stroke="#000000" stroke-width="2.5" stroke-linecap="round"/>
+    <polygon fill="#000000" points="20,6.5 16,14 24,14"/>
+</svg>

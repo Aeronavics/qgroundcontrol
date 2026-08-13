@@ -2,33 +2,37 @@
 
 ControllerHandler::ControllerHandler()
 {
+    // Channel Listener for the mapped channel outputs
     _siyiSdk.setChannelListener([this](const std::array<qint16,16>& ch){
-        setAllChannelValues(ch);
+        std::array<qint16,16> copy = ch;
+        QMetaObject::invokeMethod(this, [this, copy]{ setAllChannelValues(copy); }, Qt::QueuedConnection);
     });
 
     _siyiSdk.start();
 
+    // The input calibration display
+    _rcu.setAnalogListener([this](const std::array<qint16,12>& v){
+        std::array<qint16,12> copy = v;
+        QMetaObject::invokeMethod(this, [this, copy]{ setRawAnalogValues(copy); }, Qt::QueuedConnection);
+    });
+
     _rcu.open();
 
     _channels = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+    _rawAnalog = {0,0,0,0,0,0,0,0,0,0,0,0};
     _channelMappings = {"", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""};
     _channelReverses = {false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false};
     _inputList = {"J1", "J2", "J3", "J4", "J5", "J6", "SA", "SB", "S1", "S2", "S3", "S4", "RD", "LD", "R1", "R2", "R3", "L1", "L2", "M1", "M2", "M3", "M4", "M5", "M6", " ", "RSSI", "--"};
     _buttonList = {"S1", "S2", "S3", "S4", "L1", "L2", "R1", "R2", "R3", "M1", "M2", "M3", "M4", "M5", "M6"};
     _buttonMap = {{"S1", 0}, {"S2", 0}, {"S3", 0}, {"S4", 0}, {"L1", 0}, {"L2", 0}, {"R1", 0}, {"R2", 0}, {"R3", 0}, {"M1", 0}, {"M2", 0}, {"M3", 0}, {"M4", 0}, {"M5", 0}, {"M6", 0}};
+    // Placeholder until the real value arrives via getAllButtonModes()'
+    _deadzone = 30;
 
     QtConcurrent::run(this, &ControllerHandler::setupFrameListener);
     QtConcurrent::run(this, &ControllerHandler::pullChannelMappings);
     QtConcurrent::run(this, &ControllerHandler::pullChannelReverse);
     QtConcurrent::run(this, &ControllerHandler::getAllButtonModes);
     QtConcurrent::run(this, &ControllerHandler::monitorBindingStatus);
-
-
-    // _rcu.setChannelListener([this](const std::array<qint16,16>& ch){
-    //     setChannels(ch);
-    // });
-
-    // _rcu.open();
 }
 
 
@@ -53,10 +57,27 @@ void ControllerHandler::setAllChannelValues(std::array<qint16,16> channels)
 }
 
 
+void ControllerHandler::setRawAnalogValues(std::array<qint16,12> values)
+{
+    QVariantList tempList;
+    tempList.reserve(values.size());
+    for (qint16 val : values){
+        tempList.append(val);
+    }
+    _rawAnalog = tempList;
+    emit rawAnalogChanged();
+}
+
+
 void ControllerHandler::pullChannelMappings()
 {
     std::vector<unircsdk::UniRcSdk::Mapping> _tempChannelMappings;
-    _siyiSdk.getAllChannelMappings(_tempChannelMappings);
+    if (!_siyiSdk.getAllChannelMappings(_tempChannelMappings))
+    {
+        qDebug() << "Failed to pull channel mappings";
+        pullChannelMappings();
+        return;
+    }
 
     QVariantList tempList;
     tempList.reserve(_tempChannelMappings.size());
@@ -72,7 +93,12 @@ void ControllerHandler::pullChannelMappings()
 void ControllerHandler::pullChannelReverse()
 {
     std::vector<int> _tempChannelReverses;
-    _siyiSdk.getAllReverse(_tempChannelReverses);
+    if (!_siyiSdk.getAllReverse(_tempChannelReverses))
+    {
+        qDebug() << "Failed to pull channel reverse";
+        pullChannelReverse();
+        return;
+    }
 
     QVariantList tempList;
     tempList.reserve(_tempChannelReverses.size());
@@ -207,44 +233,62 @@ void ControllerHandler::getAllButtonModes()
     _rcu.getButtonModes();
     _rcu.getFlightMode();
     _rcu.getDeadzone();
-    _rcu.getFlightChannel();
+    pullFlightChannel();
+}
+
+void ControllerHandler::pullFlightChannel()
+{
+    _haveFlightChannel.store(false);
+    while (!_haveFlightChannel.load())
+    {
+        _rcu.getFlightChannel();
+        for (int i = 0; i < 20 && !_haveFlightChannel.load(); i++)
+        {
+            std::this_thread::sleep_for(std::chrono::milliseconds(50));
+        }
+    }
 }
 
 void ControllerHandler::setupFrameListener()
 {
     _rcu.setFrameListener([this](int cmd, const std::vector<uint8_t>& vect){
-        if (cmd == 0x34) {
-            if (vect.size() >= 2)
-            {
-                for (int i = 0; i < 15; i++)
+        std::vector<uint8_t> v = vect;
+        QMetaObject::invokeMethod(this, [this, cmd, v]{
+            if (cmd == 0x34) {
+                if (v.size() >= 2)
                 {
-                    _buttonMap[_buttonList[vect[i*2]]] = QString::number(vect[(i*2)+1]);
+                    for (int i = 0; i < 15; i++)
+                    {
+                        _buttonMap[_buttonList[v[i*2]]] = QString::number(v[(i*2)+1]);
+                    }
+                    emit buttonMapChanged();
                 }
-                emit buttonMapChanged();
             }
-        }
-        else if (cmd == 0x61)
-        {
-            if (!vect.empty())
+            else if (cmd == 0x61)
             {
-                _flightMode = vect[0];
-                emit flightModeChanged();
+                if (!v.empty())
+                {
+                    _flightMode = v[0];
+                    emit flightModeChanged();
+                }
             }
-        }
-        else if (cmd == 0x53)
-        {
-            if (!vect.empty())
+            else if (cmd == 0x53)
             {
-                qDebug() << "Deadzone set to: " << vect[0];
+                if (!v.empty())
+                {
+                    _deadzone = v[0];
+                    emit deadzoneChanged();
+                }
             }
-        }
-        else if (cmd == 0x63) {
-            if (!vect.empty())
-            {
-                _flightChannel = vect[0];
-                emit flightChannelChanged();
+            else if (cmd == 0x63) {
+                if (!v.empty())
+                {
+                    _flightChannel = v[0];
+                    _haveFlightChannel.store(true);
+                    emit flightChannelChanged();
+                }
             }
-        }
+        }, Qt::QueuedConnection);
     });
 }
 
@@ -275,7 +319,7 @@ void ControllerHandler::callStartDialCalibration()
 
 void ControllerHandler::startDialCalibration()
 {
-    int res = _rcu.runCalibration(unircsdk::RcuSession::CAL_DIALS, [this](int cb){ dialCalibrationCallback(cb);}, 12000);
+    int res = _rcu.runCalibration(unircsdk::RcuSession::CAL_DIALS, [this](int cb){ dialCalibrationCallback(cb);}, 20000);
     qDebug() << "Dial Calibration Return Result: " << res;
 }
 
@@ -291,19 +335,36 @@ void ControllerHandler::dialCalibrationCallback(int cb)
 void ControllerHandler::toggleButtonMode(QString buttonName)
 {
     qint8 buttonId = _buttonList.indexOf(buttonName);
+    int newMode = (_buttonMap[buttonName].toInt() + 1) % 3;
 
-    _rcu.setButtonMode(buttonId, (_buttonMap[buttonName].toInt() + 1) % 3);
+    _buttonMap[buttonName] = newMode;
+    emit buttonMapChanged();
+
+    _rcu.setButtonMode(buttonId, newMode);
     _rcu.getButtonModes();
 }
 
 
 void ControllerHandler::startBinding()
 {
+    QtConcurrent::run(this, &ControllerHandler::startBindingThread);
+}
+
+void ControllerHandler::startBindingThread()
+{
     qDebug() << "Start binding";
-    _siyiSdk.startBinding();
+    if (!_siyiSdk.startBinding())
+    {
+        qDebug() << "Failed to call Start binding";
+    }
 }
 
 void ControllerHandler::stopBinding()
+{
+    QtConcurrent::run(this, &ControllerHandler::stopBindingThread);
+}
+
+void ControllerHandler::stopBindingThread()
 {
     qDebug() << "Stop binding";
     if (!_siyiSdk.stopBinding())
@@ -355,7 +416,7 @@ void ControllerHandler::setFlightModeChannel(qint8 channel)
 {
     qDebug() << "Channel " << channel;
     _rcu.setFlightChannel(channel);
-    _rcu.getFlightChannel();
+    pullFlightChannel();
 }
 
 void ControllerHandler::callSetFlightChannel(qint8 channel)
@@ -367,6 +428,22 @@ void ControllerHandler::callSetFlightChannel(qint8 channel)
 void ControllerHandler::callSetFlightMode(qint8 mode)
 {
     QtConcurrent::run(this, &ControllerHandler::setFlightMode, mode);
+}
+
+void ControllerHandler::callSetDeadzone(qint8 value)
+{
+    QtConcurrent::run(this, &ControllerHandler::setDeadzone, value);
+}
+
+void ControllerHandler::setDeadzone(qint8 value)
+{
+    qint8 clamped = qBound<qint8>(10, value, 80);
+
+    _deadzone = clamped;
+    emit deadzoneChanged();
+
+    _rcu.setDeadzone(clamped);
+    _rcu.getDeadzone();
 }
 
 
