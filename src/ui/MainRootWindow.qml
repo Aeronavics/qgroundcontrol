@@ -364,7 +364,8 @@ ApplicationWindow {
                         text:               qsTr("Controller Setup")
                         imageColor:         qgcPal.text
                         imageResource:      "/qmlimages/RC.svg"
-                        visible:            QGroundControl.corePlugin.showAdvancedUI
+                        // Only on SIYI hand controllers
+                        visible:            QGroundControl.corePlugin.showAdvancedUI && QGroundControl.isSiyiController
                         onClicked: {
                             if (!mainWindow.preventViewSwitch()) {
                                 allowCriticalMessagePopup = false

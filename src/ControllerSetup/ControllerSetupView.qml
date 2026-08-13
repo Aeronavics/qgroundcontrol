@@ -49,11 +49,6 @@ Rectangle {
     }
 
     function _showSummaryPanel() {
-        // if (!_vehicleConnected) {
-        //     panelLoader.setSourceComponent(disconnectedVehicleSummaryComponent)
-        // } else {
-        //     panelLoader.setSource("ChannelSetup.qml")
-        // }
         panelLoader.setSource("ChannelSetup.qml")
         channelsButton.checked = true
     }
@@ -119,7 +114,7 @@ Rectangle {
 
             SubMenuButton {
                 id:                 calibrationButton
-                imageResource:      "/qmlimages/FirmwareUpgradeIcon.png"
+                imageResource:      "/qmlimages/RadioComponentIcon.png"
                 setupIndicator:     false
                 exclusiveGroup:     setupButtonGroup
                 text:               qsTr("Calibration")
@@ -129,7 +124,7 @@ Rectangle {
             }
             SubMenuButton {
                 id:                 systemButton
-                imageResource:      "/qmlimages/FirmwareUpgradeIcon.png"
+                imageResource:      "/qmlimages/Gears.svg"
                 setupIndicator:     false
                 exclusiveGroup:     setupButtonGroup
                 text:               qsTr("System")
@@ -137,26 +132,16 @@ Rectangle {
 
                 onClicked: showPanel(this, "ControllerSystem.qml")
             }
-            // SubMenuButton {
-            //     id:                 calibrationButton
-            //     imageResource:      "/qmlimages/FirmwareUpgradeIcon.png"
-            //     setupIndicator:     false
-            //     exclusiveGroup:     setupButtonGroup
-            //     text:               qsTr("RC Calibration")
-            //     Layout.fillWidth:   true
+            SubMenuButton {
+                id:                 firmwareButton
+                imageResource:      "/qmlimages/FirmwareUpgradeIcon.png"
+                setupIndicator:     false
+                exclusiveGroup:     setupButtonGroup
+                text:               qsTr("Firmware")
+                Layout.fillWidth:   true
 
-            //     onClicked: showPanel(this, "RCCalibration.qml")
-            // }
-            // SubMenuButton {
-            //     id:                 systemButton
-            //     imageResource:      "/qmlimages/FirmwareUpgradeIcon.png"
-            //     setupIndicator:     false
-            //     exclusiveGroup:     setupButtonGroup
-            //     text:               qsTr("System")
-            //     Layout.fillWidth:   true
-
-            //     onClicked: showPanel(this, "SystemSetup.qml")
-            // }
+                onClicked: showPanel(this, "ControllerFirmwareUpdate.qml")
+            }
         }
     }
 

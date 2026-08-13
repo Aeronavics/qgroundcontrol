@@ -26,6 +26,7 @@
 
 #include <Siyi/unirc_sdk.h>
 #include <Siyi/rcu_session.h>
+#include <Siyi/fpv_upgrade_client.h>
 
 /// Controller for ControllerHandler.qml.
 class ControllerHandler : public QObject
@@ -48,6 +49,18 @@ public:
     Q_PROPERTY(qint8        flightMode              READ flightMode             NOTIFY flightModeChanged)
     Q_PROPERTY(qint8        deadzone                READ deadzone               NOTIFY deadzoneChanged)
 
+    // ---- FPV (image-transmission) firmware update ----
+    Q_PROPERTY(QString      fpvVersion              READ fpvVersion             NOTIFY fpvVersionChanged)
+    Q_PROPERTY(bool         fpvLinkUp               READ fpvLinkUp              NOTIFY fpvLinkUpChanged)
+    Q_PROPERTY(qint8        fpvUpdateState          READ fpvUpdateState         NOTIFY fpvUpdateStateChanged)
+    Q_PROPERTY(int          fpvUpdateProgress       READ fpvUpdateProgress      NOTIFY fpvUpdateProgressChanged)
+    Q_PROPERTY(QString      fpvUpdateStatus         READ fpvUpdateStatus        NOTIFY fpvUpdateStatusChanged)
+    Q_PROPERTY(QString      firmwareName            READ firmwareName           NOTIFY firmwareSelectionChanged)
+    Q_PROPERTY(qint64       firmwareSize            READ firmwareSize           NOTIFY firmwareSelectionChanged)
+    Q_PROPERTY(bool         firmwareSelected        READ firmwareSelected       NOTIFY firmwareSelectionChanged)
+    Q_PROPERTY(bool         airUnitPresent          READ airUnitPresent         NOTIFY airUnitPresentChanged)
+    Q_PROPERTY(QString      airVersion              READ airVersion             NOTIFY airUnitPresentChanged)
+
     QVariantList    channels                ()  {return _channels;}
     QVariantList    rawAnalog               ()  {return _rawAnalog;}
     QVariantList    channelMappings         ()  {return _channelMappings;}
@@ -60,6 +73,29 @@ public:
     qint8           bindingStatus           ()  {return _bindingStatus;}
     qint8           flightMode              ()  {return _flightMode;}
     qint8           deadzone                ()  {return _deadzone;}
+    QString         fpvVersion              ()  {return _fpvVersion;}
+    bool            fpvLinkUp               ()  {return _fpvLinkUp;}
+    qint8           fpvUpdateState          ()  {return _fpvUpdateState;}
+    int             fpvUpdateProgress       ()  {return _fpvUpdateProgress;}
+    QString         fpvUpdateStatus         ()  {return _fpvUpdateStatus;}
+    QString         firmwareName            ()  {return _firmwareName;}
+    qint64          firmwareSize            ()  {return _firmwareSize;}
+    bool            firmwareSelected        ()  {return !_firmwareUrl.isEmpty();}
+    bool            airUnitPresent          ()  {return _airUnitPresent;}
+    QString         airVersion              ()  {return _airVersion;}
+
+    /// Mirrors FirmwareUpdate.qml's state handling. Keep in sync with the QML.
+    enum FpvUpdateState {
+        FpvIdle         = 0,
+        FpvAnnouncing   = 1,
+        FpvUploading    = 2,
+        FpvVerifying    = 3,
+        FpvCommitting   = 4,
+        FpvRebooting    = 5,
+        FpvSuccess      = 6,
+        FpvFailed       = 7
+    };
+    Q_ENUM(FpvUpdateState)
 
     Q_INVOKABLE void setChannelReverse(int channel, bool reverse);
     void setChannelReverseThread(int channel, bool reverse);
@@ -77,6 +113,17 @@ public:
     Q_INVOKABLE void callSetFlightChannel(qint8 channelId);
     Q_INVOKABLE void callSetDeadzone(qint8 value);
 
+    /// Probe the FPV module: refreshes fpvLinkUp + fpvVersion.
+    Q_INVOKABLE void callRefreshFpvVersion();
+
+    /// Remember a firmware file chosen in the file browser and publish its
+    /// resolved name/size for display.
+    Q_INVOKABLE void callSelectFirmware(const QString& url);
+
+    /// Run the full ground-unit FPV firmware update on the file most recently
+    /// passed to callSelectFirmware().
+    Q_INVOKABLE void callUpgradeFpvFirmware(bool airUnit = false);
+
 signals:
     void channelsChanged();
     void rawAnalogChanged();
@@ -90,6 +137,13 @@ signals:
     void bindingStatusChanged();
     void flightModeChanged();
     void deadzoneChanged();
+    void fpvVersionChanged();
+    void fpvLinkUpChanged();
+    void fpvUpdateStateChanged();
+    void fpvUpdateProgressChanged();
+    void fpvUpdateStatusChanged();
+    void firmwareSelectionChanged();
+    void airUnitPresentChanged();
 
 private slots:
 
@@ -110,6 +164,24 @@ private:
     qint8 _bindingStatus;
     qint8 _deadzone;
     std::atomic<bool> _haveFlightChannel{false};
+    std::atomic<bool> _running{true};
+
+    QString _fpvVersion;
+    bool    _fpvLinkUp          = false;
+    qint8   _fpvUpdateState     = FpvIdle;
+    int     _fpvUpdateProgress  = 0;
+    QString _fpvUpdateStatus;
+    std::atomic<bool> _fpvUpdateBusy{false};
+
+    QString _firmwareUrl;
+    QString _firmwareName;
+    qint64  _firmwareSize = 0;
+
+    bool    _airUnitPresent = false;
+    QString _airVersion;
+
+    std::atomic<bool> _skyUpgradeReady{false};
+    std::atomic<bool> _skyUpgradeReplied{false};
 
     std::pair<int, int> mapInputArrayToControlValues(qint8 inputArrayValue);
     void setChannelMapping(qint8 channel, qint8 input);
@@ -136,6 +208,17 @@ private:
     void getFlightMode          ();
     void setFlightMode          (qint8 mode);
     void setDeadzone            (qint8 value);
+
+    void refreshFpvVersion      ();
+    void upgradeFpvFirmware     (QString url, QString name, bool airUnit);
+    /// Enable air-unit upgrade mode and wait for the unit to report ready.
+    /// Mirrors UniGCS: SET(1) -> 12s settle -> poll GET up to 4x at 1s.
+    bool prepareAirUnitForUpgrade();
+    /// content:// cannot be fopen()'d, so stage it to a real file first.
+    /// Returns the staged path, or an empty string on failure.
+    QString stageFirmwareLocally(const QString& url, const QString& name, QString& errorOut);
+    /// Marshals an FPV update state change onto the GUI thread.
+    void postFpvState           (qint8 state, int progress, const QString& status);
 };
 
 #endif

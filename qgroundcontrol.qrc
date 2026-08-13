@@ -307,6 +307,7 @@
         <file alias="ControllerCalibration.qml">src/ControllerSetup/ControllerCalibration.qml</file>
         <file alias="ChannelSetup.qml">src/ControllerSetup/ChannelSetup.qml</file>
         <file alias="ControllerSystem.qml">src/ControllerSetup/ControllerSystem.qml</file>
+        <file alias="ControllerFirmwareUpdate.qml">src/ControllerSetup/ControllerFirmwareUpdate.qml</file>
         <file alias="CalibrationChannelBar.qml">src/ControllerSetup/CalibrationChannelBar.qml</file>
         <file alias="CalibrationStickIndicator.qml">src/ControllerSetup/CalibrationStickIndicator.qml</file>
         <file alias="CalibrationDialIndicator.qml">src/ControllerSetup/CalibrationDialIndicator.qml</file>

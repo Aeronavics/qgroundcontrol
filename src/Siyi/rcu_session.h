@@ -116,6 +116,23 @@ public:
     static constexpr int CMD_SET_SDK_CONNECT = 0x82;
     static constexpr int CMD_CHANNEL_ADAPTION= 0x72;
 
+    // Air-unit ("sky") firmware-upgrade mode. Same 0x14 image-transmission group
+    // as CMD_CHANNEL_ADAPTION, so these use TARGET_IMAGE, not TARGET_RC_MCU.
+    //
+    // UniGCS sends SET(1), waits 12s, then polls GET until it reports ready
+    // before uploading firmware to the air unit. What it does internally is
+    // unconfirmed — the air unit is reachable over IP without it — but the
+    // measured 0.12 MB/s RF throughput makes "quiet the link for the transfer"
+    // the plausible reading, so replicate the vendor sequence.
+    static constexpr int CMD_SET_SKY_UPGRADE = 0x74;   // 116, payload [enabled]
+    static constexpr int CMD_GET_SKY_UPGRADE = 0x73;   // 115, reply [status]
+
+    /// In the reply to 0x73/0x74 a payload byte of ZERO means ready/ok
+    /// (UniGCS tests `(data[0] & 255) == 0`) — note the inversion.
+    static bool skyUpgradeReplyIsReady(const std::vector<uint8_t>& data) {
+        return !data.empty() && data[0] == 0;
+    }
+
     // ---- GET/query command ids (send with EMPTY payload; MCU replies on the same
     //      cmd id with the value). Pattern across the RCU config space: GET = odd,
     //      SET = GET+1. Replies arrive through the FrameListener / dispatch(). ----
@@ -185,12 +202,19 @@ public:
     // ---- low level send / frame builder ----
     // Send a command into the live session (keeps the fd open). Returns false if
     // the session is not open or the write failed. Serialised by an internal mutex.
-    bool send(int target, int cmd, const std::vector<uint8_t>& data);
+    // `ctrl` is frame byte 1: bit0 need_ack, bit1 ack_pack, bits2-3 CRC type.
+    // 0x09 is what every verified command here uses. UniGCS uses 0x0B for a few
+    // queries; CTRL_QUERY_ALT exists so those can be reproduced exactly.
+    static constexpr int CTRL_DEFAULT   = 0x09;
+    static constexpr int CTRL_QUERY_ALT = 0x0B;
+
+    bool send(int target, int cmd, const std::vector<uint8_t>& data, int ctrl = CTRL_DEFAULT);
     bool send(int cmd, const std::vector<uint8_t>& data) { return send(TARGET_RC_MCU, cmd, data); }
 
     // Build an AA app->MCU frame. NOTE: increments the sequence counter; call
     // through send() (which holds the write lock) rather than concurrently.
-    std::vector<uint8_t> buildFrame(int target, int cmd, const std::vector<uint8_t>& data);
+    std::vector<uint8_t> buildFrame(int target, int cmd, const std::vector<uint8_t>& data,
+                                    int ctrl = CTRL_DEFAULT);
 
     // ---- RCU config (through the live session) ----
     void setFailsafeEnabled(bool en);
@@ -211,7 +235,15 @@ public:
     // same cmd id; register a FrameListener (setFrameListener) to receive the reply.
     // target defaults to the RC MCU (0x10); pass TARGET_IMAGE for 0x14 queries
     // (e.g. CMD_GET_CHANNEL_ADAPTION).
-    void requestGet(int getCmd, int target = TARGET_RC_MCU);
+    void requestGet(int getCmd, int target = TARGET_RC_MCU, int ctrl = CTRL_DEFAULT);
+
+    // ---- air-unit ("sky") firmware upgrade prelude ----
+    /// Enable/disable the air-unit upgrade mode. Enable before uploading
+    /// firmware to 192.168.144.11; disable again afterwards.
+    void setSkyUpgradeMode(bool enabled);
+    /// Ask whether the air unit is ready. The answer arrives on the frame
+    /// listener as CMD_GET_SKY_UPGRADE — see skyUpgradeReplyIsReady().
+    void getSkyUpgradeReady();
     void getFlightMode()      { requestGet(CMD_GET_FLIGHT_MODE); }
     void getFlightChannel()   { requestGet(CMD_GET_FLIGHT_CHANNEL); }
     void getDeadzone()        { requestGet(CMD_GET_DEADZONE); }

@@ -17,10 +17,25 @@ Namespace: `unircsdk`. Standard `#pragma once`, RAII, `enum class`, `nullptr`.
 | `unirc_frame.h` | 0x5566 frame `build()` + streaming `Parser` + little-endian helpers (`u16`/`s16`/`u32`). Header-only. |
 | `rcu_session.h` / `.cpp` | **The internal driver.** RC-MCU link on `/dev/ttyHS1` @230400: session open/keepalive, live channels, all config setters, gated calibration. |
 | `unirc_sdk.h` / `.cpp` | External SDK on `/dev/ttyHS3` @115200: channel streaming + synchronous request/response for hw id, firmware, system settings, binding, mappings, reverse. |
+| `udp_port.h` / `.cpp` | POSIX UDP socket (unconnected `sendto`/`recvfrom` + `SO_RCVTIMEO`) for the FPV upgrade link. |
+| `fpv_frame.h` | The `0xAA` V3 frame (`CMD_ID` + `SUBCMD`) used by the FPV upgrade channel. Header-only. |
+| `ftp_upload.h` / `.cpp` | Minimal FTP `STOR` + `SIZE` — where the FPV firmware bytes actually travel. |
+| `fpv_upgrade_client.h` / `.cpp` | **Ground-unit FPV firmware upgrade.** See `FIRMWARE_UPGRADE_PROTOCOL.md`. |
 
-There is no build system here (the target build is QGC's). Compile the three
-`.cpp` files with your project; the three headers are included by them.
-Example: `g++ -std=c++14 -pthread rcu_session.cpp serial_port.cpp your_main.cpp`.
+## Building
+
+`CMakeLists.txt` builds these as the **`Siyi`** static library, wired into QGC via
+`QGC_SIYI_ENABLED` (defaults ON everywhere except Windows). The library is
+intentionally **Qt-free** — plain C++14 + POSIX — so Qt's autogen passes are
+disabled for the target and it can be driven from a plain `main()` or a test
+harness. It links only `Threads::Threads`.
+
+Because it is POSIX-only (termios + BSD sockets) it does **not** build on
+Windows; enabling `QGC_SIYI_ENABLED` there is a hard configure error rather than
+a pile of compile errors.
+
+To use it standalone (e.g. cross-compiled for the controller to test on-device):
+`g++ -std=c++14 -pthread rcu_session.cpp serial_port.cpp your_main.cpp`.
 
 ## Two links, two protocols (both verified)
 

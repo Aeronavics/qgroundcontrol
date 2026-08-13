@@ -106,19 +106,20 @@ void RcuSession::rxLoop() {
 }
 
 // ---------------------------------------------------------------- send
-bool RcuSession::send(int target, int cmd, const std::vector<uint8_t>& data) {
+bool RcuSession::send(int target, int cmd, const std::vector<uint8_t>& data, int ctrl) {
     std::lock_guard<std::mutex> lk(writeMutex_);
     if (!port_.isOpen()) return false;
-    std::vector<uint8_t> f = buildFrame(target, cmd, data);
+    std::vector<uint8_t> f = buildFrame(target, cmd, data, ctrl);
     return port_.write(f.data(), f.size());
 }
 
 std::vector<uint8_t> RcuSession::buildFrame(int target, int cmd,
-                                            const std::vector<uint8_t>& data) {
+                                            const std::vector<uint8_t>& data,
+                                            int ctrl) {
     size_t dl = data.size();
     int s = seq_++ & 0xFFFF;
     std::vector<uint8_t> f(12 + dl + 2);
-    f[0] = 0xAA; f[1] = 0x09; f[2] = 0x03;
+    f[0] = 0xAA; f[1] = static_cast<uint8_t>(ctrl); f[2] = 0x03;
     f[3] = static_cast<uint8_t>(dl & 0xFF);
     f[4] = static_cast<uint8_t>((dl >> 8) & 0xFF);
     f[5] = crc8_maxim(f.data(), 5);                 // CRC-8/MAXIM over the 5-byte header
@@ -159,8 +160,19 @@ void RcuSession::setFlightChannel(int ch) {
     send(TARGET_RC_MCU, CMD_FLIGHT_CHANNEL, std::vector<uint8_t>{ static_cast<uint8_t>(ch) });
 }
 
-void RcuSession::requestGet(int getCmd, int target) {
-    send(target, getCmd, std::vector<uint8_t>());  // empty payload = query; reply on same cmd id
+void RcuSession::setSkyUpgradeMode(bool enabled) {
+    send(TARGET_IMAGE, CMD_SET_SKY_UPGRADE,
+         std::vector<uint8_t>{ static_cast<uint8_t>(enabled ? 1 : 0) });
+}
+
+void RcuSession::getSkyUpgradeReady() {
+    // UniGCS sends this particular query with CTRL 0x0B rather than 0x09; match
+    // it byte-for-byte so the air path cannot fail on an avoidable difference.
+    requestGet(CMD_GET_SKY_UPGRADE, TARGET_IMAGE, CTRL_QUERY_ALT);
+}
+
+void RcuSession::requestGet(int getCmd, int target, int ctrl) {
+    send(target, getCmd, std::vector<uint8_t>(), ctrl);  // empty payload = query; reply on same cmd id
 }
 
 void RcuSession::setSdkConnectType(int t) {
