@@ -46,8 +46,19 @@ the container and never touches the controller's JVM.
 
 | Credential ID (env var in `Jenkinsfile`) | Kind | Needed for |
 | --- | --- | --- |
-| `aeronavics-github-ssh` (`GIT_SSH_CREDENTIALS_ID`) | SSH private key | The `libs/mavlink/include/mavlink/v2.0` submodule uses an `git@github.com:` remote |
 | `qgc-android-keystore-password` (`ANDROID_KEYSTORE_CREDENTIALS_ID`) | Secret text | Only when `SIGN_RELEASE` is ticked; unlocks the committed `android/android_release.keystore` (alias `QGCAndroidKeyStore`) |
+
+No separate Git credential is needed. Every submodule is HTTPS, and the
+checkout uses the Git plugin's `parentCredentials` option so the job's own SCM
+credential (a GitHub App works fine) is reused for the private `Aeronavics/*`
+submodules.
+
+The checkout also sets `noTags: false`. This matters more than it looks:
+multibranch jobs clone with `--no-tags`, and
+[`QGCCommon.pri`](../../QGCCommon.pri) only derives a real version when
+`git describe` matches `v#.#.#`. Without tags the build silently produces an
+APK versioned `0.0.0` with a meaningless `ANDROID_VERSION_CODE`, so the
+pipeline marks the build UNSTABLE if no version tag is reachable.
 
 ## Parameters
 

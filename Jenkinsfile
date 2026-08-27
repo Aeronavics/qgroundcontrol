@@ -79,8 +79,7 @@ pipeline {
         GSTREAMER_ANDROID_ROOT          = '/opt/gstreamer-1.0-android-universal-1.18.6'
         BUILD_DIR                       = "${WORKSPACE}/build/android-multiabi"
         PACKAGE_DIR                     = "${WORKSPACE}/build/android-multiabi/package"
-        // Jenkins credential ids - see README-android-jenkins.md
-        GIT_SSH_CREDENTIALS_ID          = 'aeronavics-github-ssh'
+        // Jenkins credential id - see README-android-jenkins.md
         ANDROID_KEYSTORE_CREDENTIALS_ID = 'qgc-android-keystore-password'
     }
 
@@ -88,23 +87,35 @@ pipeline {
 
         stage('Checkout') {
             steps {
-                checkout scm
-                // The mavlink submodule uses an SSH remote, so submodule
-                // checkout needs the deploy key. Tags are required because QGC
-                // derives APP_VERSION_STR from `git describe`.
-                sshagent(credentials: [env.GIT_SSH_CREDENTIALS_ID]) {
-                    sh '''
-                        set -eu
-                        export GIT_SSH_COMMAND="ssh -o StrictHostKeyChecking=accept-new"
-                        git fetch --tags --force
-                        git submodule sync --recursive
-                        git submodule update --init --recursive
-                    '''
-                }
+                // Let the Git plugin do the whole checkout rather than raw git:
+                //  * parentCredentials reuses the job's own credential for the
+                //    private Aeronavics submodules (all submodules are HTTPS).
+                //  * noTags:false is essential - multibranch clones with
+                //    --no-tags, and QGCCommon.pri only derives a real VERSION
+                //    when `git describe` matches v#.#.#. Without tags the APK
+                //    silently builds as 0.0.0 with a bogus versionCode.
+                checkout([
+                    $class: 'GitSCM',
+                    branches: scm.branches,
+                    userRemoteConfigs: scm.userRemoteConfigs,
+                    // Extensions are set explicitly rather than merged with
+                    // scm.extensions: a CloneOption inherited from the branch
+                    // source could otherwise re-assert noTags and quietly undo
+                    // the tag fetch.
+                    extensions: [
+                        [$class: 'CloneOption', noTags: false, shallow: false, depth: 0, honorRefspec: false, timeout: 30],
+                        [$class: 'SubmoduleOption', parentCredentials: true, recursiveSubmodules: true,
+                         disableSubmodules: false, trackingSubmodules: false, timeout: 60],
+                    ],
+                ])
                 script {
                     env.QGC_VERSION = sh(
                         script: 'git describe --tags --always',
                         returnStdout: true).trim()
+                    if (!(env.QGC_VERSION ==~ /^v\d+\.\d+\.\d+.*/)) {
+                        unstable("git describe returned '${env.QGC_VERSION}' - no version tag reachable, " +
+                                 'so QGC will build as VERSION 0.0.0. Check that tags were fetched.')
+                    }
                     echo "Building QGroundControl ${env.QGC_VERSION} for ABIs: ${params.ANDROID_ABIS}"
                 }
             }
