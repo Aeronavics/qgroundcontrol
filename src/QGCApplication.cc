@@ -109,6 +109,7 @@
 #include "CustomAction.h"
 #include "CustomActionManager.h"
 #include "GimbalController.h"
+#include "ControllerSetup/ControllerHandler.h"
 
 #if defined(QGC_ENABLE_PAIRING)
 #include "PairingManager.h"
@@ -525,6 +526,7 @@ void QGCApplication::_initCommon()
     qmlRegisterType<RCToParamDialogController>      (kQGCControllers,                       1, 0, "RCToParamDialogController");
     qmlRegisterType<CustomAction>                   (kQGCControllers,                       1, 0, "CustomAction");
     qmlRegisterType<CustomActionManager>            (kQGCControllers,                       1, 0, "CustomActionManager");
+    qmlRegisterType<ControllerHandler>              (kQGCControllers,                       1, 0, "ControllerHandler");
 
     qmlRegisterType<TerrainProfile>                 ("QGroundControl.Controls",             1, 0, "TerrainProfile");
     qmlRegisterType<ToolStripAction>                ("QGroundControl.Controls",             1, 0, "ToolStripAction");

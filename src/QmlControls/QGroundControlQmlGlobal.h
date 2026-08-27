@@ -74,6 +74,9 @@ public:
     Q_PROPERTY(MicrohardManager*    microhardManager        READ    microhardManager        CONSTANT)
     Q_PROPERTY(bool                 microhardSupported      READ    microhardSupported      CONSTANT)
     Q_PROPERTY(bool                 supportsPairing         READ    supportsPairing         CONSTANT)
+    /// True when running on a SIYI UniRC hand controller, i.e. when the serial
+    /// interfaces the Controller Setup page drives are actually present.
+    Q_PROPERTY(bool                 isSiyiController        READ    isSiyiController        CONSTANT)
     Q_PROPERTY(QGCPalette*          globalPalette           MEMBER  _globalPalette          CONSTANT)   ///< This palette will always return enabled colors
     Q_PROPERTY(QmlUnitsConversion*  unitsConversion         READ    unitsConversion         CONSTANT)
     Q_PROPERTY(bool                 singleFirmwareSupport   READ    singleFirmwareSupport   CONSTANT)
@@ -217,6 +220,13 @@ public:
     bool    px4ProFirmwareSupported ();
     bool    apmFirmwareSupported    ();
     bool    skipSetupPage           () const{ return _skipSetupPage; }
+
+    /// Detected by CAPABILITY rather than by model string: the Controller Setup
+    /// page is useless without these two UARTs (RcuSession drives /dev/ttyHS1,
+    /// UniRcSdk drives /dev/ttyHS3), and the SIYI model names vary across the
+    /// range (Pro_94, Standard_94, Standard-10inch_A2...) so matching them is
+    /// brittle. Evaluated once — the hardware cannot appear at runtime.
+    static bool isSiyiController();
     void    setSkipSetupPage        (bool skip);
 
     void    setIsVersionCheckEnabled    (bool enable);

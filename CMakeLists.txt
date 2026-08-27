@@ -104,6 +104,18 @@ else()
 		)
 endif()
 
+# SIYI UniRC 7 support. The library is POSIX-only (termios + BSD sockets), so it
+# cannot build on Windows; default it off there rather than breaking the build.
+if (WIN32)
+	set(QGC_SIYI_DEFAULT OFF)
+else()
+	set(QGC_SIYI_DEFAULT ON)
+endif()
+option(QGC_SIYI_ENABLED "Enable SIYI UniRC 7 support (POSIX only)" ${QGC_SIYI_DEFAULT})
+if (QGC_SIYI_ENABLED AND WIN32)
+	message(FATAL_ERROR "QGC_SIYI_ENABLED is not supported on Windows: the SIYI library uses termios and BSD sockets.")
+endif()
+
 if (GST_FOUND)
     add_definitions(
         -DQGC_GST_STREAMING

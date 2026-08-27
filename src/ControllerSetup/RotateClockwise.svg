@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Mimics the Unicode "↻" (U+21BB CLOCKWISE OPEN CIRCLE ARROW) glyph as a
+     standalone icon, since that glyph isn't present in every font QGC ships
+     - see CalibrationDialIndicator.qml. A 270° arc (gap at upper-left) with
+     an arrowhead at the end pointing in the direction of travel. -->
+<svg version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+    <path d="M 12 4 A 8 8 0 1 1 4 12"
+          fill="none" stroke="#000000" stroke-width="2.5" stroke-linecap="round"/>
+    <polygon fill="#000000" points="4,6.5 0,14 8,14"/>
+</svg>

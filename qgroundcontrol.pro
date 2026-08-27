@@ -420,6 +420,7 @@ INCLUDEPATH += \
     src/ui/px4_configuration \
     src/ui/toolbar \
     src/ui/uas \
+    src/Siyi \
 
 contains (DEFINES, QGC_ENABLE_PAIRING) {
     INCLUDEPATH += \
@@ -772,6 +773,16 @@ HEADERS += \
     src/uas/UASMessageHandler.h \
     src/AnalyzeView/GeoTagController.h \
     src/AnalyzeView/ExifParser.h \
+    src/Siyi/crc.h \
+    src/Siyi/fpv_frame.h \
+    src/Siyi/fpv_upgrade_client.h \
+    src/Siyi/ftp_upload.h \
+    src/Siyi/rcu_session.h \
+    src/Siyi/serial_port.h \
+    src/Siyi/udp_port.h \
+    src/Siyi/unirc_frame.h \
+    src/Siyi/unirc_sdk.h \
+    src/ControllerSetup/ControllerHandler.h \
 
 contains (DEFINES, QGC_ENABLE_PAIRING) {
     HEADERS += \
@@ -1036,6 +1047,13 @@ SOURCES += \
     src/uas/UASMessageHandler.cc \
     src/AnalyzeView/GeoTagController.cc \
     src/AnalyzeView/ExifParser.cc \
+    src/Siyi/fpv_upgrade_client.cpp \
+    src/Siyi/ftp_upload.cpp \
+    src/Siyi/rcu_session.cpp \
+    src/Siyi/serial_port.cpp \
+    src/Siyi/udp_port.cpp \
+    src/Siyi/unirc_sdk.cpp \
+    src/ControllerSetup/ControllerHandler.cc \
 
 contains (DEFINES, QGC_ENABLE_PAIRING) {
     SOURCES += \

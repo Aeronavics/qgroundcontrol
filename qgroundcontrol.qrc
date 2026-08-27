@@ -303,6 +303,14 @@
         <file alias="QGroundControl/FlightMap/SprayingIndicator.qml">src/FlightMap/MapItems/SprayingIndicator.qml</file>
         <file>src/PlanView/PlanViewTool.qml</file>
         <file alias="QGroundControl/FlightMap/TaggedIndicator.qml">src/FlightMap/MapItems/TaggedIndicator.qml</file>
+        <file alias="ControllerSetupView.qml">src/ControllerSetup/ControllerSetupView.qml</file>
+        <file alias="ControllerCalibration.qml">src/ControllerSetup/ControllerCalibration.qml</file>
+        <file alias="ChannelSetup.qml">src/ControllerSetup/ChannelSetup.qml</file>
+        <file alias="ControllerSystem.qml">src/ControllerSetup/ControllerSystem.qml</file>
+        <file alias="ControllerFirmwareUpdate.qml">src/ControllerSetup/ControllerFirmwareUpdate.qml</file>
+        <file alias="CalibrationChannelBar.qml">src/ControllerSetup/CalibrationChannelBar.qml</file>
+        <file alias="CalibrationStickIndicator.qml">src/ControllerSetup/CalibrationStickIndicator.qml</file>
+        <file alias="CalibrationDialIndicator.qml">src/ControllerSetup/CalibrationDialIndicator.qml</file>
     </qresource>
     <qresource prefix="/FirstRunPromptDialogs">
         <file alias="UnitsFirstRunPrompt.qml">src/FirstRunPromptDialogs/UnitsFirstRunPrompt.qml</file>

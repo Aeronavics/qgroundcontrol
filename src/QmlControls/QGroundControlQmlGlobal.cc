@@ -11,6 +11,7 @@
 #include "LinkManager.h"
 
 #include <QSettings>
+#include <QFileInfo>
 #include <QLineF>
 #include <QPointF>
 
@@ -312,4 +313,14 @@ QString QGroundControlQmlGlobal::altitudeModeShortDescription(AltMode altMode)
 
     // Should never get here but makes some compilers happy
     return QString();
+}
+
+bool QGroundControlQmlGlobal::isSiyiController()
+{
+    // Both nodes must be present: /dev/ttyHS0 alone is just the Bluetooth UART
+    // and exists on plenty of Qualcomm devices, whereas the ttyHS1 + ttyHS3
+    // pair is what the SIYI controller exposes and what this page needs.
+    static const bool siyi = QFileInfo::exists(QStringLiteral("/dev/ttyHS1")) &&
+                             QFileInfo::exists(QStringLiteral("/dev/ttyHS3"));
+    return siyi;
 }

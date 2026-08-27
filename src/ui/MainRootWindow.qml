@@ -168,6 +168,10 @@ ApplicationWindow {
         showTool(qsTr("Vehicle Setup"), "SetupView.qml", "/qmlimages/Gears.svg")
     }
 
+    function showControllerSetupTool() {
+        showTool(qsTr("Controller Setup"), "ControllerSetupView.qml", "/qmlimages/RC.svg")
+    }
+
     function showSettingsTool() {
         showTool(qsTr("Application Settings"), "AppSettings.qml", "/res/SPSALogoWhite")
     }
@@ -349,6 +353,24 @@ ApplicationWindow {
                                 allowCriticalMessagePopup = false
                                 toolSelectDialog.close()
                                 mainWindow.showSetupTool()
+                            }
+                        }
+                    }
+
+                    SubMenuButton {
+                        id:                 controllerSetupButton
+                        height:             toolSelectDialog._toolButtonHeight
+                        Layout.fillWidth:   true
+                        text:               qsTr("Controller Setup")
+                        imageColor:         qgcPal.text
+                        imageResource:      "/qmlimages/RC.svg"
+                        // Only on SIYI hand controllers
+                        visible:            QGroundControl.corePlugin.showAdvancedUI && QGroundControl.isSiyiController
+                        onClicked: {
+                            if (!mainWindow.preventViewSwitch()) {
+                                allowCriticalMessagePopup = false
+                                toolSelectDialog.close()
+                                mainWindow.showControllerSetupTool()
                             }
                         }
                     }
