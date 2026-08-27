@@ -1,0 +1,145 @@
+#
+# QGroundControl Android build environment
+#
+#   Qt 5.15.2 / android-clang / multi-ABI (armeabi-v7a arm64-v8a x86 x86_64)
+#
+# The build context is this directory (nothing is COPYed in), so build with:
+#
+#   docker build -t qgc-android-build:qt5.15.2 \
+#       -f deploy/docker/Dockerfile-build-android deploy/docker
+#
+# Toolchain versions are pinned deliberately - see README-android-jenkins.md:
+#   * JDK 11             - Qt 5.15.2 generates an Android Gradle Plugin 7.0.0
+#                          project; D8 crashes with a NullPointerException on
+#                          newer JDKs.
+#   * android-34 only    - androiddeployqt picks the *highest* installed SDK
+#                          platform for compileSdk. android-35's android.jar is
+#                          not parseable by AGP 7.0.0's aapt2
+#                          ("RES_TABLE_TYPE_TYPE entry offsets overlap").
+#                          Installing only android-34 makes the choice
+#                          deterministic and correct.
+#   * NDK r21e           - the NDK Qt 5.15.2 was built against.
+#
+FROM ubuntu:22.04
+
+LABEL org.opencontainers.image.title="QGroundControl Android build environment" \
+      org.opencontainers.image.description="Qt 5.15.2 android-clang multi-ABI toolchain"
+
+ARG QT_VERSION=5.15.2
+ARG QT_ANDROID_ARCH=android
+ARG QT_MODULES=qtcharts
+# aqtinstall is pinned - newer releases regularly change CLI/repo handling.
+ARG AQTINSTALL_VERSION=3.1.18
+# NDK r21e
+ARG ANDROID_NDK_VERSION=21.4.7075529
+ARG ANDROID_PLATFORM_VERSION=34
+ARG ANDROID_BUILD_TOOLS_VERSION=34.0.0
+# commandlinetools 9.0 - the last line that runs happily on JDK 11
+ARG ANDROID_CMDLINE_TOOLS_BUILD=9477386
+ARG GSTREAMER_VERSION=1.18.6
+
+ENV DEBIAN_FRONTEND=noninteractive \
+    LANG=en_US.UTF-8 \
+    LC_ALL=en_US.UTF-8
+
+RUN apt-get update && apt-get -y --quiet --no-install-recommends install \
+        build-essential \
+        ca-certificates \
+        ccache \
+        curl \
+        file \
+        git \
+        locales \
+        make \
+        openjdk-11-jdk-headless \
+        openssh-client \
+        python3 \
+        python3-pip \
+        python3-setuptools \
+        rsync \
+        unzip \
+        wget \
+        xz-utils \
+        zip \
+        zlib1g-dev \
+    && locale-gen en_US.UTF-8 \
+    && apt-get -y autoremove \
+    && apt-get clean autoclean \
+    && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
+ENV JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64
+ENV QT_PATH=/opt/Qt
+ENV QT_ANDROID=${QT_PATH}/${QT_VERSION}/${QT_ANDROID_ARCH}
+ENV ANDROID_SDK_ROOT=/opt/android-sdk
+ENV ANDROID_HOME=${ANDROID_SDK_ROOT}
+ENV ANDROID_NDK_ROOT=${ANDROID_SDK_ROOT}/ndk/${ANDROID_NDK_VERSION}
+ENV ANDROID_NDK_HOME=${ANDROID_NDK_ROOT} \
+    ANDROID_NDK_LATEST_HOME=${ANDROID_NDK_ROOT} \
+    ANDROID_NDK=${ANDROID_NDK_ROOT}
+ENV GSTREAMER_VERSION=${GSTREAMER_VERSION}
+ENV GSTREAMER_ANDROID_ROOT=/opt/gstreamer-1.0-android-universal-${GSTREAMER_VERSION}
+ENV PATH=${QT_ANDROID}/bin:${ANDROID_SDK_ROOT}/platform-tools:${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin:${JAVA_HOME}/bin:${PATH}
+
+# ---------------------------------------------------------------------------
+# Qt 5.15.2 for Android. Since Qt 5.14 a single "android" arch ships every ABI
+# (this is what Qt Creator calls the "Android Qt 5.15.2 Clang Multi-Abi" kit).
+# ---------------------------------------------------------------------------
+RUN pip3 install --no-cache-dir "aqtinstall==${AQTINSTALL_VERSION}" \
+    && aqt install-qt linux android ${QT_VERSION} ${QT_ANDROID_ARCH} \
+         -O ${QT_PATH} -m ${QT_MODULES} \
+    && test -x ${QT_ANDROID}/bin/qmake \
+    && test -x ${QT_ANDROID}/bin/androiddeployqt
+
+# ---------------------------------------------------------------------------
+# Android SDK + NDK
+# ---------------------------------------------------------------------------
+RUN mkdir -p ${ANDROID_SDK_ROOT}/cmdline-tools \
+    && curl -fsSL -o /tmp/cmdline-tools.zip \
+         https://dl.google.com/android/repository/commandlinetools-linux-${ANDROID_CMDLINE_TOOLS_BUILD}_latest.zip \
+    && unzip -q /tmp/cmdline-tools.zip -d /tmp \
+    && mv /tmp/cmdline-tools ${ANDROID_SDK_ROOT}/cmdline-tools/latest \
+    && rm -f /tmp/cmdline-tools.zip \
+    && yes | sdkmanager --licenses > /dev/null \
+    && sdkmanager --install \
+         "platform-tools" \
+         "platforms;android-${ANDROID_PLATFORM_VERSION}" \
+         "build-tools;${ANDROID_BUILD_TOOLS_VERSION}" \
+         "build-tools;30.0.2" \
+         "ndk;${ANDROID_NDK_VERSION}" \
+    && test -d ${ANDROID_NDK_ROOT}/toolchains/llvm/prebuilt/linux-x86_64
+
+# Guard rail: androiddeployqt auto-selects the highest installed platform, so
+# fail the image build if anything newer than android-34 sneaks in.
+RUN ! ls ${ANDROID_SDK_ROOT}/platforms | grep -qE 'android-(3[5-9]|[4-9][0-9])'
+
+# ---------------------------------------------------------------------------
+# GStreamer Android universal. QGC resolves this by relative path from the
+# source tree (src/VideoReceiver/../../gstreamer-1.0-android-universal-x.y.z),
+# so the pipeline symlinks it into the workspace at build time.
+# ---------------------------------------------------------------------------
+RUN mkdir -p ${GSTREAMER_ANDROID_ROOT} \
+    && curl -fsSL https://gstreamer.freedesktop.org/data/pkg/android/${GSTREAMER_VERSION}/gstreamer-1.0-android-universal-${GSTREAMER_VERSION}.tar.xz \
+       | tar xJ -C ${GSTREAMER_ANDROID_ROOT} \
+    && test -d ${GSTREAMER_ANDROID_ROOT}/arm64 \
+    && test -d ${GSTREAMER_ANDROID_ROOT}/armv7 \
+    && test -d ${GSTREAMER_ANDROID_ROOT}/x86 \
+    && test -d ${GSTREAMER_ANDROID_ROOT}/x86_64
+
+# ---------------------------------------------------------------------------
+# Jenkins runs the container as the agent's uid/gid, not as a user that exists
+# in this image. Cache mounts live under /cache so a fresh named volume
+# inherits these permissions, and the SDK stays writable because AGP wants to
+# touch it.
+# ---------------------------------------------------------------------------
+RUN mkdir -p /cache/home /cache/ccache /cache/gradle \
+    && chmod -R 777 /cache \
+    && chmod -R a+rX ${QT_PATH} ${GSTREAMER_ANDROID_ROOT} \
+    && chmod -R a+rwX ${ANDROID_SDK_ROOT}
+
+ENV HOME=/cache/home \
+    CCACHE_DIR=/cache/ccache \
+    CCACHE_MAXSIZE=10G \
+    GRADLE_USER_HOME=/cache/gradle
+
+WORKDIR /project
+CMD ["/bin/bash"]
