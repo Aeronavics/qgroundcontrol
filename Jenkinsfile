@@ -18,6 +18,9 @@
 // so rename it freely as long as the node's label matches.
 def AGENT_LABEL = 'docker'
 
+// Where successful builds are published. Note the space in "Hand Controller".
+def RELEASE_LIBRARY_DIR = '/home/releaseLibrary/AC-16/Hand Controller/APKs'
+
 // Where the toolchain is installed. ~7 GB. Must be writable by the Jenkins
 // user and should persist between builds - do not put it in the workspace.
 def TOOLCHAIN_ROOT = '/var/lib/jenkins/qgc-android-toolchain'
@@ -64,12 +67,20 @@ pipeline {
             description: 'Skip the toolchain provisioning stage. Only safe once the ' +
                          'toolchain is known good - it normally no-ops in seconds.')
         booleanParam(
+            name: 'PUBLISH_APK',
+            defaultValue: true,
+            description: 'On success, copy the APK to the release library as ' +
+                         'QGroundControl-<branch>-<commit>.apk. Only runs for SUCCESS, ' +
+                         'not UNSTABLE - an untagged build is versioned 0.0.0 and should ' +
+                         'not be published.')
+        booleanParam(
             name: 'CLEAN_BUILD',
             defaultValue: false,
             description: 'Wipe the shadow build directory before configuring.')
     }
 
     environment {
+        RELEASE_LIBRARY_DIR             = "${RELEASE_LIBRARY_DIR}"
         TOOLCHAIN_ROOT                  = "${TOOLCHAIN_ROOT}"
         TOOLCHAIN_ENV                   = "${TOOLCHAIN_ROOT}/toolchain-env.sh"
         BUILD_DIR                       = "${WORKSPACE}/build/android-multiabi"
@@ -113,7 +124,16 @@ pipeline {
                         unstable("git describe returned '${env.QGC_VERSION}' - no version tag reachable, " +
                                  'so QGC will build as VERSION 0.0.0. Check that tags were fetched.')
                     }
-                    echo "Building QGroundControl ${env.QGC_VERSION} for ABIs: ${params.ANDROID_ABIS}"
+                    // Branch names may contain '/', which is not usable in a
+                    // filename, so flatten it.
+                    env.QGC_BRANCH = (env.BRANCH_NAME
+                        ?: sh(script: 'git rev-parse --abbrev-ref HEAD', returnStdout: true).trim()
+                        ).replaceAll('/', '-')
+                    env.QGC_COMMIT = sh(
+                        script: 'git rev-parse --short HEAD',
+                        returnStdout: true).trim()
+                    echo "Building QGroundControl ${env.QGC_VERSION} " +
+                         "(${env.QGC_BRANCH} @ ${env.QGC_COMMIT}) for ABIs: ${params.ANDROID_ABIS}"
                 }
             }
         }
@@ -122,6 +142,29 @@ pipeline {
             when { expression { !params.SKIP_PROVISION } }
             steps {
                 sh '"${WORKSPACE}/deploy/jenkins/provision-android-toolchain.sh"'
+            }
+        }
+
+        stage('Check release library') {
+            when { expression { params.PUBLISH_APK } }
+            steps {
+                // Validated up front so a permissions or mount problem costs
+                // seconds rather than a completed multi-hour build.
+                sh '''
+                    set -eu
+                    mkdir -p "${RELEASE_LIBRARY_DIR}" 2>/dev/null || true
+                    if [ ! -d "${RELEASE_LIBRARY_DIR}" ]; then
+                        echo "ERROR: release library does not exist and cannot be created:" >&2
+                        echo "       ${RELEASE_LIBRARY_DIR}" >&2
+                        exit 1
+                    fi
+                    if [ ! -w "${RELEASE_LIBRARY_DIR}" ]; then
+                        echo "ERROR: release library is not writable by $(id -un):" >&2
+                        echo "       ${RELEASE_LIBRARY_DIR}" >&2
+                        exit 1
+                    fi
+                    echo "release library OK: ${RELEASE_LIBRARY_DIR}"
+                '''
             }
         }
 
@@ -203,6 +246,7 @@ pipeline {
                                 cp android-build/build/outputs/apk/release/android-build-release-signed.apk \
                                    "${PACKAGE_DIR}/QGroundControl-${QGC_VERSION}-multiabi-signed.apk"
                             '''
+                            env.APK_PATH = "${env.PACKAGE_DIR}/QGroundControl-${env.QGC_VERSION}-multiabi-signed.apk"
                         }
                     } else {
                         sh deploy + '''
@@ -215,6 +259,7 @@ pipeline {
                             cp android-build/build/outputs/apk/debug/android-build-debug.apk \
                                "${PACKAGE_DIR}/QGroundControl-${QGC_VERSION}-multiabi.apk"
                         '''
+                        env.APK_PATH = "${env.PACKAGE_DIR}/QGroundControl-${env.QGC_VERSION}-multiabi.apk"
                     }
                 }
                 sh 'ls -lh "${PACKAGE_DIR}"'
@@ -231,6 +276,39 @@ pipeline {
     }
 
     post {
+        success {
+            script {
+                if (params.PUBLISH_APK) {
+                    sh '''
+                        set -eu
+                        # Guard: an empty branch would widen the prune glob to
+                        # every branch's APKs. Refuse rather than risk it.
+                        : "${QGC_BRANCH:?branch name is empty - refusing to publish or prune}"
+                        : "${QGC_COMMIT:?commit id is empty - refusing to publish}"
+
+                        DEST="${RELEASE_LIBRARY_DIR}"
+                        NEW="QGroundControl-${QGC_BRANCH}-${QGC_COMMIT}.apk"
+
+                        # Copy first, via a temp name, so an interrupted or
+                        # failed copy never leaves a truncated APK in place and
+                        # never triggers the prune below.
+                        cp -f "${APK_PATH}" "${DEST}/.${NEW}.part"
+                        mv -f "${DEST}/.${NEW}.part" "${DEST}/${NEW}"
+                        echo "published ${DEST}/${NEW}"
+
+                        # Prune older APKs from THIS branch only, never
+                        # recursing and never touching the file just written.
+                        # The commit portion is constrained to hex so a branch
+                        # named e.g. "feature" cannot match - and delete -
+                        # artifacts belonging to "feature-x".
+                        find "${DEST}" -maxdepth 1 -type f \
+                            -name "QGroundControl-${QGC_BRANCH}-[0-9a-f]*.apk" \
+                            ! -name "${NEW}" \
+                            -print -delete
+                    '''
+                }
+            }
+        }
         failure {
             echo 'Build failed - check the qmake/androiddeployqt/Gradle output above.'
         }

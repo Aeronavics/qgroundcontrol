@@ -81,10 +81,38 @@ afterwards.
 | `QGC_BUILD_TYPE` | `DailyBuild` | `DailyBuild` or `StableBuild` |
 | `SIGN_RELEASE` | off | Produces `…-multiabi-signed.apk` via `androiddeployqt --release --sign` |
 | `BETA_PACKAGE_NAME` | off | Runs `tools/update_android_manifest_package.sh` → package `org.mavlink.qgroundcontrolbeta` |
+| `PUBLISH_APK` | **on** | On SUCCESS, copy the APK to the release library and prune older APKs from the same branch |
 | `SKIP_PROVISION` | off | Skips the toolchain stage (it normally no-ops in seconds) |
 | `CLEAN_BUILD` | off | Wipes `build/android-multiabi` first |
 
 Artifact: `build/android-multiabi/package/QGroundControl-<git describe>-multiabi[-signed].apk`
+
+## Publishing to the release library
+
+On a **successful** build the APK is copied to
+`/home/releaseLibrary/AC-16/Hand Controller/APKs/QGroundControl-<branch>-<commit>.apk`
+(the path is a constant at the top of the `Jenkinsfile`), and older APKs from
+the *same branch* are deleted. Other branches are never touched.
+
+Deliberate choices, because this step both writes outside the workspace and
+deletes files:
+
+* **SUCCESS only, not UNSTABLE.** An untagged build is versioned `0.0.0`; it
+  should not reach the release library.
+* **The destination is validated in an early stage**, before the compile, so a
+  permissions or mount problem costs seconds rather than a finished
+  multi-hour build.
+* **Copy first, prune second**, via a temporary `.part` name. A failed or
+  interrupted copy therefore leaves the previous APK intact and prunes nothing.
+* **The prune is narrow**: `-maxdepth 1`, regular files only, matching
+  `QGroundControl-<branch>-[0-9a-f]*.apk` and explicitly excluding the file
+  just written. The hex constraint stops a branch named `feature` from
+  matching — and deleting — artifacts of `feature-x`.
+* **An empty branch name aborts the step**, since it would otherwise widen the
+  prune to every branch's APKs.
+
+The Jenkins user needs write access to that directory. Branch names containing
+`/` are flattened to `-` for the filename.
 
 ## Why these versions are pinned
 
