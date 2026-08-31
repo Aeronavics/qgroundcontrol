@@ -301,7 +301,6 @@
         <file alias="SprayLogDownloadPage.qml">src/AnalyzeView/SprayLogDownloadPage.qml</file>
         <file alias="DroneOpsPage.qml">src/AnalyzeView/DroneOpsPage.qml</file>
         <file alias="QGroundControl/FlightMap/SprayingIndicator.qml">src/FlightMap/MapItems/SprayingIndicator.qml</file>
-        <file>src/PlanView/PlanViewTool.qml</file>
         <file alias="QGroundControl/FlightMap/TaggedIndicator.qml">src/FlightMap/MapItems/TaggedIndicator.qml</file>
         <file alias="ControllerSetupView.qml">src/ControllerSetup/ControllerSetupView.qml</file>
         <file alias="ControllerCalibration.qml">src/ControllerSetup/ControllerCalibration.qml</file>
