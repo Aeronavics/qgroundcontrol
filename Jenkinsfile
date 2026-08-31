@@ -87,6 +87,15 @@ pipeline {
     }
 
     environment {
+        // Parameters do not exist on the first build after their definitions
+        // change (a multibranch quirk), so they are absent from the shell
+        // environment and `set -eu` aborts with "parameter not set". Re-export
+        // the three that shell steps dereference, with defaults matching the
+        // parameter declarations above.
+        CLEAN_BUILD                     = "${params.CLEAN_BUILD ?: false}"
+        ANDROID_ABIS                    = "${params.ANDROID_ABIS ?: 'armeabi-v7a arm64-v8a x86'}"
+        QMAKE_CONFIG                    = "${params.QMAKE_CONFIG ?: 'release'}"
+
         RELEASE_LIBRARY_DIR             = "${RELEASE_LIBRARY_DIR}"
         TOOLCHAIN_ROOT                  = "${TOOLCHAIN_ROOT}"
         TOOLCHAIN_ENV                   = "${TOOLCHAIN_ROOT}/toolchain-env.sh"
