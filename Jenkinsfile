@@ -49,8 +49,15 @@ pipeline {
             description: 'qmake build configuration.')
         choice(
             name: 'QGC_BUILD_TYPE',
+            // The first choice is the default - Jenkins has no separate
+            // defaultValue for choice parameters.
             choices: ['DailyBuild', 'StableBuild'],
-            description: 'QGC build flavour (drives version string and feature flags).')
+            description: 'QGC build flavour for branch builds. Tag builds are always ' +
+                         'StableBuild regardless of this setting. StableBuild takes its version from the git ' +
+                         'tag, disables development/WIP MAVLink messages, limits languages ' +
+                         'to released ones, and uses the standard settings space. ' +
+                         'DailyBuild defines DAILY_BUILD and uses a separate ' +
+                         '"QGroundControl Daily" settings space.')
         booleanParam(
             name: 'SIGN_RELEASE',
             defaultValue: false,
@@ -132,6 +139,24 @@ pipeline {
                     env.QGC_COMMIT = sh(
                         script: 'git rev-parse --short HEAD',
                         returnStdout: true).trim()
+
+                    // Tag builds are always StableBuild. Multibranch sets
+                    // TAG_NAME; plain Pipeline jobs do not, so fall back to
+                    // asking git whether HEAD sits exactly on a tag.
+                    env.QGC_TAG = env.TAG_NAME ?: sh(
+                        script: 'git describe --tags --exact-match HEAD 2>/dev/null || true',
+                        returnStdout: true).trim()
+                    if (env.QGC_TAG) {
+                        env.EFFECTIVE_BUILD_TYPE = 'StableBuild'
+                        if (params.QGC_BUILD_TYPE == 'DailyBuild') {
+                            echo "Tag ${env.QGC_TAG}: forcing StableBuild, overriding the " +
+                                 'QGC_BUILD_TYPE parameter.'
+                        }
+                    } else {
+                        env.EFFECTIVE_BUILD_TYPE = params.QGC_BUILD_TYPE ?: 'DailyBuild'
+                    }
+                    echo "Build type: ${env.EFFECTIVE_BUILD_TYPE}" +
+                         (env.QGC_TAG ? " (tag ${env.QGC_TAG})" : '')
                     echo "Building QGroundControl ${env.QGC_VERSION} " +
                          "(${env.QGC_BRANCH} @ ${env.QGC_COMMIT}) for ABIs: ${params.ANDROID_ABIS}"
                 }
@@ -206,7 +231,7 @@ pipeline {
                     "${QT_ANDROID}/bin/qmake" "${WORKSPACE}/qgroundcontrol.pro" \
                         -spec android-clang \
                         CONFIG+=${QMAKE_CONFIG} \
-                        CONFIG+=${QGC_BUILD_TYPE} \
+                        CONFIG+=${EFFECTIVE_BUILD_TYPE} \
                         ANDROID_ABIS="${ANDROID_ABIS}"
 
                     make -j"$(nproc)"

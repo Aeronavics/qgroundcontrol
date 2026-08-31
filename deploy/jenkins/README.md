@@ -78,7 +78,7 @@ afterwards.
 | --- | --- | --- |
 | `ANDROID_ABIS` | `armeabi-v7a arm64-v8a x86` | All three ABIs land in one APK. Set to `arm64-v8a` alone for ~3x faster builds. **`x86_64` is not supported** — [`QGCCommon.pri:74`](../../QGCCommon.pri) hard-errors with `Unsupported Android architecture: x86_64`. |
 | `QMAKE_CONFIG` | `release` | `release` or `debug` |
-| `QGC_BUILD_TYPE` | `DailyBuild` | `DailyBuild` or `StableBuild` |
+| `QGC_BUILD_TYPE` | `DailyBuild` | Applies to **branch** builds only — see below. `DailyBuild` defines `DAILY_BUILD` and uses a separate "QGroundControl Daily" settings space; `StableBuild` takes its version from the git tag and excludes development/WIP MAVLink messages. The first entry in the `choices` list is the default. |
 | `SIGN_RELEASE` | off | Produces `…-multiabi-signed.apk` via `androiddeployqt --release --sign` |
 | `BETA_PACKAGE_NAME` | off | Runs `tools/update_android_manifest_package.sh` → package `org.mavlink.qgroundcontrolbeta` |
 | `PUBLISH_APK` | **on** | On SUCCESS, copy the APK to the release library and prune older APKs from the same branch |
@@ -86,6 +86,25 @@ afterwards.
 | `CLEAN_BUILD` | off | Wipes `build/android-multiabi` first |
 
 Artifact: `build/android-multiabi/package/QGroundControl-<git describe>-multiabi[-signed].apk`
+
+## Tag builds are always StableBuild
+
+Building a tag forces `CONFIG+=StableBuild`, overriding the `QGC_BUILD_TYPE`
+parameter (the override is logged when it happens). Branch builds use the
+parameter as chosen.
+
+Detection prefers `TAG_NAME`, which multibranch sets for tag builds, and falls
+back to `git describe --tags --exact-match HEAD` so plain Pipeline jobs behave
+the same way.
+
+For multibranch jobs this only fires if the branch source has the **Discover
+tags** behaviour added — without it Jenkins never builds tags at all.
+
+On a tag, `git describe` returns the bare tag (`v4.4.3`), which satisfies the
+version regex in [`QGCCommon.pri`](../../QGCCommon.pri) and yields
+`VERSION = 4.4.3`. Note that the published filename uses the tag in place of a
+branch name (`QGroundControl-v4.4.3-<commit>.apk`), and since each tag is
+unique, tag APKs are never pruned by a later build.
 
 ## Publishing to the release library
 
