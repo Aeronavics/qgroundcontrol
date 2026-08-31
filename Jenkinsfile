@@ -1,30 +1,26 @@
 #!/usr/bin/env groovy
 //
-// QGroundControl - Android build pipeline
+// QGroundControl - Android build pipeline (native, no Docker)
 //
 //   Qt 5.15.2 / android-clang / multi-ABI
-//   (the "Android Qt 5.15.2 Clang Multi-Abi" kit, as a container build)
+//   (the "Android Qt 5.15.2 Clang Multi-Abi" kit)
 //
-// Everything is compiled inside deploy/docker/Dockerfile-build-android, so the
-// only thing the Jenkins agent needs is a working Docker daemon.
+// The toolchain is provisioned onto the agent by
+// deploy/jenkins/provision-android-toolchain.sh - Qt, NDK r21e, SDK
+// android-34, JDK 11 and GStreamer, all under TOOLCHAIN_ROOT, no root needed.
+// The script is idempotent, so after the first build it costs a few seconds.
 //
-// See deploy/docker/README-android-jenkins.md for job/credential setup.
+// See deploy/jenkins/README.md for agent prerequisites and job setup.
 //
 
-// Agent label that has Docker available.
+// Agent label for the build node. Kept as 'docker' because that label is
+// already applied to the existing node - nothing here needs Docker any more,
+// so rename it freely as long as the node's label matches.
 def AGENT_LABEL = 'docker'
 
-// Persistent named volumes keep ccache and the Gradle distribution/cache warm
-// across builds. /cache is world-writable in the image, so these work no
-// matter which uid Jenkins runs the container as.
-def DOCKER_RUN_ARGS = [
-    '-v qgc-android-ccache:/cache/ccache',
-    '-v qgc-android-gradle:/cache/gradle',
-    '-v qgc-android-home:/cache/home',
-    '-e HOME=/cache/home',
-    '-e CCACHE_DIR=/cache/ccache',
-    '-e GRADLE_USER_HOME=/cache/gradle',
-].join(' ')
+// Where the toolchain is installed. ~7 GB. Must be writable by the Jenkins
+// user and should persist between builds - do not put it in the workspace.
+def TOOLCHAIN_ROOT = '/var/lib/jenkins/qgc-android-toolchain'
 
 pipeline {
     agent { label AGENT_LABEL }
@@ -63,9 +59,10 @@ pipeline {
             description: 'Rewrite the manifest package to org.mavlink.qgroundcontrolbeta ' +
                          'so the build installs alongside a release build.')
         booleanParam(
-            name: 'REBUILD_IMAGE',
+            name: 'SKIP_PROVISION',
             defaultValue: false,
-            description: 'Rebuild the toolchain image from scratch (--pull --no-cache).')
+            description: 'Skip the toolchain provisioning stage. Only safe once the ' +
+                         'toolchain is known good - it normally no-ops in seconds.')
         booleanParam(
             name: 'CLEAN_BUILD',
             defaultValue: false,
@@ -73,13 +70,13 @@ pipeline {
     }
 
     environment {
-        IMAGE_TAG                       = 'qgc-android-build:qt5.15.2'
-        QT_ANDROID                      = '/opt/Qt/5.15.2/android'
-        GSTREAMER_VERSION               = '1.18.6'
-        GSTREAMER_ANDROID_ROOT          = '/opt/gstreamer-1.0-android-universal-1.18.6'
+        TOOLCHAIN_ROOT                  = "${TOOLCHAIN_ROOT}"
+        TOOLCHAIN_ENV                   = "${TOOLCHAIN_ROOT}/toolchain-env.sh"
         BUILD_DIR                       = "${WORKSPACE}/build/android-multiabi"
         PACKAGE_DIR                     = "${WORKSPACE}/build/android-multiabi/package"
-        // Jenkins credential id - see README-android-jenkins.md
+        CCACHE_DIR                      = "${TOOLCHAIN_ROOT}/ccache"
+        CCACHE_MAXSIZE                  = '10G'
+        // Jenkins credential id - see deploy/jenkins/README.md
         ANDROID_KEYSTORE_CREDENTIALS_ID = 'qgc-android-keystore-password'
     }
 
@@ -121,16 +118,10 @@ pipeline {
             }
         }
 
-        stage('Build toolchain image') {
+        stage('Provision toolchain') {
+            when { expression { !params.SKIP_PROVISION } }
             steps {
-                script {
-                    def opts = params.REBUILD_IMAGE ? '--pull --no-cache' : ''
-                    // Context is deploy/docker so the 2 GB source tree is not
-                    // shipped to the Docker daemon.
-                    docker.build(
-                        env.IMAGE_TAG,
-                        "${opts} -f ${WORKSPACE}/deploy/docker/Dockerfile-build-android ${WORKSPACE}/deploy/docker")
-                }
+                sh '"${WORKSPACE}/deploy/jenkins/provision-android-toolchain.sh"'
             }
         }
 
@@ -141,7 +132,7 @@ pipeline {
                     if [ "${CLEAN_BUILD}" = "true" ]; then
                         rm -rf "${BUILD_DIR}"
                     fi
-                    mkdir -p "${BUILD_DIR}" "${PACKAGE_DIR}"
+                    mkdir -p "${BUILD_DIR}" "${PACKAGE_DIR}" "${CCACHE_DIR}"
                 '''
                 script {
                     if (params.BETA_PACKAGE_NAME) {
@@ -155,35 +146,29 @@ pipeline {
 
         stage('qmake + build') {
             steps {
-                script {
-                    docker.image(env.IMAGE_TAG).inside(DOCKER_RUN_ARGS) {
-                        sh '''
-                            set -eu
-                            # Jenkins injects its own PATH into the container, so
-                            # put the Qt host tools back in front.
-                            export PATH="${QT_ANDROID}/bin:${PATH}"
-                            export CCACHE_BASEDIR="${WORKSPACE}"
+                sh '''
+                    set -eu
+                    . "${TOOLCHAIN_ENV}"
+                    export CCACHE_BASEDIR="${WORKSPACE}"
 
-                            # QGC looks for GStreamer at <source root>/gstreamer-1.0-android-universal-<ver>.
-                            # Link the copy baked into the image, unless a real
-                            # directory has been placed there by hand.
-                            GST_LINK="${WORKSPACE}/gstreamer-1.0-android-universal-${GSTREAMER_VERSION}"
-                            if [ ! -e "${GST_LINK}" ] || [ -L "${GST_LINK}" ]; then
-                                ln -sfn "${GSTREAMER_ANDROID_ROOT}" "${GST_LINK}"
-                            fi
+                    # QGC looks for GStreamer at <source root>/gstreamer-1.0-android-universal-<ver>.
+                    # Link the provisioned copy, unless a real directory has
+                    # been placed there by hand.
+                    GST_LINK="${WORKSPACE}/gstreamer-1.0-android-universal-${GSTREAMER_VERSION}"
+                    if [ ! -e "${GST_LINK}" ] || [ -L "${GST_LINK}" ]; then
+                        ln -sfn "${GSTREAMER_ANDROID_ROOT}" "${GST_LINK}"
+                    fi
 
-                            cd "${BUILD_DIR}"
-                            "${QT_ANDROID}/bin/qmake" "${WORKSPACE}/qgroundcontrol.pro" \
-                                -spec android-clang \
-                                CONFIG+=${QMAKE_CONFIG} \
-                                CONFIG+=${QGC_BUILD_TYPE} \
-                                ANDROID_ABIS="${ANDROID_ABIS}"
+                    cd "${BUILD_DIR}"
+                    "${QT_ANDROID}/bin/qmake" "${WORKSPACE}/qgroundcontrol.pro" \
+                        -spec android-clang \
+                        CONFIG+=${QMAKE_CONFIG} \
+                        CONFIG+=${QGC_BUILD_TYPE} \
+                        ANDROID_ABIS="${ANDROID_ABIS}"
 
-                            make -j"$(nproc)"
-                            ccache -s || true
-                        '''
-                    }
-                }
+                    make -j"$(nproc)"
+                    ccache -s || true
+                '''
             }
         }
 
@@ -192,45 +177,44 @@ pipeline {
                 script {
                     // CONFIG+=installer is deliberately not used: its post-link
                     // `make apk` runs per-ABI, which defeats a multi-ABI build.
-                    // Package once, from the top level, instead.
+                    // androiddeployqt is invoked once, at the top level, with
+                    // --android-platform pinned - it otherwise picks the
+                    // highest installed SDK, and AGP 7.0.0's aapt2 cannot parse
+                    // android-35's android.jar.
+                    def deploy = '''
+                        set -eu
+                        . "${TOOLCHAIN_ENV}"
+                        cd "${BUILD_DIR}"
+                        make apk_install_target
+                    '''
                     if (params.SIGN_RELEASE) {
                         withCredentials([string(credentialsId: env.ANDROID_KEYSTORE_CREDENTIALS_ID,
                                                 variable: 'ANDROID_KEYSTORE_PASSWORD')]) {
-                            docker.image(env.IMAGE_TAG).inside(DOCKER_RUN_ARGS) {
-                                sh '''
-                                    set -eu
-                                    export PATH="${QT_ANDROID}/bin:${PATH}"
-                                    cd "${BUILD_DIR}"
+                            sh deploy + '''
+                                "${QT_ANDROID}/bin/androiddeployqt" --verbose \
+                                    --input "${BUILD_DIR}/android-QGroundControl-deployment-settings.json" \
+                                    --output "${BUILD_DIR}/android-build" \
+                                    --android-platform "android-${ANDROID_PLATFORM_VERSION}" \
+                                    --jdk "${JAVA_HOME}" \
+                                    --release \
+                                    --sign "${WORKSPACE}/android/android_release.keystore" QGCAndroidKeyStore \
+                                    --storepass "${ANDROID_KEYSTORE_PASSWORD}"
 
-                                    # The target installs into ${BUILD_DIR}/android-build itself.
-                                    make apk_install_target
-
-                                    "${QT_ANDROID}/bin/androiddeployqt" --verbose \
-                                        --input "${BUILD_DIR}/android-QGroundControl-deployment-settings.json" \
-                                        --output "${BUILD_DIR}/android-build" \
-                                        --gradle \
-                                        --release \
-                                        --sign "${WORKSPACE}/android/android_release.keystore" QGCAndroidKeyStore \
-                                        --storepass "${ANDROID_KEYSTORE_PASSWORD}"
-
-                                    cp android-build/build/outputs/apk/release/android-build-release-signed.apk \
-                                       "${PACKAGE_DIR}/QGroundControl-${QGC_VERSION}-multiabi-signed.apk"
-                                '''
-                            }
-                        }
-                    } else {
-                        docker.image(env.IMAGE_TAG).inside(DOCKER_RUN_ARGS) {
-                            sh '''
-                                set -eu
-                                export PATH="${QT_ANDROID}/bin:${PATH}"
-                                cd "${BUILD_DIR}"
-
-                                make apk
-
-                                cp android-build/build/outputs/apk/debug/android-build-debug.apk \
-                                   "${PACKAGE_DIR}/QGroundControl-${QGC_VERSION}-multiabi.apk"
+                                cp android-build/build/outputs/apk/release/android-build-release-signed.apk \
+                                   "${PACKAGE_DIR}/QGroundControl-${QGC_VERSION}-multiabi-signed.apk"
                             '''
                         }
+                    } else {
+                        sh deploy + '''
+                            "${QT_ANDROID}/bin/androiddeployqt" --verbose \
+                                --input "${BUILD_DIR}/android-QGroundControl-deployment-settings.json" \
+                                --output "${BUILD_DIR}/android-build" \
+                                --android-platform "android-${ANDROID_PLATFORM_VERSION}" \
+                                --jdk "${JAVA_HOME}"
+
+                            cp android-build/build/outputs/apk/debug/android-build-debug.apk \
+                               "${PACKAGE_DIR}/QGroundControl-${QGC_VERSION}-multiabi.apk"
+                        '''
                     }
                 }
                 sh 'ls -lh "${PACKAGE_DIR}"'
@@ -248,12 +232,12 @@ pipeline {
 
     post {
         failure {
-            echo 'Build failed - check the androiddeployqt/Gradle output above.'
+            echo 'Build failed - check the qmake/androiddeployqt/Gradle output above.'
         }
         cleanup {
             // Drop the GStreamer symlink so a workspace wipe never chases it
-            // into /opt. Never touch a real directory.
-            sh 'GST_LINK="${WORKSPACE}/gstreamer-1.0-android-universal-${GSTREAMER_VERSION}"; [ -L "${GST_LINK}" ] && rm -f "${GST_LINK}"; true'
+            // into the toolchain root. Never touch a real directory.
+            sh 'GST_LINK="${WORKSPACE}/gstreamer-1.0-android-universal-1.18.6"; [ -L "${GST_LINK}" ] && rm -f "${GST_LINK}"; true'
         }
     }
 }
