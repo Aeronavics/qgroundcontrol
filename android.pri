@@ -6,10 +6,14 @@ ANDROID_PACKAGE_SOURCE_DIR          = $$OUT_PWD/ANDROID_PACKAGE_SOURCE_DIR  # Te
 ANDROID_PACKAGE_QGC_SOURCE_DIR      = $$PWD/android                         # Original location of QGC package files
 ANDROID_PACKAGE_CUSTOM_SOURCE_DIR   = $$PWD/custom/android                  # Original location for custom build override package files
 
-# We always move the package files to the ANDROID_PACKAGE_SOURCE_DIR build dir so we can modify the manifest as needed
+# We always move the package files to the ANDROID_PACKAGE_SOURCE_DIR build dir so we can modify the manifest as needed.
+# The directory is wiped first so it is an exact mirror of the source package dir. A merging copy leaves behind files
+# which have since been renamed, moved or deleted, and androiddeployqt then hands those stale leftovers to Gradle -
+# a second copy of a jar under libs/ shows up as "Type ... is defined multiple times" when D8 merges the dex archives.
 
 android_source_dir_target.target = $$ANDROID_PACKAGE_SOURCE_DIR/AndroidManifest.xml
 android_source_dir_target.commands = \
+    -$$QMAKE_DEL_TREE $$ANDROID_PACKAGE_SOURCE_DIR $$escape_expand(\\n\\t) \
     $$QMAKE_MKDIR $$ANDROID_PACKAGE_SOURCE_DIR && \
     $$QMAKE_COPY_DIR $$ANDROID_PACKAGE_QGC_SOURCE_DIR/* $$ANDROID_PACKAGE_SOURCE_DIR
 PRE_TARGETDEPS += $$android_source_dir_target.target

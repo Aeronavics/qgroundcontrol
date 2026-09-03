@@ -271,6 +271,17 @@ pipeline {
                         set -eu
                         . "${TOOLCHAIN_ENV}"
                         cd "${BUILD_DIR}"
+
+                        # androiddeployqt merges into android-build rather than
+                        # rebuilding it, so anything a previous build left there
+                        # survives and is handed to Gradle. A second copy of a
+                        # jar under libs/ fails the build in D8 with
+                        # "Type ... is defined multiple times". The directory is
+                        # regenerated in full by apk_install_target and
+                        # androiddeployqt below, so wiping it is always safe -
+                        # it only costs a Gradle rebuild.
+                        rm -rf android-build
+
                         make apk_install_target
                     '''
                     if (params.SIGN_RELEASE) {
