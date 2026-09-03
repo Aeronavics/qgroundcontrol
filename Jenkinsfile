@@ -103,7 +103,16 @@ pipeline {
         PACKAGE_DIR                     = "${WORKSPACE}/build/android-multiabi/package"
         CCACHE_DIR                      = "${TOOLCHAIN_ROOT}/ccache"
         CCACHE_MAXSIZE                  = '10G'
-        // Jenkins credential id - see deploy/jenkins/README.md
+        // Nexus - see deploy/jenkins/README.md for the resulting artifact path
+        NEXUS_URL                       = 'nexus.aeronavics.com'
+        NEXUS_PROTOCOL                  = 'https'
+        NEXUS_VERSION                   = 'nexus3'
+        NEXUS_REPOSITORY                = 'release_library'
+        NEXUS_GROUP_ID                  = 'QGC'
+        NEXUS_ARTIFACT_ID               = 'QGC'
+        NEXUS_CREDENTIALS_ID            = 'JenkinsAdmin'
+
+        // Jenkins credential ids - see deploy/jenkins/README.md
         ANDROID_KEYSTORE_CREDENTIALS_ID = 'qgc-android-keystore-password'
     }
 
@@ -312,7 +321,11 @@ pipeline {
     post {
         success {
             script {
-                if (params.PUBLISH_APK) {
+                // params are absent on the first build after their definitions
+                // change, and a null must not silently skip publishing - fall
+                // back to the declared default rather than to false.
+                def publish = (params.PUBLISH_APK == null) ? true : params.PUBLISH_APK
+                if (publish) {
                     sh '''
                         set -eu
                         # Guard: an empty branch would widen the prune glob to
@@ -340,6 +353,32 @@ pipeline {
                             ! -name "${NEW}" \
                             -print -delete
                     '''
+
+                    // Maven layout: the artifact lands at
+                    //   /repository/release_library/QGC/QGC/<hash>/QGC-<hash>.apk
+                    // The version is the short commit hash, so every commit
+                    // publishes a distinct GAV. Note that re-running a build
+                    // on the SAME commit re-deploys an identical GAV, which a
+                    // Nexus repository with a "release" (immutable) policy
+                    // will reject.
+                    nexusArtifactUploader(
+                        nexusVersion: env.NEXUS_VERSION,
+                        protocol: env.NEXUS_PROTOCOL,
+                        nexusUrl: env.NEXUS_URL,
+                        repository: env.NEXUS_REPOSITORY,
+                        credentialsId: env.NEXUS_CREDENTIALS_ID,
+                        groupId: env.NEXUS_GROUP_ID,
+                        version: "latest",
+                        artifacts: [[
+                            artifactId: env.NEXUS_ARTIFACT_ID,
+                            classifier: '',
+                            file: env.APK_PATH,
+                            type: 'apk',
+                        ]]
+                    )
+                    echo "uploaded to ${env.NEXUS_PROTOCOL}://${env.NEXUS_URL}/repository/" +
+                         "${env.NEXUS_REPOSITORY}/${env.NEXUS_GROUP_ID}/${env.NEXUS_ARTIFACT_ID}/" +
+                         "latest/${env.NEXUS_ARTIFACT_ID}-latest.apk"
                 }
             }
         }

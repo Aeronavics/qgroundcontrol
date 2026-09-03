@@ -106,6 +106,36 @@ version regex in [`QGCCommon.pri`](../../QGCCommon.pri) and yields
 branch name (`QGroundControl-v4.4.3-<commit>.apk`), and since each tag is
 unique, tag APKs are never pruned by a later build.
 
+## Uploading to Nexus
+
+On success the APK is uploaded to `nexus.aeronavics.com` with the **Nexus
+Artifact Uploader** plugin, using the `JenkinsAdmin` credential. Settings are
+constants in the `Jenkinsfile`'s `environment` block.
+
+| Setting | Value |
+| --- | --- |
+| Repository | `release_library` (Maven) |
+| Group ID | `QGC` |
+| Artifact ID | `QGC` |
+| Version | short commit hash (`git rev-parse --short HEAD`) |
+| Type | `apk` |
+
+Resulting path, from Maven layout:
+
+```
+https://nexus.aeronavics.com/repository/release_library/QGC/QGC/<hash>/QGC-<hash>.apk
+```
+
+`release_library` is configured to **allow redeploy**, so re-running a build on
+the same commit overwrites the existing artifact rather than failing. That
+makes retries and rebuilds safe, at the cost of a given hash not being
+immutable — the artifact at a hash is whatever was built last, not necessarily
+the first build of that commit. If immutability is ever wanted, give the
+version a per-build suffix such as `"${env.QGC_COMMIT}-${env.BUILD_NUMBER}"`.
+
+`nexusVersion` is `nexus3` and `protocol` is `https`; both are one-line changes
+if the server differs.
+
 ## Publishing to the release library
 
 On a **successful** build the APK is copied to
